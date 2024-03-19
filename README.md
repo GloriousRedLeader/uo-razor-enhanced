@@ -11,3 +11,7 @@ You can safely clone this repo or just manually copy the files into your razord 
 
 * core -> this is framework stuff I've written (for the most part). These don't do anythign on their own. You'll need a bootstrap scripts
 * root directory -> This is the main stuff you see. Some of these use parts of the core lib, some are standalone. These are safe to run. You will map these to keybinds in razor for maximum effeciency.
+
+### Warning
+
+There are some powerful features here. Use with care. Don't be a jackass.
