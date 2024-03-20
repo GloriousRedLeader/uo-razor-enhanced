@@ -20,14 +20,14 @@ class CharacterStats(Forms.Form):
     
     def __init__(self):
         #Misc.RemoveSharedValue("character_stats_rule_select")
-        self.stats = self.getStatsFromItems()
+        #self.stats = self.getStatsFromItems()
         
         self.GROUP_BOX_WIDTH = 750
         
         # Main UI Screen
         self.Width = 810
         self.Height = 1100
-        self.Text = 'Character Stats Form'
+        self.Text = 'Character Stats by fatman'
         
         # Server rules box
         self.serverRulesBox = Forms.GroupBox()
@@ -75,9 +75,10 @@ class CharacterStats(Forms.Form):
     
     def getStatsFromItems(self):
         
-        LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "FacialHair", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
+        #LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "FacialHair", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
+        LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
         
-        WEAPON_LAYERS = [ "RightHand", "LeftHand" ]
+        #WEAPON_LAYERS = [ "RightHand", "LeftHand" ]
         
         # https://www.uoex.net/wiki/Stat_Caps
         # https://uo.com/wiki/ultima-online-wiki/items/magic-item-properties/
@@ -147,18 +148,22 @@ class CharacterStats(Forms.Form):
         for layer in LAYERS:
             item = Player.GetItemOnLayer(layer)
             if item != None:
-                
                 # Special handling of Resistances property
                 allResistString = Items.GetPropValueString(item.Serial, 'Resistances')
+                #Misc.Pause(100)
                 match = pattern.match(allResistString)
-
                 for stat in stats:
-                    stat['value'] = stat['value'] + Items.GetPropValue(item.Serial, stat['name'])
-                
+                    v = Items.GetPropValue(item.Serial, stat['name'])
+                    s = Items.GetPropValueString(item.Serial, stat['name'])
+                    #if v > 0:
+                        #print("Item: {} Value: {} String: {}".format(item.Name, v, s))
+                    #Misc.Pause(100)
+                    #stat['value'] = stat['value'] + Items.GetPropValue(item.Serial, stat['name'])
+                    stat['value'] = stat['value'] + v
+                    #print("Layer: {} Item: {} Property: {} Value: {} Final Value: {}".format(layer, item.Name, stat['name'], v, stat['value']))
                     if match != None and stat['name'] in resistMap:
                         resistValue = match.group(resistMap[stat['name']])
                         if resistValue != "--":
-                            print("Adding this value {} to stat {}".format(int(resistValue.replace("%", "")), stat['name']))
                             stat['value'] = stat['value'] + int(resistValue.replace("%", ""))
         return stats
                         
@@ -313,7 +318,7 @@ class CharacterStats(Forms.Form):
         self.serverRulesBox.Controls.Add(self.ruleRadioNormal)
         self.serverRulesBox.Controls.Add(self.ruleRadioUOEX)
 
-    def drawItemPropertyGroup(self, groupName, pointX, pointY):
+    def drawItemPropertyGroup(self, stats, groupName, pointX, pointY):
         
         groupNameLabel = Forms.Label()
         groupNameLabel.Text = groupName
@@ -333,7 +338,7 @@ class CharacterStats(Forms.Form):
         table.ColumnStyles.Add(ColumnStyle(SizeType.Absolute, COL_VALUE_WIDTH))
  
         totalItems = 0
-        for key, stat in enumerate(self.stats):
+        for key, stat in enumerate(stats):
             if stat['group_name'] != groupName:
                 continue
             
@@ -382,15 +387,19 @@ class CharacterStats(Forms.Form):
         hoverHelpLabel.Width = int(CharacterStats.INNER_CONTENT_WIDTH)
         hoverHelpLabel.Height = 25
         hoverHelpLabel.Location = Point( 25, 25)
-        self.itemStatsBox.Controls.Add(hoverHelpLabel)             
+        self.itemStatsBox.Controls.Add(hoverHelpLabel)    
+
+        stats = self.getStatsFromItems()
+
+        print(stats)
         
-        self.drawItemPropertyGroup("Stats", 25, 50)
-        self.drawItemPropertyGroup("Weapon Hits", 25, 265)
-        self.drawItemPropertyGroup("Misc", 25, 500)
+        self.drawItemPropertyGroup(stats, "Stats", 25, 50)
+        self.drawItemPropertyGroup(stats, "Weapon Hits", 25, 265)
+        self.drawItemPropertyGroup(stats, "Misc", 25, 500)
         
-        self.drawItemPropertyGroup("Resistances", 375, 50)
-        self.drawItemPropertyGroup("Magic", 375, 190)
-        self.drawItemPropertyGroup("Melee", 375, 350)
+        self.drawItemPropertyGroup(stats, "Resistances", 375, 50)
+        self.drawItemPropertyGroup(stats, "Magic", 375, 190)
+        self.drawItemPropertyGroup(stats, "Melee", 375, 350)
         
     def RuleSelect(self, *args):
         Misc.SetSharedValue("character_stats_rule_select", args[0].Text)
