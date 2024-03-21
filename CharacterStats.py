@@ -118,11 +118,11 @@ class CharacterStats(Forms.Form):
             { "name": "Energy Resist", "value": 0, "max": 70, "group_name": "Resistances", "description": "Get to 70" },
             
             # Weapon Hits
-            { "name": "Hit Life Leech", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "On every successful hit, converts a percentage of the damage inflicted by the attack into hit points for the wielder. (If you hit your target for 50 damage with a 60% Hit Life Leech weapon, you have a chance of healing between 0 (50 * 30% * 1% = 0.15) and 9 (50 * 30% * 60%) hit points.)."  },
-            { "name": "Hit Stamina Leech", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "Has a percentage chance on each hit to convert 100% of the damage inflicted on the target into stamina for the wielder. (If you hit your target for 50 damage, you have a chance of regaining 50 stamina)."  },
-            { "name": "Hit Mana Leech", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "On every successful hit, converts a percentage of the damage inflicted by the attack into mana points for the wielder. (If you hit your target for 50 damage with a 60% Hit Mana Leech weapon, you have a chance of recovering between 0 (50 * 40% * 1% = 0.2) and 12 (50 * 40% * 60%) mana.)"  },
-            { "name": "Hit Lower Attack", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "Has a percentage chance on each hit to lower the hit chance of the target (HCI -25). Approximate duration, 5-10 seconds. The effect does not stack with itself,  percentage hit chance from items is multiplied, not added. example item 1 has 50% hla, item 2 has 30% hla, total hla = 65%"  },
-            { "name": "Hit Lower Defense", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "Has a percentage chance on each hit to lower the defensive capabilities of the target(DCI -25). Approximate duration, 5-10 seconds. The effect does not stack with itself,  percentage hit chance from items is multiplied, not added. example item 1 has 50% hld, item 2 has 30% hld, total hld = 65%  In pvp reduces 35% of the target’s maximum DCI."  },
+            { "name": "Hit Life Leech", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "On every successful hit, converts a percentage of the damage inflicted by the attack into hit points for the wielder.\n(If you hit your target for 50 damage with a 60% Hit Life Leech weapon, you have a chance of healing between 0 (50 * 30% * 1% = 0.15) and 9 (50 * 30% * 60%) hit points.)."  },
+            { "name": "Hit Stamina Leech", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "Has a percentage chance on each hit to convert 100% of the damage inflicted on the target into stamina for the wielder.\n(If you hit your target for 50 damage, you have a chance of regaining 50 stamina)."  },
+            { "name": "Hit Mana Leech", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "On every successful hit, converts a percentage of the damage inflicted by the attack into mana points for the wielder.\n(If you hit your target for 50 damage with a 60% Hit Mana Leech weapon, you have a chance of recovering between 0 (50 * 40% * 1% = 0.2) and 12 (50 * 40% * 60%) mana.)"  },
+            { "name": "Hit Lower Attack", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "Has a percentage chance on each hit to lower the hit chance of the target (HCI -25). Approximate duration, 5-10 seconds.\nThe effect does not stack with itself,  percentage hit chance from items is multiplied, not added. example item 1 has 50% hla, item 2 has 30% hla, total hla = 65%"  },
+            { "name": "Hit Lower Defense", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "Has a percentage chance on each hit to lower the defensive capabilities of the target(DCI -25). Approximate duration, 5-10 seconds.\nThe effect does not stack with itself,  percentage hit chance from items is multiplied, not added. example item 1 has 50% hld, item 2 has 30% hld, total hld = 65%  In pvp reduces 35% of the target’s maximum DCI."  },
             { "name": "Hit Magic Arrow", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "Has a percentage chance on each hit to cast the magery spell magic arrow on the target."  },
             { "name": "Hit Harm", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "Has a percentage chance on each hit to cast the magery spell harm on the target."  },
             { "name": "Hit Fireball", "value": 0, "max": 0, "group_name": "Weapon Hits", "description": "Has a percentage chance on each hit to cast the magery spell fireball on the target."  },
@@ -216,15 +216,15 @@ class CharacterStats(Forms.Form):
         charStatsTable.Controls.Add(dexterityLabel , 1, 2) 
         dexterityValue = Forms.Label()
         dexterityValue.Text = str(Player.Dex)
-        charStatsTable.Controls.Add(dexterityValue , 1, 3) 
+        charStatsTable.Controls.Add(dexterityValue , 1, 3)        
         
         intelligenceLabel = Forms.Label()
         intelligenceLabel.Text = "Intelligence"
         intelligenceLabel.Font = Font(FontFamily.GenericSansSerif, 10.0, FontStyle.Bold)
-        charStatsTable.Controls.Add(intelligenceLabel , 1, 2) 
+        charStatsTable.Controls.Add(intelligenceLabel , 2, 2) 
         intelligenceValue = Forms.Label()
         intelligenceValue.Text = str(Player.Int)
-        charStatsTable.Controls.Add(intelligenceValue , 1, 3) 
+        charStatsTable.Controls.Add(intelligenceValue , 2, 3) 
         
         self.charStatsBox.Controls.Clear()
         self.charStatsBox.Controls.Add(charStatsTable)
