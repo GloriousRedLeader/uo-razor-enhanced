@@ -29,7 +29,7 @@ namespace RazorEnhanced
         private Journal.JournalEntry _lastEntry = null;
 
         private Mobile _player;
-        private int _lootDelay =  IsOSI ? 800 : 200;
+        private int _lootDelay =  IsOSI ? 800 : 400;
         private DateTime? DeathClock = null;
         readonly Journal _journal = new Journal();
         

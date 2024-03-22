@@ -75,8 +75,9 @@ class CharacterStats(Forms.Form):
     
     def getStatsFromItems(self):
         
-        #LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "FacialHair", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
-        LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
+        LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "FacialHair", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
+        #LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
+        #LAYERS = [ "Ring"]
         
         #WEAPON_LAYERS = [ "RightHand", "LeftHand" ]
         
@@ -154,7 +155,7 @@ class CharacterStats(Forms.Form):
                 match = pattern.match(allResistString)
                 for stat in stats:
                     v = Items.GetPropValue(item.Serial, stat['name'])
-                    s = Items.GetPropValueString(item.Serial, stat['name'])
+                    #s = Items.GetPropValueString(item.Serial, stat['name'])
                     #if v > 0:
                         #print("Item: {} Value: {} String: {}".format(item.Name, v, s))
                     #Misc.Pause(100)
@@ -391,7 +392,7 @@ class CharacterStats(Forms.Form):
 
         stats = self.getStatsFromItems()
 
-        print(stats)
+        #print(stats)
         
         self.drawItemPropertyGroup(stats, "Stats", 25, 50)
         self.drawItemPropertyGroup(stats, "Weapon Hits", 25, 265)

@@ -2,6 +2,9 @@ from System.Collections.Generic import List
 from System import Byte
 from Scripts.core.core_mobiles import get_mobs_exclude_serials
 
+# This is a standalone script that will attack the closest gray creature with your weapon
+# That is all.
+
 eligible = get_mobs_exclude_serials(6)
 
 if len(eligible) > 0:
