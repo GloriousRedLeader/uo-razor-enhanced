@@ -212,7 +212,6 @@ def run_ss_bot(
             #while Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=6:                
                 Target.SetLast(nearest)
                 
-                print("SS Ability {}".format(ssAbility))
                 if useHonor == 1 and nearest.Serial != lastHonoredSerial:
                     Player.HeadMessage(307, "Honoring this fucker {}".format(nearest.Name))
                     Player.InvokeVirtue("Honor");
