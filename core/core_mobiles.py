@@ -40,10 +40,10 @@ def get_mobs_exclude_serials (range, checkLineOfSight = False, serialsToExclude 
     return mobs
     
 # Find a vendor NPC by name and highlight.
-def find_vendor_by_name (vendorName, range = 10):
+def find_vendor_by_name (vendorName, vendorRange = 10):
     fil = Mobiles.Filter()
     fil.Enabled = True
-    fil.RangeMax = range
+    fil.RangeMax = vendorRange
     fil.Notorieties = List[Byte](bytes([7]))
     fil.IsGhost = False
     fil.Friend = False
