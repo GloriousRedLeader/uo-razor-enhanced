@@ -65,7 +65,12 @@ def run_dex_bot(
     usePets = 0,
     
     # Limits pet commands since it spams the world.
-    petCommandDelayMs = 5000):
+    petCommandDelayMs = 5000,
+    
+    # This will stop character from auto attacking if disabled.
+    # Adding this while I level my vet skill so I don't kill things
+    # too quickly.
+    shouldAttack = True):
 
     # These are fairly static controls. Adjust as needed based on latency.
 
@@ -160,7 +165,8 @@ def run_dex_bot(
                         Player.ChatSay("All Follow Me")
                     Timer.Create( 'petCommandTimer', petCommandDelayMs )
 
-                Player.Attack(nearest)
+                if shouldAttack == True:
+                    Player.Attack(nearest)
         else:
             if usePets == 1 and Timer.Check('petCommandTimer') == False:
                 Player.ChatSay("All Follow Me")

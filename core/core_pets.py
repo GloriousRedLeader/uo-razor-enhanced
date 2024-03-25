@@ -12,7 +12,7 @@ Timer.Create("vet_bot_pet_warning", 1)
 # specified health percentage.
 # You should not use this method, instead use run_vet_bot() below which will
 # loop and do all the good stuff.
-def vet_pet( healthPercent, petSerials, containerSerial, bandageDelayMs ):
+def vet_pets( healthPercent, petSerials, containerSerial, bandageDelayMs ):
     #global petID
     #global petSerial
     atLeastOnePetFound = False
@@ -142,7 +142,7 @@ def run_vet_bot(
                 Player.HeadMessage(78, "Vetbot Running")
                 Timer.Create("vet_bot_ping_delay", 3000)
 
-            vet_pet(healthPercent, petSerials, containerSerial, bandageDelayMs)
+            vet_pets(healthPercent, petSerials, containerSerial, bandageDelayMs)
             Misc.Pause(500)
             continue
 
