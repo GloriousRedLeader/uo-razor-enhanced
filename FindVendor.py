@@ -5,7 +5,10 @@
 from Scripts.core.core_mobiles import find_vendor_by_name
 
 # Just replace this with your vendors name and walk around mashing this script. 
-VENDOR_NAME = "Jess"
+# 100k
+VENDOR_NAME = "Minion"
+VENDOR_NAME = "Dread Mongbat"
+VENDOR_NAME = "Guy the Vendor"
 
 # Search within this many tiles
 VENDOR_RANGE = 15

@@ -16,13 +16,13 @@ from System.Windows import Forms
 # is an absolute outrage and warrants federal investigation. Until then, behold.
 class CharacterStats(Forms.Form):
     
-    INNER_CONTENT_WIDTH = 700        
+    INNER_CONTENT_WIDTH = 700      
+    GROUP_BOX_WIDTH = 750  
     
     def __init__(self):
         #Misc.RemoveSharedValue("character_stats_rule_select")
-        #self.stats = self.getStatsFromItems()
         
-        self.GROUP_BOX_WIDTH = 750
+        #self.GROUP_BOX_WIDTH = 750
         
         # Main UI Screen
         self.Width = 810
@@ -75,8 +75,8 @@ class CharacterStats(Forms.Form):
     
     def getStatsFromItems(self):
         
-        LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "FacialHair", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
-        #LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
+        #LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "FacialHair", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
+        LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
         #LAYERS = [ "Ring"]
         
         #WEAPON_LAYERS = [ "RightHand", "LeftHand" ]
@@ -146,9 +146,33 @@ class CharacterStats(Forms.Form):
             "Energy Resist": 5
         }
         
+        # Item properties are odd. They are inconsistent. If the item hasn't been
+        # viewed in awhile, perhaps via mouse hover, then it won't be in some global
+        # item cache, even the players own items. Probably an optimization as there 
+        # are so many items in the world. In any case I think the fix to "refresh"
+        # item properties is to close the paper doll and re-open it. 
+        # So here we are tracking the number of items a player has and also
+        # whether those items have properties that were found. We can let the
+        # player know that they should probably close their paper doll and 
+        # open the addone again.
+        totalItemsOnPlayer = 0
+        totalItemsOnPlayerWithProperties = 0
+        
         for layer in LAYERS:
             item = Player.GetItemOnLayer(layer)
             if item != None:
+                totalItemsOnPlayer = totalItemsOnPlayer + 1
+                if len(item.Properties) == 0:
+                    totalItemsOnPlayerWithProperties = totalItemsOnPlayerWithProperties + 1
+                    continue
+                #print(item.Properties)
+              #  print("---------------------------")
+               # print(item.Name)
+                #for prop in item.Properties:
+                    #print(prop.ToString())
+                 #   print("\tNumber: {}, Args: {}, ToString: {}".format(prop.Number, prop.Args, prop.ToString()))
+                #continue
+                
                 # Special handling of Resistances property
                 allResistString = Items.GetPropValueString(item.Serial, 'Resistances')
                 #Misc.Pause(100)
@@ -156,6 +180,7 @@ class CharacterStats(Forms.Form):
                 for stat in stats:
                     v = Items.GetPropValue(item.Serial, stat['name'])
                     #s = Items.GetPropValueString(item.Serial, stat['name'])
+                    #print(s)
                     #if v > 0:
                         #print("Item: {} Value: {} String: {}".format(item.Name, v, s))
                     #Misc.Pause(100)
@@ -166,7 +191,10 @@ class CharacterStats(Forms.Form):
                         resistValue = match.group(resistMap[stat['name']])
                         if resistValue != "--":
                             stat['value'] = stat['value'] + int(resistValue.replace("%", ""))
-        return stats
+            else:
+                print("Could not find item on layer {}".format(layer))
+
+        return (stats, totalItemsOnPlayer,  totalItemsOnPlayerWithProperties)
                         
     def drawCharStatsBox(self):
         charStatsTable = Forms.TableLayoutPanel()
@@ -313,7 +341,6 @@ class CharacterStats(Forms.Form):
         if not self.ruleRadioNormal.Checked and not self.ruleRadioUOEX.Checked:
             self.ruleRadioNormal.Checked = True
         
-
         self.serverRulesBox.Controls.Clear()
         self.serverRulesBox.Controls.Add(serverRulesLabel)
         self.serverRulesBox.Controls.Add(self.ruleRadioNormal)
@@ -381,26 +408,34 @@ class CharacterStats(Forms.Form):
         
     def drawItemStatsBox(self):
         self.itemStatsBox.Controls.Clear()
-        
-        hoverHelpLabel = Forms.Label()
-        hoverHelpLabel.Text = "Hover over an item property name for more info"
-        hoverHelpLabel.Font = Font(FontFamily.GenericSansSerif, 9.0, FontStyle.Italic)
-        hoverHelpLabel.Width = int(CharacterStats.INNER_CONTENT_WIDTH)
-        hoverHelpLabel.Height = 25
-        hoverHelpLabel.Location = Point( 25, 25)
-        self.itemStatsBox.Controls.Add(hoverHelpLabel)    
 
-        stats = self.getStatsFromItems()
-
-        #print(stats)
+        stats, totalItemsOnPlayer, totalItemsOnPlayerWithProperties = self.getStatsFromItems()
         
-        self.drawItemPropertyGroup(stats, "Stats", 25, 50)
-        self.drawItemPropertyGroup(stats, "Weapon Hits", 25, 265)
-        self.drawItemPropertyGroup(stats, "Misc", 25, 500)
-        
-        self.drawItemPropertyGroup(stats, "Resistances", 375, 50)
-        self.drawItemPropertyGroup(stats, "Magic", 375, 190)
-        self.drawItemPropertyGroup(stats, "Melee", 375, 350)
+        if totalItemsOnPlayerWithProperties > 0:
+            achtungLabel = Forms.Label()
+            achtungLabel.Text = "Achtung!\n\nThe script could not find properties on {} / {} equipped items. This is not the script's fault mind you. It has to do with Razor and caching, and quite possibly might be this script's fault.\n\nTo fix this, please close your paper doll and re-open it. That will refresh the item property cache and give you accurate results. Good luck.".format(totalItemsOnPlayerWithProperties, totalItemsOnPlayer)
+            achtungLabel.Font = Font(FontFamily.GenericSansSerif, 10.0, FontStyle.Regular)
+            achtungLabel.ForeColor = Color.Red
+            achtungLabel.Width = int(CharacterStats.INNER_CONTENT_WIDTH)
+            achtungLabel.Height = 350
+            achtungLabel.Location = Point( 25, 25)
+            self.itemStatsBox.Controls.Add(achtungLabel)              
+        else:
+            hoverHelpLabel = Forms.Label()
+            hoverHelpLabel.Text = "Hover over an item property name for more info"
+            hoverHelpLabel.Font = Font(FontFamily.GenericSansSerif, 9.0, FontStyle.Italic)
+            hoverHelpLabel.Width = int(CharacterStats.INNER_CONTENT_WIDTH)
+            hoverHelpLabel.Height = 25
+            hoverHelpLabel.Location = Point( 25, 25)
+            self.itemStatsBox.Controls.Add(hoverHelpLabel)             
+            
+            self.drawItemPropertyGroup(stats, "Stats", 25, 50)
+            self.drawItemPropertyGroup(stats, "Weapon Hits", 25, 265)
+            self.drawItemPropertyGroup(stats, "Misc", 25, 500)
+            
+            self.drawItemPropertyGroup(stats, "Resistances", 375, 50)
+            self.drawItemPropertyGroup(stats, "Magic", 375, 190)
+            self.drawItemPropertyGroup(stats, "Melee", 375, 350)
         
     def RuleSelect(self, *args):
         Misc.SetSharedValue("character_stats_rule_select", args[0].Text)
