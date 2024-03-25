@@ -68,7 +68,7 @@ def run_dex_bot(
     petCommandDelayMs = 5000,
     
     # This will stop character from auto attacking if disabled.
-    # Adding this while I level my vet skill so I don't kill things
+    # Adding this while I level my vet skill so I dont kill things
     # too quickly.
     shouldAttack = True):
 

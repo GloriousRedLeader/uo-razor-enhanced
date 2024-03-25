@@ -12,9 +12,8 @@ Timer.Create("vet_bot_pet_warning", 1)
 # specified health percentage.
 # You should not use this method, instead use run_vet_bot() below which will
 # loop and do all the good stuff.
-def vet_pets( healthPercent, petSerials, containerSerial, bandageDelayMs ):
-    #global petID
-    #global petSerial
+def vet_pets( healthPercent, petSerials, containerSerial, bandageDelayMs, healSpellName = None ):
+
     atLeastOnePetFound = False
     atLeastOnePetMissing = False
     
@@ -30,10 +29,8 @@ def vet_pets( healthPercent, petSerials, containerSerial, bandageDelayMs ):
     
     for pet in pets:
 
-    #if petID:
-        #print("healthPercent {}".format(healthPercent))
-        #print("healthPercent {}".format(healthPercent))
-        if getHealthPercent(pet) < healthPercent or pet.Poisoned or pet.Hits == 0:
+        petCurrentHealthPercent = getHealthPercent(pet)
+        if petCurrentHealthPercent < healthPercent or pet.Poisoned or pet.Hits == 0:
             #if runToPet and Player.DistanceTo(petID) > 2:
             #    pathFindToPet()
             if Player.DistanceTo(pet) <= 2 and not Player.BuffsExist('Veterinary'):
@@ -48,6 +45,13 @@ def vet_pets( healthPercent, petSerials, containerSerial, bandageDelayMs ):
                 Target.WaitForTarget(3000)
                 Target.TargetExecute(pet)
                 Misc.Pause(bandageDelayMs)
+                
+        # Heal with spell
+        if petCurrentHealthPercent < 50 and healSpellName != None and not pet.Poisoned and pet.Hits > 0:
+            Spells.Cast(healSpellName)
+            Target.WaitForTarget(3000)
+            Target.TargetExecute(pet)
+                
                 
                 #return True
         #return False
@@ -111,7 +115,6 @@ def leash_pets(
     elif atLeastOnePetMissing:
         Player.HeadMessage(38, "At least one pet missing.")
 
-    
 # This is the public API you should use when running a pet heal bot
 # in the background.
 def run_vet_bot(
@@ -131,7 +134,12 @@ def run_vet_bot(
     # Wait this long in between bandage attempts. This is a dumb
     # program, it doesn't know when fingers slip, or even whether
     # fingers can slip bandaging an aneemal.
-    bandageDelayMs = 2000):
+    bandageDelayMs = 2000,
+    
+    # Optionally provide a heal spell name if you really want to get serious
+    # Currently will only use this if pet is < 50% health. Can have things like
+    # "Greater Heal" or "Close Wounds".
+    healSpellName = None):
         
     # This is just a head message to let us know the application is running.
     Timer.Create("vet_bot_ping_delay", 1000)
@@ -142,7 +150,7 @@ def run_vet_bot(
                 Player.HeadMessage(78, "Vetbot Running")
                 Timer.Create("vet_bot_ping_delay", 3000)
 
-            vet_pets(healthPercent, petSerials, containerSerial, bandageDelayMs)
+            vet_pets(healthPercent, petSerials, containerSerial, bandageDelayMs, healSpellName)
             Misc.Pause(500)
             continue
 
