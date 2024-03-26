@@ -1,3 +1,9 @@
+# Razor Enhanced Scripts for Ultima Online by
+#	GRL  
+#	https://github.com/GloriousRedLeader/uo-razor-enhanced
+#	2024-03-26
+# Use at your own risk. 
+
 from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
 from Scripts.fm_core.core_spells import cast_until_works
 from System.Collections.Generic import List 
