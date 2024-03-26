@@ -1,3 +1,16 @@
+# Razor Enhanced Scripts for Ultima Online by
+#	GRL  
+#	https://github.com/GloriousRedLeader/uo-razor-enhanced
+#	2024-03-26
+# Use at your own risk. 
+
+# This script is easy. Just bind it to a hotkey in razor and run it. No modifications needed.
+# Will display a summary of character stats with some contextual help. Tested on UOEX, UOAlive, 
+# and InsaneUO.
+#
+# The fact that this stuff isnt baked into clients (all the fun weapon hits and thresholds)
+# is an absolute outrage and warrants federal investigation. Until then, behold.
+
 import clr
 clr.AddReference ('System.Windows.Forms')
 clr.AddReference('System.Drawing')
@@ -8,12 +21,6 @@ from System.Windows.Forms import TextBox, Keys, KeyPressEventHandler, DataGridVi
 from System.Windows.Forms import DataGridViewCellBorderStyle, ColumnStyle, SizeType, RowStyle, GroupBox
 from System.Windows import Forms
 
-# This script is easy. Just bind it to a hotkey in razor and run it. No modifications needed.
-# Will display a summary of character stats with some contextual help. Tested on UOEX, UOAlive, 
-# and InsaneUO.
-#
-# The fact that this stuff isnt baked into clients (all the fun weapon hits and thresholds)
-# is an absolute outrage and warrants federal investigation. Until then, behold.
 class CharacterStats(Forms.Form):
     
     INNER_CONTENT_WIDTH = 700      

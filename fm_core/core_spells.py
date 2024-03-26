@@ -1,3 +1,9 @@
+# Razor Enhanced Scripts for Ultima Online by
+#	GRL  
+#	https://github.com/GloriousRedLeader/uo-razor-enhanced
+#	2024-03-26
+# Use at your own risk. 
+
 # Make sure a spell gets cast
 def cast_until_works(castFunc, delayBetweenAttemptsMs = 500, maxAttempts = -1):
     while maxAttempts != 0:

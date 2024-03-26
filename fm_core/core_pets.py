@@ -1,3 +1,9 @@
+# Razor Enhanced Scripts for Ultima Online by
+#	GRL  
+#	https://github.com/GloriousRedLeader/uo-razor-enhanced
+#	2024-03-26
+# Use at your own risk. 
+
 # Took some of this from Smaptastic from the UOAlive scripts channel on discord March 12th 2024.
 # Not sure if he/she/they/them/thee/thy/thine has a github.
 # I have made a few changes from original script. First, I removed 95% of the stuff

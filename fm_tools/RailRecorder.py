@@ -1,6 +1,9 @@
+# GRL DID NOT WRITE THIS.
+# This beautiful script was written by someone else. Just storing it here for safekeeping.
+# This is a good, very useful script.
+
 from time import sleep
 from datetime import datetime
-#import clr, time, thread, sys, System
 import clr, time, sys, System
 
 clr.AddReference('System')
@@ -8,7 +11,6 @@ clr.AddReference('System.Drawing')
 clr.AddReference('System.Windows.Forms')
 clr.AddReference('System.Data')
 
-#from System.Threading import ThreadStart, Thread
 from System.Collections.Generic import List
 from System import Byte
 from System import Environment

@@ -1,7 +1,8 @@
-import sys # buy upto 40 in newhaven 3495, 2414
-
+# GRL DID NOT WRITE THIS SCRIPT!
 # Not written by me. Credit goes to wherever this came from. 
 # Im hosting for safekeeping.
+
+import sys # buy upto 40 in newhaven 3495, 2414
 
 while True:
     Misc.Pause(1)

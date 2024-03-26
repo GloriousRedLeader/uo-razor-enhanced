@@ -1,3 +1,9 @@
+# Razor Enhanced Scripts for Ultima Online by
+#	GRL  
+#	https://github.com/GloriousRedLeader/uo-razor-enhanced
+#	2024-03-26
+# Use at your own risk. 
+
 # This is an example of how to find a vendor in a sea of vendors.
 # If the vendor is on your screen and within range it should be able to find
 # it. Just provide the vendor name.

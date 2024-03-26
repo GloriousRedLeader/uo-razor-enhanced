@@ -1,3 +1,7 @@
+# GRL DID NOT WRITE THIS SCRIPT!
+# Not written by me. Credit goes to wherever this came from. 
+# Im hosting for safekeeping.
+
 Misc.SendMessage("Training Chiv")
 
 while True:

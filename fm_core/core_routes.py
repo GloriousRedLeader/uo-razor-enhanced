@@ -1,3 +1,9 @@
+# Razor Enhanced Scripts for Ultima Online by
+#	GRL  
+#	https://github.com/GloriousRedLeader/uo-razor-enhanced
+#	2024-03-26
+# Use at your own risk. 
+
 # List of nice coordinates that work well with rails
 
 # Start around southern portion
