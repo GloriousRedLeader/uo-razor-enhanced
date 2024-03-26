@@ -2,13 +2,10 @@
 # If the vendor is on your screen and within range it should be able to find
 # it. Just provide the vendor name.
 # When it finds the vendor text will appear above its head so you can find it.
-from Scripts.core.core_mobiles import find_vendor_by_name
+from Scripts.fm_core.core_mobiles import find_vendor_by_name
 
 # Just replace this with your vendors name and walk around mashing this script. 
-# 100k
-VENDOR_NAME = "Minion"
-VENDOR_NAME = "Dread Mongbat"
-VENDOR_NAME = "Guy the Vendor"
+VENDOR_NAME = "DEALS"
 
 # Search within this many tiles
 VENDOR_RANGE = 15

@@ -22,7 +22,7 @@
 # But if youre playing different characters on different servers with different 
 # script names, that becomes hard to track. So instead we can use this shared variable.
 
-Timer.Create("vet_bot_pet_warning", 1)
+Timer.Create("vetLoopPetWarning", 1)
 
 # Bandages the pet if youre close enough and its either poisoned or below the 
 # specified health percentage.
@@ -73,12 +73,12 @@ def vet_pets( healthPercent, petSerials, containerSerial, bandageDelayMs, healSp
         #return False
     #return False
     
-    if Timer.Check("vet_bot_pet_warning") == False:
+    if Timer.Check("vetLoopPetWarning") == False:
         if not atLeastOnePetFound:
             Player.HeadMessage(38, "Could not find any pets.")
         elif atLeastOnePetMissing:
             Player.HeadMessage(38, "At least one pet missing.")
-        Timer.Create("vet_bot_pet_warning", 3000)
+        Timer.Create("vetLoopPetWarning", 3000)
 
 # Returns a current HP percentage value. Works for pets, but does quite a bit of rounding for them, as
 # pet max HP is always considered to be 25, and they decrease as fractions of that. (i.e., 23/25 is 92%)

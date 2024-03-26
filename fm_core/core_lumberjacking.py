@@ -1,6 +1,6 @@
-from Scripts.core.core_player import find_first_in_container_by_ids, find_first_in_hands_by_id
-from Scripts.core.core_rails import go_to_tile
-from Scripts.core.core_items import AXE_STATIC_IDS, LOG_STATIC_IDS, TREE_STATIC_IDS
+from Scripts.fm_core.core_player import find_first_in_container_by_ids, find_first_in_hands_by_id
+from Scripts.fm_core.core_rails import go_to_tile
+from Scripts.fm_core.core_items import AXE_STATIC_IDS, LOG_STATIC_IDS, TREE_STATIC_IDS
 from System.Collections.Generic import List
 import sys
 

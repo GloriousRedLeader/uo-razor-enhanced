@@ -1,6 +1,6 @@
-from Scripts.core.core_mobiles import get_mobs_exclude_serials
-from Scripts.core.core_player import find_instrument
-from Scripts.core.core_spells import cast_until_works
+from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
+from Scripts.fm_core.core_player import find_instrument
+from Scripts.fm_core.core_spells import cast_until_works
 import sys
 
 # These are loops that will run on your character that find nearest enemies,

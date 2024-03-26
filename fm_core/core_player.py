@@ -1,4 +1,4 @@
-from Scripts.core.core_items import INSTRUMENT_STATIC_IDS
+from Scripts.fm_core.core_items import INSTRUMENT_STATIC_IDS
 
 # Takes a list of itemIDs and returns the first one it finds.
 def find_first_in_container_by_ids(itemIDs, container):
