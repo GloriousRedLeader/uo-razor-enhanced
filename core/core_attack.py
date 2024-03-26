@@ -3,6 +3,27 @@ from Scripts.core.core_player import find_instrument
 from Scripts.core.core_spells import cast_until_works
 import sys
 
+# These are loops that will run on your character that find nearest enemies,
+# attack them, use spells and abilities, etc. Pick the one that you like the best
+# and use it. Most common ones are things that discord, consecrate weapon,
+# attack nearest, etc. Theres a lot of options so be sure to enable what you need.
+
+# Advanced configuration:
+#
+# All loop functions in this framework should honor a shared variable that 
+# will pause the loops. Anything that loops should do this. They should respond to the
+# change within 1000ms. You can pause all scripts by setting this vairable:
+#
+#   core_loops_enabled
+#       (1) Enabled
+#       (0) Disabled
+#
+# This will not stop the script, it will just sit in a loop and wait until the variable
+# is once again set to 1. This is useful for teleporting and use with other scripts at the same time.
+# You could also just manually stop / start your attack loop script. 
+# But if youre playing different characters on different servers with different 
+# script names, that becomes hard to track. So instead we can use this shared variable.
+
 # Good resources:
 # https://github.com/dorana/RazorEnhancedScripts/blob/master/RazorScripts/SampMaster.cs
 # https://github.com/hampgoodwin/razorenhancedscripts/tree/master
@@ -10,7 +31,7 @@ import sys
 # https://github.com/matsamilla/Razor-Enhanced/blob/master/resource_LumberjackingScanTile.py
 # https://github.com/YulesRules/Ultima-Online-Razor-Enhanced-Pathfinding/blob/main/PathfindingMain.py
 
-def run_dex_bot(
+def run_dex_loop(
     # This is my special convention. It represents abilities that are toggled and
     # activated by next auto attack. These are what the possible values are:
     # 0 - Disabled, dont do anything
@@ -88,7 +109,16 @@ def run_dex_bot(
     Timer.Create( 'dexConfidenceTimer', 6000 )
     Timer.Create( 'petCommandTimer', 1500 )
     
+    # Always enable on start
+    Misc.SetSharedValue("core_loops_enabled", 1)
+    
     while not Player.IsGhost:
+        
+        if Misc.ReadSharedValue("core_loops_enabled") != 1:
+            Misc.Pause(500)
+            Player.HeadMessage( 48, 'DexxerLoop Paused...' )
+            Timer.Create( 'dexPingTimer', 2000 )
+            continue
         
         if Timer.Check( 'dexPingTimer' ) == False:
             Player.HeadMessage( 78, 'DexxerLoop Running...' )
@@ -178,7 +208,7 @@ def run_dex_bot(
         
 # Use this if you want to shadowstrike things all day
 # Probably a good idea to be in wraith form
-def run_ss_bot(
+def run_ss_loop (
 
     # This isnt TOO important, just helps prevent spamming messages like 
     # You need at least x mana to do this. Meh. User should be able to figure
@@ -205,7 +235,16 @@ def run_ss_bot(
     # Initial timer creation, not super important.
     Timer.Create( 'dexPingTimer', 1 )
     
+    # Always enable on start
+    Misc.SetSharedValue("core_loops_enabled", 1)
+    
     while not Player.IsGhost:
+        
+        if Misc.ReadSharedValue("core_loops_enabled") != 1:
+            Misc.Pause(500)
+            Player.HeadMessage( 48, 'SS Loop Paused...' )
+            Timer.Create( 'dexPingTimer', 2000 )
+            continue
         
         if Timer.Check( 'dexPingTimer' ) == False:
             Player.HeadMessage( 78, 'SS Loop Running...' )

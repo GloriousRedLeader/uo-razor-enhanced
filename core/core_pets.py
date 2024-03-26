@@ -6,6 +6,22 @@
 # Known Issues: Most likely doesnt play nice with heal agent or other scripts that 
 # block actions, e.g. "You must wait to do this". No idea how that stuff works.
 
+# Advanced configuration:
+#
+# All loop functions in this framework should honor a shared variable that 
+# will pause the loops. Anything that loops should do this. They should respond to the
+# change within 1000ms. You can pause all scripts by setting this vairable:
+#
+#   core_loops_enabled
+#       (1) Enabled
+#       (0) Disabled
+#
+# This will not stop the script, it will just sit in a loop and wait until the variable
+# is once again set to 1. This is useful for teleporting and use with other scripts at the same time.
+# You could also just manually stop / start your attack loop script. 
+# But if youre playing different characters on different servers with different 
+# script names, that becomes hard to track. So instead we can use this shared variable.
+
 Timer.Create("vet_bot_pet_warning", 1)
 
 # Bandages the pet if youre close enough and its either poisoned or below the 
@@ -76,7 +92,7 @@ def getHealthPercent(mobForHP):
         
 # Will look through your bags, find a leash, and leash all the pets 
 # around you.
-def leash_pets(
+def leash_pets (
     # An array of serials for your pets. You must provide this.
     # To get the serials you can use razor and press "Inspect Entities",
     # but really all of these programs have this feature and most clients
@@ -104,6 +120,10 @@ def leash_pets(
         pets.append(pet)
     
     for pet in pets:
+        if Misc.ReadSharedValue("core_loops_enabled") != 1:
+            Player.HeadMessage( 48, "Skipping pet {} because framework is paused".format(pet.Name))
+            break
+            
         if Player.DistanceTo(pet) <= 5:
             Items.UseItem(leash)
             Target.WaitForTarget(3000)
@@ -117,7 +137,7 @@ def leash_pets(
 
 # This is the public API you should use when running a pet heal bot
 # in the background.
-def run_vet_bot(
+def run_vet_loop (
     
     # An array of serials for your pets. You must provide this.
     # To get the serials you can use razor and press "Inspect Entities",
@@ -142,13 +162,23 @@ def run_vet_bot(
     healSpellName = None):
         
     # This is just a head message to let us know the application is running.
-    Timer.Create("vet_bot_ping_delay", 1000)
+    Timer.Create("vetLoopTimer", 1000)
 
+    # Always enable on start
+    Misc.SetSharedValue("core_loops_enabled", 1)
+    
     while True:
         while not Player.IsGhost:
-            if Timer.Check("vet_bot_ping_delay") == False:
-                Player.HeadMessage(78, "Vetbot Running")
-                Timer.Create("vet_bot_ping_delay", 3000)
+            
+            if Misc.ReadSharedValue("core_loops_enabled") != 1:
+                Misc.Pause(500)
+                Player.HeadMessage( 48, 'Vet Loop Paused...' )
+                Timer.Create( 'vetLoopTimer', 2000 )
+                continue            
+            
+            if Timer.Check("vetLoopTimer") == False:
+                Player.HeadMessage(78, "Vet Loop Running")
+                Timer.Create("vetLoopTimer", 3000)
 
             vet_pets(healthPercent, petSerials, containerSerial, bandageDelayMs, healSpellName)
             Misc.Pause(500)
