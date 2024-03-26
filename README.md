@@ -35,8 +35,6 @@ A **Multi Pet Vet** loop will heal / rez pets around you. Just plug in some seri
 
 I found this **Lootmaster** script from Discord on UO Alive. I think its a little easier to use than the Razor Enhanced looter. We really need a public database of loot profiles because they are very time consuming to configure. Find it at *fm_tools/Lootmaster.cs* and set it to auto start. You'll have to do some configuration to make it work. I think there's a link to the original author and maybe a guide on how to use it.
 
-**Rail Recorder ** is written by someone. It is great.
-
 ### Credits
 
 I wrote some of this stuff. Others I am just storing for safekeeping. These were acquired via discord or github. All credit goes to original authors.
