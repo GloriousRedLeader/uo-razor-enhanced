@@ -1,7 +1,7 @@
 # Razor Enhanced Scripts for Ultima Online by
-#	GRL  
-#	https://github.com/GloriousRedLeader/uo-razor-enhanced
-#	2024-03-26
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2024-03-26
 # Use at your own risk. 
 
 # This script is easy. Just bind it to a hotkey in razor and run it. No modifications needed.
@@ -83,11 +83,9 @@ class CharacterStats(Forms.Form):
     def getStatsFromItems(self):
         
         #LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "FacialHair", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
-        LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
-        #LAYERS = [ "Ring"]
-        
-        #WEAPON_LAYERS = [ "RightHand", "LeftHand" ]
-        
+        #LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Hair", "Waist", "InnerTorso", "Bracelet", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
+        LAYERS = [ "RightHand", "LeftHand", "Shoes", "Pants", "Shirt", "Head", "Gloves", "Ring", "Neck", "Waist", "InnerTorso", "Bracelet", "MiddleTorso", "Earrings", "Arms", "Cloak", "OuterTorso", "OuterLegs", "InnerLegs", "Talisman" ]
+
         # https://www.uoex.net/wiki/Stat_Caps
         # https://uo.com/wiki/ultima-online-wiki/items/magic-item-properties/
         stats = [
@@ -170,6 +168,7 @@ class CharacterStats(Forms.Form):
             if item != None:
                 totalItemsOnPlayer = totalItemsOnPlayer + 1
                 if len(item.Properties) == 0:
+                    print("This item has no properties {} on layer {}".format(item.Name, layer))
                     totalItemsOnPlayerWithProperties = totalItemsOnPlayerWithProperties + 1
                     continue
                 #print(item.Properties)
