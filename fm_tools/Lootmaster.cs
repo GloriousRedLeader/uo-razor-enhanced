@@ -30,7 +30,8 @@ namespace RazorEnhanced
         private Journal.JournalEntry _lastEntry = null;
 
         private Mobile _player;
-        private int _lootDelay =  IsOSI ? 800 : 400;
+        //private int _lootDelay =  IsOSI ? 800 : 400;
+        private int _lootDelay =  IsOSI ? 800 : 600;
         private DateTime? DeathClock = null;
         readonly Journal _journal = new Journal();
         
@@ -215,19 +216,23 @@ namespace RazorEnhanced
                             var rows = _journal.GetJournalEntry(_lastEntry);
                             if (rows == null) continue;
                             var filtered = rows.Where(r => r.Type == "System");
-                            if (filtered.Any(r => r.Text == "You must wait to perform another action."))
-                            {
-                                if (_lootDelay >= 700)
-                                {
-                                    _lootDelay = 400;
-                                    Handler.SendMessage(MessageType.Log, $"Resetting loot delay to {_lootDelay}");
-                                }
-                                else
-                                {
-                                    _lootDelay += 10;
-                                    Handler.SendMessage(MessageType.Log, $"Adjusting loot delay with 10ms, currently at {_lootDelay}");
-                                }
-                            }
+                            
+                            
+                            // When this resets it kills looting for a bit until 
+                            // it grows again.
+                            //if (filtered.Any(r => r.Text == "You must wait to perform another action."))
+                            //{
+                              //  if (_lootDelay >= 700)
+                               // {
+                                //    _lootDelay = 400;
+                                 //   Handler.SendMessage(MessageType.Log, $"Resetting loot delay to {_lootDelay}");
+                               // }
+                                //else
+                                //{
+                                 //   _lootDelay += 10;
+                                  //  Handler.SendMessage(MessageType.Log, $"Adjusting loot delay with 10ms, currently at {_lootDelay}");
+                               // }
+                            //}
                         }
 
                         UpdateLootMasterGump(Hue.Idle);

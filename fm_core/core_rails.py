@@ -1,9 +1,10 @@
 # Razor Enhanced Scripts for Ultima Online by
-#	GRL  
-#	https://github.com/GloriousRedLeader/uo-razor-enhanced
-#	2024-03-26
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2024-03-26
 # Use at your own risk. 
 
+from Scripts.fm_core.core_player import open_bank_and_deposit_items
 from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
 from Scripts.fm_core.core_spells import cast_until_works
 from System.Collections.Generic import List 
@@ -130,6 +131,39 @@ def do_route(path, range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 
                 break
     Player.HeadMessage(48, "Done in this zone!")
     
+# Move that fat ass. Looks like some serious information is needed here.
+# All parameters are required.
+def recall(
+
+    # This is easy. Use the razor inspector and get the unique Serial for your runebook.
+    # Each runebook has a unique serial. Easy.
+    runebookSerial, 
+    
+    # This one I *think* is the same for ALL runebooks. However, it is different on each
+    # shard. So we can't have a cross-shard solution here. Use Razor Enhanced "Inspect Gumps"
+    # Open your runebook and look for something called "Gump ID:". It is that number.
+    runebookGumpID,
+    
+    # This is the exact button that is clicked on the runebook. There are buttons for 
+    # Recall, Gate Travel, and Sacred Journey. Use Razor Enhanced "Inspect Gumps", press 
+    # the button in the rune book, then look at the output for "Gump Button". It is that value.
+    # Pro tip: If you are doing something with a lot of runes, so chaining locations back to back,
+    # fear not, because there is usually a pattern to the Gump Button values. I have seen these:
+    #           Insane UO               UOEX
+    # Rune 1: Gump Button 75        Gump Button 7
+    # Rune 2: Gump Button 76        Gump Button 17
+    runeGumpButton
+    ):
+
+    Journal.Clear()
+    Items.UseItem(runebookSerial)
+    Gumps.WaitForGump(runebookGumpID, 3000)
+    if Journal.Search("Invalid Serial"):
+        Misc.SendMessage("Could not find runebook. If it is in a bag in your backpack, open the bag and it should work.", 38)
+        Player.HeadMessage(38, "Could not start auto bot, see sys message")
+        return False
+    Gumps.SendAction(runebookGumpID, runeGumpButton)
+
 # Main entry point into auto farming. Will recall to runes in different books,
 # follow a path of coords assocaited with that rune, and kill stuff / loot stuff.
 # Right now only works with sacred journey.
@@ -138,12 +172,12 @@ def ride_the_rails(
     # runebooks a List of constructs that contain these properties:
     #   runebook_serial: Serial for a runebook, e.g. 0x46FB3DF1
     #   attack_range: number of tiles to scan, smaller means smaller area, larger means more problems
-    #   runes_enabled: 0-based index of runes in the runebook to use (must line up with index of paths)
-    #   rune_paths: 3d array of coords. Index of outer array must line up with rune, e.g. rune 0 is equal
-    #       to paths[0]
+    #   rune_paths: A tuple where:
+    #           first item = A runebook Button (see recall function runeGumpButton for full description
+    #           second item = array of 2d coords, e.g. [[123,50], [127,52], etc.], use RailRecorder to generate
     runebooks, 
     
-    # runebookBumpId = Open the bump inspector and get the gump id for yoru runebook, i think this 
+    # runebookBumpId = Open the gump inspector and get the gump id for yoru runebook, i think this 
     # differs per server for some reason, however it should be the same value for each runebook
     # on that server. Note this is different than runebook serial which IS unique per runebook.
     runebookGumpID, 
@@ -162,10 +196,13 @@ def ride_the_rails(
     while loopForever:
         Misc.SendMessage("Starting Cyle: {}".format(cycles))
         for runebook in runebooks:
-            for i in runebook["runes_enabled"]:
-                path = runebook["rune_paths"][i]
+            print("Rune Book ------------- {}".format(runebook["runebook_serial"]))
+            for runeGumpButton, path in runebook["rune_paths"]:
+            
+            #for i in runebook["runes_enabled"]:
+                #path = runebook["rune_paths"][i]
 
-                Misc.SendMessage("Going to run rune {}".format(i))
+                Misc.SendMessage("Going to run rune {}".format(runeGumpButton))
                 
                 
                 # Pause dex_loop so we can recall.
@@ -181,17 +218,19 @@ def ride_the_rails(
                 Misc.SetSharedValue("core_loops_enabled", 0)
                 Misc.Pause(1000)
                 
-                def recall():
-                    Journal.Clear()
-                    Items.UseItem(runebook["runebook_serial"])
-                    Gumps.WaitForGump(runebookGumpID, 3000)
-                    if Journal.Search("Invalid Serial"):
-                        Misc.SendMessage("Could not find runebook. If it is in a bag in your backpack, open the bag and it should work.", 38)
-                        Player.HeadMessage(38, "Could not start auto bot, see sys message")
-                        sys.exit()
-                    Gumps.SendAction(runebookGumpID, (i * 10) + 7)
+#                def recall():
+#                    Journal.Clear()
+#                    Items.UseItem(runebook["runebook_serial"])
+#                    Gumps.WaitForGump(runebookGumpID, 3000)
+#                    if Journal.Search("Invalid Serial"):
+#                        Misc.SendMessage("Could not find runebook. If it is in a bag in your backpack, open the bag and it should work.", 38)
+#                        Player.HeadMessage(38, "Could not start auto bot, see sys message")
+#                        sys.exit()
+#                    Gumps.SendAction(runebookGumpID, (i * 10) + 7)
                 
-                cast_until_works(recall)                    
+#                cast_until_works(recall)  
+                
+                cast_until_works(lambda: recall(runebook["runebook_serial"], runebookGumpID, runeGumpButton))
                 #Misc.SendMessage("Trying to go", 123)
                 #cast_until_works(lambda: Gumps.SendAction(runebookGumpID, (i * 10) + 7))
                 #Gumps.SendAction(1431013363, (i * 10) + 7)
@@ -199,8 +238,6 @@ def ride_the_rails(
                 
                 # Tell attack loop it can continue.
                 Misc.SetSharedValue("core_loops_enabled", 1)
-                
-                
                 
                 #Misc.SendMessage("Starting Journey", 123)
                 # Unpause dex_loop so we can kill stuff.
@@ -210,7 +247,14 @@ def ride_the_rails(
                 rails_stats("report")
                 
         cycles = cycles + 1
-        
+
+# UOEX Sacred Journey Gump Button based on rune position in book (Each Shard has different formula)
+#def get_sacred_journey_gump_button_uoex(runeIndex):
+#    return (runeIndex * 10) + 7
+
+# Insane UO Sacred Journey Gump Button based on rune position in book (Each Shard has different formula)
+#def get_sacred_journey_gump_button_insaneuo(runeIndex):
+#    return 75 + runeIndex
 
 # Globals. Put in a class one day.
 railsStartingGold = 0
@@ -240,4 +284,51 @@ def rails_stats(option):
             goldPerHour = 0
         else:
             goldPerHour = "{:,.0f}".format(earnedGold / hours)
-        Player.HeadMessage(253, "[GPH: {}]".format(goldPerHour))         
+        Player.HeadMessage(253, "[GPH: {}]".format(goldPerHour))    
+   
+# Runs a check to see if player should recall back to base for any reason
+def check_recall_deposit_or_repairs(
+
+    # This is the location of our bank
+    bankRunebookSerial,
+    
+    # This is the rune gump button in the runebook (see recall function for complete definition)
+    bankRuneGumpButton,
+    
+    # If we want to continue farming, provide this, otherwise will just stop
+    returnToRunebookSerial,
+    
+    # If we want to continue farming, this is the rune gump button to click (see recall function for complete definition)
+    returnToRuneGumpButton,
+    
+    # runebookBumpId = Open the gump inspector and get the gump id for yoru runebook, i think this 
+    # differs per server for some reason, however it should be the same value for each runebook
+    # on that server. Note this is different than runebook serial which IS unique per runebook.
+    runebookGumpID, 
+
+    # If character has less than this amount of free capacity, then we return to base
+    # And deposit stuff. Default is 80% full go back to base.
+    weightThreshold = 0.80
+    ):
+    
+    if Player.Weight / Player.MaxWeight > weightThreshold:
+        Player.HeadMessage(48, "Heading back to base...")
+        
+        # Stop Attack Loop so we can recall. There are just way too many
+        # problems here to manage this. Theyll never know anyway.
+        Misc.SetSharedValue("core_loops_enabled", 0)
+        Misc.Pause(1000)
+        
+        cast_until_works(lambda: recall(bankRunebookSerial, runebookGumpID, bankRuneGumpButton))
+        Misc.Pause(5000)
+        open_bank_and_deposit_items(itemIDs = [0x0EED])
+        Misc.Pause(2000)
+        if returnToRunebookSerial != None and returnToRuneGumpButton != None:
+            Player.HeadMessage(48, "Returning to location...")
+            cast_until_works(lambda: recall(returnToRunebookSerial, runebookGumpID, returnToRuneGumpButton))
+            Misc.Pause(2000)
+            
+        # Tell attack loop it can continue.
+        Misc.SetSharedValue("core_loops_enabled", 1)
+    else:
+        Player.HeadMessage(48, "No need to return to base...")
