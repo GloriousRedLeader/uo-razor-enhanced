@@ -5,6 +5,9 @@
 # Use at your own risk. 
 
 # Make sure a spell gets cast
+# DEPRECATED: Maybe dont use this. Ive got it baked into the recall
+# function (fm_core.core_rails) which is the only place you really need it
+# (maybe).
 def cast_until_works(castFunc, delayBetweenAttemptsMs = 500, maxAttempts = -1):
     while maxAttempts != 0:
         Journal.Clear()
