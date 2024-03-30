@@ -1,7 +1,7 @@
 # Razor Enhanced Scripts for Ultima Online by
-#	GRL  
-#	https://github.com/GloriousRedLeader/uo-razor-enhanced
-#	2024-03-26
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2024-03-26
 # Use at your own risk. 
 
 from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
@@ -36,6 +36,11 @@ import sys
 # https://github.com/ScriptB3ast/razor-enhanced/blob/master/items_useSkinningKnife.py
 # https://github.com/matsamilla/Razor-Enhanced/blob/master/resource_LumberjackingScanTile.py
 # https://github.com/YulesRules/Ultima-Online-Razor-Enhanced-Pathfinding/blob/main/PathfindingMain.py
+
+# 88 - blue        
+# 78 - green    DEX LOOP
+# 48 - organge  RAIL LOOP                  
+# 253 - yellow  GPH
 
 def run_dex_loop(
     # This is my special convention. It represents abilities that are toggled and
@@ -122,8 +127,9 @@ def run_dex_loop(
         
         if Misc.ReadSharedValue("core_loops_enabled") != 1:
             Misc.Pause(500)
-            Player.HeadMessage( 48, 'DexxerLoop Paused...' )
-            Timer.Create( 'dexPingTimer', 2000 )
+            if Timer.Check( 'dexPingTimer' ) == False:
+                Player.HeadMessage( 78, 'DexxerLoop Paused...' )
+                Timer.Create( 'dexPingTimer', 1000)
             continue
         
         if Timer.Check( 'dexPingTimer' ) == False:
@@ -170,7 +176,7 @@ def run_dex_loop(
                 Target.SetLast(nearest)
                 
                 if useHonor == 1 and nearest.Serial != lastHonoredSerial:
-                    Player.HeadMessage(307, "Honoring this fucker {}".format(nearest.Name))
+                    Player.HeadMessage(78, "Honoring {}".format(nearest.Name))
                     Player.InvokeVirtue("Honor");
                     Target.WaitForTarget(3000, True);
                     Target.TargetExecute(nearest);

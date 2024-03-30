@@ -124,7 +124,7 @@ def do_route(path, range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 
                 # got away or not. It is more likely that there is loot and the monster is dead if attempts 
                 # is greater than zero.
                 if autoLootBufferMs > 0 and goToNearestAttempts > 0:
-                    Player.HeadMessage(99, "Pausing a little extra 1s for more loot")
+                    Player.HeadMessage(48, "Pausing a little extra for more loot")
                     Misc.Pause(autoLootBufferMs)
             else:
                 Player.HeadMessage(48, "Nothing left in sector")
@@ -160,7 +160,7 @@ def recall(
         # track. Die if we can't find it.
         runebookGumpID = 0
         totalMs = 0
-        dieAfterMs = 3000
+        dieAfterMs = 6000
         while True:
             runebookGumpID = Gumps.CurrentGump( )
             if runebookGumpID == 0:
@@ -170,15 +170,18 @@ def recall(
             totalMs = totalMs + 100
             #print ("total time: {}".format(totalMs))
             if totalMs > dieAfterMs:
-                Player.HeadMessage(38, "[error] Could not find runebook gump id. Stopping!")
+                Player.HeadMessage(38, "Rail loop dying")
+                Player.HeadMessage(38, "Could not find runebook gump id")
                 Player.HeadMessage(38, "See fm_core.core_rails.recall")
                 sys.exit()
         
         Gumps.WaitForGump(runebookGumpID, 3000)
         if Journal.Search("Invalid Serial"):
             Misc.SendMessage("Could not find runebook. If it is in a bag in your backpack, open the bag and it should work.", 38)
-            Player.HeadMessage(38, "Could not start auto bot, see sys message")
-            return False
+            Player.HeadMessage(38, "Rail loop dying")
+            Player.HeadMessage(38, "Issue with finding runebook")
+            Player.HeadMessage(38, "See fm_core.core_rails.recall")
+            sys.exit()
         Gumps.SendAction(runebookGumpID, runeGumpButton)
         
         Misc.Pause(3000)
@@ -468,7 +471,9 @@ def do_vendor_sell(
     
     recall(runebookSerial, runeGumpButton)
     
-    SellAgent.Enable()
+    
+    if not SellAgent.Status():
+        SellAgent.Enable()
     
     Misc.SetSharedValue("core_loops_enabled", 0)
     Misc.Pause(3000)    
