@@ -5,6 +5,7 @@
 # Use at your own risk. 
 
 from Scripts.fm_core.core_player import open_bank_and_deposit_items
+from Scripts.fm_core.core_player import move_all_items_from_container
 from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
 from Scripts.fm_core.core_spells import cast_until_works
 from System.Collections.Generic import List 
@@ -383,6 +384,22 @@ def run_rail_loop_single(
     # Note: If you do not provide a rune back to the path, then it will just stop at the vendors.
     vendorRunebookSerialsAndGumpButtons = [],
     
+    # If cleanup britain is available on your server you can set details below.
+    cubRunebookSerial = None,
+    
+    # If cleanup britain is available on your server you can set details below.
+    cubRuneGumpButton = None,
+
+    # If cleanup britain is available on your server you can set details below.
+    # This is a bag in your inventory, probably something from auto looter.
+    # This script will transfer ALL items in this bag into the cub container,
+    # so be carefuL!!!!!
+    cubSourceContainerSerial = None,
+    
+    # If cleanup britain is available on your server you can set details below.
+    # This is the serial of the chest in britain. Use inspector.
+    cubDestinationContainerSerial = None,
+    
     # Percent of weight we can hold. If we exceed this, go back to bank / vendors and offload.
     # Default is offload when 80% full.
     weightThreshold = 0.80,
@@ -404,6 +421,8 @@ def run_rail_loop_single(
     if Player.Weight / Player.MaxWeight < weightThreshold and pathRunebookSerial != None and pathRuneGumpButton != None:
         recall(pathRunebookSerial, pathRuneGumpButton)
                 
+    rails_stats("start")        
+    
     while True:
         # Assume user has player in a good spot to start the run and isnt overloaded
         canPlayerProceed = True
@@ -413,6 +432,11 @@ def run_rail_loop_single(
             if bankRunebookSerial != None and bankRuneGumpButton != None:
                 canPlayerProceed = False
                 do_banking(bankRunebookSerial, bankRuneGumpButton)
+                rails_stats("start")
+                
+            if cubRunebookSerial != None and cubRuneGumpButton != None and cubSourceContainerSerial != None and cubDestinationContainerSerial != None:
+                canPlayerProceed = False
+                move_all_items_from_container(cubSourceContainerSerial, cubDestinationContainerSerial)
                 
             if len(vendorRunebookSerialsAndGumpButtons) > 0:
                 canPlayerProceed = False
@@ -423,11 +447,8 @@ def run_rail_loop_single(
                 canPlayerProceed = True
                 recall(pathRunebookSerial, pathRuneGumpButton)
                 
-
         if canPlayerProceed:
-            rails_stats("start")
             do_route(path, range = attackRange, autoLootBufferMs = autoLootBufferMs, pathFindingTimeoutSeconds = pathFindingTimeoutSeconds)
-            #do_route(path, 5, pathFindingTimeoutSeconds, autoLootBufferMs = 2000)
             rails_stats("report")
         else:
             Misc.SendMessage("Provide a rune to farming location or move character there yourself", 38)

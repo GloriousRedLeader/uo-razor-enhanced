@@ -37,10 +37,11 @@ import sys
 # https://github.com/matsamilla/Razor-Enhanced/blob/master/resource_LumberjackingScanTile.py
 # https://github.com/YulesRules/Ultima-Online-Razor-Enhanced-Pathfinding/blob/main/PathfindingMain.py
 
-# 88 - blue        
+# 88 - blue     PET LOOP
 # 78 - green    DEX LOOP
 # 48 - organge  RAIL LOOP                  
 # 253 - yellow  GPH
+# 455 - white   PLAYER / ITEMS
 
 def run_dex_loop(
     # This is my special convention. It represents abilities that are toggled and
@@ -295,6 +296,7 @@ def run_ss_loop (
                         Player.HeadMessage(68, "Hidden, yes special, yes attack")
                     else:
                         Player.HeadMessage(38, "Hidden, no special, no attack")
+                        Target.Cancel()
         
             
         Misc.Pause(500)

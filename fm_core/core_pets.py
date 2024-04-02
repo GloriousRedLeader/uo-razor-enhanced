@@ -1,7 +1,7 @@
 # Razor Enhanced Scripts for Ultima Online by
-#	GRL  
-#	https://github.com/GloriousRedLeader/uo-razor-enhanced
-#	2024-03-26
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2024-03-26
 # Use at your own risk. 
 
 # Took some of this from Smaptastic from the UOAlive scripts channel on discord March 12th 2024.
@@ -57,9 +57,9 @@ def vet_pets( healthPercent, petSerials, containerSerial, bandageDelayMs, healSp
             #    pathFindToPet()
             if Player.DistanceTo(pet) <= 2 and not Player.BuffsExist('Veterinary'):
                 if pet.Hits == 0:
-                    Player.HeadMessage(48, "Rezzing {}".format(pet.Name))
+                    Player.HeadMessage(88, "Rezzing {}".format(pet.Name))
                 else:
-                    Player.HeadMessage(48, "Bandaging {}".format(pet.Name))
+                    Player.HeadMessage(88, "Bandaging {}".format(pet.Name))
 
                 bandage = Items.FindByID(0x0E21, 0, containerSerial)
                 #Items.UseItem(bandage, petSerial)
@@ -127,12 +127,13 @@ def leash_pets (
     
     for pet in pets:
         if Misc.ReadSharedValue("core_loops_enabled") != 1:
-            Player.HeadMessage( 48, "Skipping pet {} because framework is paused".format(pet.Name))
+            Player.HeadMessage( 88, "Skipping pet {} because framework is paused".format(pet.Name))
             break
             
         if Player.DistanceTo(pet) <= 5:
             Items.UseItem(leash)
             Target.WaitForTarget(3000)
+            Player.HeadMessage( 88, "Leashing fluffy {}".format(pet.Name))
             Target.TargetExecute(pet)
             Misc.Pause(1000)
             
@@ -158,7 +159,7 @@ def run_vet_loop (
     healthPercent = 95, 
     
     # Wait this long in between bandage attempts. This is a dumb
-    # program, it doesn't know when fingers slip, or even whether
+    # program, it doesnt know when fingers slip, or even whether
     # fingers can slip bandaging an aneemal.
     bandageDelayMs = 2000,
     
@@ -178,12 +179,12 @@ def run_vet_loop (
             
             if Misc.ReadSharedValue("core_loops_enabled") != 1:
                 Misc.Pause(500)
-                Player.HeadMessage( 48, 'Vet Loop Paused...' )
-                Timer.Create( 'vetLoopTimer', 2000 )
+                Player.HeadMessage( 88, 'Vet Loop Paused...' )
+                Timer.Create( 'vetLoopTimer', 1000 )
                 continue            
             
             if Timer.Check("vetLoopTimer") == False:
-                Player.HeadMessage(78, "Vet Loop Running")
+                Player.HeadMessage(88, "Vet Loop Running")
                 Timer.Create("vetLoopTimer", 3000)
 
             vet_pets(healthPercent, petSerials, containerSerial, bandageDelayMs, healSpellName)

@@ -87,7 +87,7 @@ def find_instrument( container ):
 # Give it a list of item ids and it will deposit into bank
 # Gold is 0x0EED
 def open_bank_and_deposit_items(itemIDs = []):
-    Player.HeadMessage(48, "Depositing Items...")
+    Player.HeadMessage(455, "[start] Depositing Items...")
     Player.ChatSay(48, 'banco')
     Misc.Pause(600)
     depositCount = 0
@@ -96,9 +96,34 @@ def open_bank_and_deposit_items(itemIDs = []):
             item = find_in_container_by_id(itemID, Player.Backpack)
             if item == None:
                 break
-            Player.HeadMessage(48, "Depositing {}".format(item.Name))
+            Player.HeadMessage(455, "Depositing {}".format(item.Name))
             Items.Move(item, Player.Bank, item.Amount)
             depositCount = depositCount + 1
             Misc.Pause(600)
-    Player.HeadMessage(48, "[done] Deposited {} items.".format(depositCount))
+    Player.HeadMessage(455, "[done] Depositing {} items.".format(depositCount))
             
+# This will get us items from our bank box and put them in our backpack.
+# Use this to get regs, bandages, potions, etc.
+# Will stop if cannot find the amount required.
+def open_bank_and_resupply(
+    # An array of tuples (<item id>, <amount>)
+    itemsNeeded = []):
+
+    Player.HeadMessage(455, "[start] Resupplying...")
+    Player.ChatSay(48, 'banco')
+    Misc.Pause(1000)
+ 
+    for itemID, amount in itemsNeeded:
+        count = Items.ContainerCount(Player.Backpack, itemID, -1, True)
+        print("Currenlty have {} / {} of itemID in backpack".format(count, amount))
+    Player.HeadMessage(455, "[done] Resupplying...")
+    
+# Nice utility to just move junk from one bag to another.
+def move_all_items_from_container(sourceContainerSerial, destinationContainerSerial):
+    Player.HeadMessage(455, "[start] Cleaing up Britain...")
+    items = Items.FindBySerial(sourceContainerSerial)
+    for item in Items.FindBySerial(sourceContainerSerial).Contains:
+        Player.HeadMessage(455, "Junking item {}".format(item.Name))
+        Items.Move(item, destinationContainerSerial, item.Amount)
+        Misc.Pause(800)
+    Player.HeadMessage(455, "[done] Cleaing up Britain...")
