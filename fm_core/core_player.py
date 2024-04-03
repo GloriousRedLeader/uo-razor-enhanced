@@ -109,21 +109,22 @@ def open_bank_and_resupply(
     # An array of tuples (<item id>, <amount>)
     itemsNeeded = []):
 
-    Player.HeadMessage(455, "[start] Resupplying...")
+    #Player.HeadMessage(455, "[start] Resupplying...")
     Player.ChatSay(48, 'banco')
     Misc.Pause(1000)
  
     for itemID, amount in itemsNeeded:
         count = Items.ContainerCount(Player.Backpack, itemID, -1, True)
         print("Currenlty have {} / {} of itemID in backpack".format(count, amount))
-    Player.HeadMessage(455, "[done] Resupplying...")
+    #Player.HeadMessage(455, "[done] Resupplying...")
     
 # Nice utility to just move junk from one bag to another.
 def move_all_items_from_container(sourceContainerSerial, destinationContainerSerial):
-    Player.HeadMessage(455, "[start] Cleaing up Britain...")
+    #Player.HeadMessage(455, "[start] Cleaing up Britain...")
     items = Items.FindBySerial(sourceContainerSerial)
+    Player.HeadMessage(455, "Junking {} items".format(len(items)))
     for item in Items.FindBySerial(sourceContainerSerial).Contains:
         Player.HeadMessage(455, "Junking item {}".format(item.Name))
         Items.Move(item, destinationContainerSerial, item.Amount)
         Misc.Pause(800)
-    Player.HeadMessage(455, "[done] Cleaing up Britain...")
+    #Player.HeadMessage(455, "[done] Cleaing up Britain...")

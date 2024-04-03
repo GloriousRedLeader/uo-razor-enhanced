@@ -13,6 +13,8 @@ from System import Byte, Int32
 import sys
 import time
 
+CORE_LOOP_DELAY_MS = 1500
+
 # Can potentially swap implementation to use this pathfinder:
 # https://github.com/YulesRules/Ultima-Online-Razor-Enhanced-Pathfinding/blob/main/README.md
 # The timeout value is in seconds. It is a float. 
@@ -191,13 +193,13 @@ def recall(
         
     # Stop Attack Loop so we can recall. There are just way too many
     # problems here to manage this. Theyll never know anyway.
-    Misc.SetSharedValue("core_loops_enabled", 0)
-    Misc.Pause(2000)   
+    #Misc.SetSharedValue("core_loops_enabled", 0)
+    #Misc.Pause(2000)   
         
     cast_until_works(lambda: do_recall(runebookSerial, runeGumpButton))
     
-    Misc.Pause(3000)
-    Misc.SetSharedValue("core_loops_enabled", 1)
+    #Misc.Pause(3000)
+    #Misc.SetSharedValue("core_loops_enabled", 1)
     
 
 # Main entry point into auto farming. Will recall to runes in different books,
@@ -254,14 +256,19 @@ def run_rail_loop_multi(
 #                cast_until_works(recall)  
                 
                 #cast_until_works(lambda: recall(runebook["runebook_serial"], runebookGumpID, runeGumpButton))
+                
+                Misc.SetSharedValue("core_loops_enabled", 0)
+                Misc.Pause(CORE_LOOP_DELAY_MS)
+                
                 recall(runebook["runebook_serial"], runeGumpButton)
                 
-                
+                Misc.SetSharedValue("core_loops_enabled", 1)
+                Misc.Pause(CORE_LOOP_DELAY_MS)
                 
                 #Misc.SendMessage("Trying to go", 123)
                 #cast_until_works(lambda: Gumps.SendAction(runebookGumpID, (i * 10) + 7))
                 #Gumps.SendAction(1431013363, (i * 10) + 7)
-                Misc.Pause(3000)
+                #Misc.Pause(3000)
                 
                 # Tell attack loop it can continue.
                 #Misc.SetSharedValue("core_loops_enabled", 1)
@@ -419,15 +426,20 @@ def run_rail_loop_single(
     # If we are not overloaded lets head to farming location
     # main loop will pick up if we are overloaded
     if Player.Weight / Player.MaxWeight < weightThreshold and pathRunebookSerial != None and pathRuneGumpButton != None:
+        Misc.SetSharedValue("core_loops_enabled", 0)
+        Misc.Pause(CORE_LOOP_DELAY_MS)    
         recall(pathRunebookSerial, pathRuneGumpButton)
-                
+        Misc.SetSharedValue("core_loops_enabled", 1)
+        Misc.Pause(CORE_LOOP_DELAY_MS)    
+    
     rails_stats("start")        
     
     while True:
+    
         # Assume user has player in a good spot to start the run and isnt overloaded
         canPlayerProceed = True
         
-        if Player.Weight / Player.MaxWeight > weightThreshold:
+        if Player.Weight / Player.MaxWeight >= weightThreshold:
             canPlayerProceed = False
             if bankRunebookSerial != None and bankRuneGumpButton != None:
                 canPlayerProceed = False
@@ -436,7 +448,7 @@ def run_rail_loop_single(
                 
             if cubRunebookSerial != None and cubRuneGumpButton != None and cubSourceContainerSerial != None and cubDestinationContainerSerial != None:
                 canPlayerProceed = False
-                move_all_items_from_container(cubSourceContainerSerial, cubDestinationContainerSerial)
+                do_clean_up_britain(cubRunebookSerial, cubRuneGumpButton, cubSourceContainerSerial, cubDestinationContainerSerial)
                 
             if len(vendorRunebookSerialsAndGumpButtons) > 0:
                 canPlayerProceed = False
@@ -445,7 +457,11 @@ def run_rail_loop_single(
 
             if pathRunebookSerial != None and pathRuneGumpButton != None:
                 canPlayerProceed = True
+                Misc.SetSharedValue("core_loops_enabled", 0)
+                Misc.Pause(CORE_LOOP_DELAY_MS)    
                 recall(pathRunebookSerial, pathRuneGumpButton)
+                Misc.SetSharedValue("core_loops_enabled", 1)
+                Misc.Pause(CORE_LOOP_DELAY_MS)
                 
         if canPlayerProceed:
             do_route(path, range = attackRange, autoLootBufferMs = autoLootBufferMs, pathFindingTimeoutSeconds = pathFindingTimeoutSeconds)
@@ -464,19 +480,20 @@ def do_banking(
     
     # This is the rune gump button in the runebook (see recall function for complete definition)
     runeGumpButton):
-        
     
     Player.HeadMessage(48, "[start] Banking...")
     
+    Misc.SetSharedValue("core_loops_enabled", 0)
+    Misc.Pause(CORE_LOOP_DELAY_MS)    
+    
     recall(runebookSerial, runeGumpButton)
     
-    Misc.SetSharedValue("core_loops_enabled", 0)
-    Misc.Pause(3000)    
+    #Misc.Pause(3000)    
 
     open_bank_and_deposit_items(itemIDs = [0x0EED])
     
     Misc.SetSharedValue("core_loops_enabled", 1)
-    Misc.Pause(3000)    
+    Misc.Pause(CORE_LOOP_DELAY_MS)    
     
     Player.HeadMessage(48, "[done] Banking...")
 
@@ -490,19 +507,48 @@ def do_vendor_sell(
         
     Player.HeadMessage(48, "[start] Vendor Sell...")
     
+    Misc.SetSharedValue("core_loops_enabled", 0)
+    Misc.Pause(CORE_LOOP_DELAY_MS)    
+    
     recall(runebookSerial, runeGumpButton)
     
+    #Misc.Pause(3000)    
     
     if not SellAgent.Status():
         SellAgent.Enable()
     
-    Misc.SetSharedValue("core_loops_enabled", 0)
-    Misc.Pause(3000)    
+    Misc.Pause(500)    
 
     Player.ChatSay(38, "vendor sell")
     
     Misc.SetSharedValue("core_loops_enabled", 1)
-    Misc.Pause(3000)    
+    Misc.Pause(CORE_LOOP_DELAY_MS)    
     
     Player.HeadMessage(48, "[done] Vendor Sell...")
     
+def do_clean_up_britain(
+    # Runebook serial withour bank rune
+    runebookSerial,
+    
+    # This is the rune gump button in the runebook (see recall function for complete definition)
+    runeGumpButton,
+    
+    # The serial of the source container, all items will be trashed!
+    sourceContainerSerial,
+    
+    # The serial for the chest in britain where you dump all your trash Items
+    destinationContainerSerial):
+        
+    Player.HeadMessage(48, "[start] Cleanup Britain...")
+    
+    Misc.SetSharedValue("core_loops_enabled", 0)
+    Misc.Pause(CORE_LOOP_DELAY_MS)    
+    
+    recall(runebookSerial, runeGumpButton)
+    
+    move_all_items_from_container(sourceContainerSerial, destinationContainerSerial)
+    
+    Misc.SetSharedValue("core_loops_enabled", 1)
+    Misc.Pause(CORE_LOOP_DELAY_MS)    
+    
+    Player.HeadMessage(48, "[done] Cleanup Britain...")
