@@ -163,20 +163,20 @@ def recall(
         # track. Die if we can't find it.
         runebookGumpID = 0
         totalMs = 0
-        dieAfterMs = 6000
+        dieAfterMs = 12000
         while True:
             runebookGumpID = Gumps.CurrentGump( )
             if runebookGumpID == 0:
-                Misc.Pause(100)
+                Misc.Pause(500)
             else:
                 break    
-            totalMs = totalMs + 100
+            totalMs = totalMs + 500
             #print ("total time: {}".format(totalMs))
             if totalMs > dieAfterMs:
-                Player.HeadMessage(38, "Rail loop dying")
                 Player.HeadMessage(38, "Could not find runebook gump id")
                 Player.HeadMessage(38, "See fm_core.core_rails.recall")
-                sys.exit()
+                return
+                #sys.exit()
         
         Gumps.WaitForGump(runebookGumpID, 3000)
         if Journal.Search("Invalid Serial"):
@@ -488,7 +488,7 @@ def do_banking(
     
     recall(runebookSerial, runeGumpButton)
     
-    #Misc.Pause(3000)    
+    Misc.Pause(CORE_LOOP_DELAY_MS)
 
     open_bank_and_deposit_items(itemIDs = [0x0EED])
     
@@ -517,7 +517,7 @@ def do_vendor_sell(
     if not SellAgent.Status():
         SellAgent.Enable()
     
-    Misc.Pause(500)    
+    Misc.Pause(CORE_LOOP_DELAY_MS) 
 
     Player.ChatSay(38, "vendor sell")
     
@@ -545,6 +545,8 @@ def do_clean_up_britain(
     Misc.Pause(CORE_LOOP_DELAY_MS)    
     
     recall(runebookSerial, runeGumpButton)
+    
+    Misc.Pause(CORE_LOOP_DELAY_MS)
     
     move_all_items_from_container(sourceContainerSerial, destinationContainerSerial)
     

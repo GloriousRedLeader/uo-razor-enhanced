@@ -122,9 +122,8 @@ def open_bank_and_resupply(
 def move_all_items_from_container(sourceContainerSerial, destinationContainerSerial):
     #Player.HeadMessage(455, "[start] Cleaing up Britain...")
     items = Items.FindBySerial(sourceContainerSerial)
-    Player.HeadMessage(455, "Junking {} items".format(len(items)))
     for item in Items.FindBySerial(sourceContainerSerial).Contains:
         Player.HeadMessage(455, "Junking item {}".format(item.Name))
         Items.Move(item, destinationContainerSerial, item.Amount)
-        Misc.Pause(800)
+        Misc.Pause(1800)
     #Player.HeadMessage(455, "[done] Cleaing up Britain...")
