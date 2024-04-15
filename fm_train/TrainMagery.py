@@ -7,6 +7,13 @@
 # I am just storing this here for safekeeping. This script is from on UO Alive Discord
 # Dec 18, 2023 Magery 0 - 120
 
+#30 - 45: Cast Fireball
+#45 - 55: Cast Lightning (or Mana Drain for also raise Resisting Spells and Evaluating Intelligence)
+#55 - 65: Cast Paralyze
+#65 - 75: Cast Reveal
+#75 - 90: Cast Flamestrike (or Mana Vampire for also raise Resisting Spells and Evaluating Intelligence)
+#90 - 120: Cast Earthquake - Equip a spell channeling, mage weapon: -29 magery weaon
+
 CAST_TIMEOUT = 700
 
 def SelfCast(spell, wait_for_target = True):
@@ -19,6 +26,8 @@ def Meditate():
     if Player.Mana != Player.ManaMax:
         Player.UseSkill("Meditation")
 
+    #print("Pausing while we meditate")
+    #Misc.Pause(10000)
     while Player.BuffsExist('Meditation') and Player.Mana != Player.ManaMax:
         Misc.Pause(1000)
 
@@ -36,6 +45,10 @@ while Player.GetSkillValue("Magery") < 120:
             SelfCast("Mana Vampire")
             Misc.Pause(CAST_TIMEOUT)
         else:
-            SelfCast("Earthquake", False)
-            Misc.Pause(2500)
+            Player.HeadMessage(123, "Casing earthquake")
+            #SelfCast("Earthquake", False)
+            Spells.CastMagery("Earthquake")
+            Misc.Pause(5000)
              
+
+

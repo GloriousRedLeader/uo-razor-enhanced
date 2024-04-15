@@ -21,6 +21,13 @@
 # Once you have those Press Play  
 #
 
+#0 - 40: Train at NPC Necromancer in New Haven
+#40 - 50: Cast Pain Spike on yourself
+#50 - 70: Cast Horrific Beast
+#70 - 90: Cast Wither
+#90 - 100: Cast Lich Form
+#100 - 120: Cast Vampiric Embrace
+
 while True:
     Necro = Player.GetSkillValue('Necromancy')
     if Necro < 35 and Player.Mana > 7:

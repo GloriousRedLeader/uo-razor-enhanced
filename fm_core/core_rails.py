@@ -163,9 +163,10 @@ def recall(
         # track. Die if we can't find it.
         runebookGumpID = 0
         totalMs = 0
-        dieAfterMs = 12000
+        dieAfterMs = 5000
         while True:
             runebookGumpID = Gumps.CurrentGump( )
+            print("GUMP ID: {}".format(runebookGumpID))
             if runebookGumpID == 0:
                 Misc.Pause(500)
             else:
@@ -426,12 +427,15 @@ def run_rail_loop_single(
     # If we are not overloaded lets head to farming location
     # main loop will pick up if we are overloaded
     if Player.Weight / Player.MaxWeight < weightThreshold and pathRunebookSerial != None and pathRuneGumpButton != None:
+        Misc.SendMessage("STARTING RECALL JUNK")
         Misc.SetSharedValue("core_loops_enabled", 0)
         Misc.Pause(CORE_LOOP_DELAY_MS)    
         recall(pathRunebookSerial, pathRuneGumpButton)
         Misc.SetSharedValue("core_loops_enabled", 1)
         Misc.Pause(CORE_LOOP_DELAY_MS)    
+        Misc.SendMessage("FINISHED RECALL")
     
+    Misc.SendMessage("MOVING ON")
     rails_stats("start")        
     
     while True:

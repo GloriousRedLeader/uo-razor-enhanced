@@ -8,50 +8,57 @@
 # Original Author may be Firebottle, posted on 3/17/2023
 
 
+#0 - 30: Train at an NPC Thief Guildmaster
+#30 - 40: Apply Lesser Poison
+#40 - 70: Apply Poison
+#70 - 92: Apply Greater Poison
+#92 - 100: Apply Deadly Poison
 
-POISON_KEG_SERIAL = 0x40D6121B
-MAX_LEVEL = 70
+POISON_KEG_SERIALS = [0x40D613B4, 0x40DF5161]
+MAX_LEVEL = 100
 
-weapon = Player.GetItemOnLayer('RightHand')
-while Player.GetSkillValue("Poisoning") < MAX_LEVEL:
-
-    poison = Items.FindByID( 0x0F0A, -1, Player.Backpack.Serial )
-    if poison == None:
-        Player.HeadMessage(58, "No more poisons, making one")
-        Items.UseItem(POISON_KEG_SERIAL)
-        Misc.Pause(250)
-
-    poison = Items.FindByID( 0x0F0A, -1, Player.Backpack.Serial )
-    if poison == None:
-        Player.HeadMessage(38, "No more poisons, quitting")
-        break;
-        
-    while Player.Poisoned:
-        Spells.CastMagery('Arch Cure')
-        Target.WaitForTarget(5000,True)
-        Target.Self()
-        Misc.Pause(2000)
-        Player.EquipItem(weapon)
-        Misc.Pause(2000)
-
-    while Player.Hits < Player.HitsMax:
-        Spells.CastMagery('Greater Heal')
-        Target.WaitForTarget(5000,True)
-        Target.Self()
-        Misc.Pause(2000)
-        Player.EquipItem(weapon)
-        Misc.Pause(2000)
-        
-    Misc.Pause(2000)
-
-    Player.UseSkill("Poisoning")
-    Misc.Pause(1000)
-    Target.WaitForTarget(10000, False)
-
-    if poison != None:
-        Target.TargetExecute(poison)
-    Target.WaitForTarget(10000, False)
-    Target.TargetExecute(weapon)
-    Misc.Pause(10000)
+for kegSerial in POISON_KEG_SERIALS:
     
+    weapon = Player.GetItemOnLayer('RightHand')
+    while Player.GetSkillValue("Poisoning") < MAX_LEVEL:
+
+        poison = Items.FindByID( 0x0F0A, -1, Player.Backpack.Serial )
+        if poison == None:
+            Player.HeadMessage(58, "No more poisons, making one")
+            Items.UseItem(kegSerial)
+            Misc.Pause(1000)
+
+        poison = Items.FindByID( 0x0F0A, -1, Player.Backpack.Serial )
+        if poison == None:
+            Player.HeadMessage(38, "No more poisons, quitting")
+            break;
+            
+        while Player.Poisoned:
+            Spells.CastMagery('Arch Cure')
+            Target.WaitForTarget(5000,True)
+            Target.Self()
+            Misc.Pause(2000)
+            Player.EquipItem(weapon)
+            Misc.Pause(2000)
+
+        while Player.Hits < Player.HitsMax:
+            Spells.CastMagery('Greater Heal')
+            Target.WaitForTarget(5000,True)
+            Target.Self()
+            Misc.Pause(2000)
+            Player.EquipItem(weapon)
+            Misc.Pause(2000)
+            
+        Misc.Pause(2000)
+
+        Player.UseSkill("Poisoning")
+        Misc.Pause(1000)
+        Target.WaitForTarget(10000, False)
+
+        if poison != None:
+            Target.TargetExecute(poison)
+        Target.WaitForTarget(10000, False)
+        Target.TargetExecute(weapon)
+        Misc.Pause(10000)
+        
 
