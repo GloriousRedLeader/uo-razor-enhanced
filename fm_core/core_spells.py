@@ -17,6 +17,7 @@ def cast_until_works(castFunc, delayBetweenAttemptsMs = 500, maxAttempts = -1):
             or Journal.Search("You are already casting a spell") 
             or Journal.Search("This book needs time to recharge")
             or Journal.Search("That location is blocked")
+            or Journal.Search("You must have at least")
         ):
             Misc.SendMessage("Waiting to retry")
             Misc.Pause(delayBetweenAttemptsMs)
