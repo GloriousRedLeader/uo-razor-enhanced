@@ -2,7 +2,8 @@
 
 #arrange these in the order that you would like to train the skill.  Remove any if you do not want to train them.
 #order = ["picking","detect", "taste","camp","hide","arms","item", "removetrap"]
-order = ["hide"]
+order = ["picking","detect", "taste","camp","hide","arms","item"]
+#order = ["taste"]
 
 mainpack = Mobiles.FindBySerial( Player.Serial ).Backpack
 

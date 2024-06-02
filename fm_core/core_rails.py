@@ -13,7 +13,7 @@ from System import Byte, Int32
 import sys
 import time
 
-CORE_LOOP_DELAY_MS = 1500
+CORE_LOOP_DELAY_MS = 650
 
 # Can potentially swap implementation to use this pathfinder:
 # https://github.com/YulesRules/Ultima-Online-Razor-Enhanced-Pathfinding/blob/main/README.md
@@ -197,6 +197,7 @@ def recall(
     #Misc.SetSharedValue("core_loops_enabled", 0)
     #Misc.Pause(2000)   
         
+    #do_recall(runebookSerial, runeGumpButton)
     cast_until_works(lambda: do_recall(runebookSerial, runeGumpButton))
     
     #Misc.Pause(3000)
@@ -423,7 +424,7 @@ def run_rail_loop_single(
     # Give a little extra time to loot when a monster dies. This is useful. A nice value
     # is about 2000ms.
     autoLootBufferMs = 2000):
-        
+    
     # If we are not overloaded lets head to farming location
     # main loop will pick up if we are overloaded
     if Player.Weight / Player.MaxWeight < weightThreshold and pathRunebookSerial != None and pathRuneGumpButton != None:
@@ -436,7 +437,11 @@ def run_rail_loop_single(
         Misc.SendMessage("FINISHED RECALL")
     
     Misc.SendMessage("MOVING ON")
+    
     rails_stats("start")        
+    
+    Misc.SendMessage("STARETETED STATSSTS")
+    
     
     while True:
     

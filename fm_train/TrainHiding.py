@@ -20,6 +20,7 @@ while not Player.IsGhost:
 #            Player.UseSkill("Stealth")
 #            Misc.Pause(3000)        
  
+
     if not Player.Visible:
         Player.UseSkill("Stealth")
         Misc.Pause(3000)
