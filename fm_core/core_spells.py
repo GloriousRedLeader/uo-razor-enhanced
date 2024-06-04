@@ -8,11 +8,11 @@
 # DEPRECATED: Maybe dont use this. Ive got it baked into the recall
 # function (fm_core.core_rails) which is the only place you really need it
 # (maybe).
-def cast_until_works(castFunc, delayBetweenAttemptsMs = 500, maxAttempts = -1):
+def cast_until_works(castFunc, delayBetweenAttemptsMs = 1000, maxAttempts = -1):
     while maxAttempts != 0:
         Journal.Clear()
         castFunc()
-        Misc.Pause(500)
+        Misc.Pause(1000)
         if (Journal.Search("You have not yet recovered") 
             or Journal.Search("You are already casting a spell") 
             or Journal.Search("This book needs time to recharge")

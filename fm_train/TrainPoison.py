@@ -14,8 +14,8 @@
 #70 - 92: Apply Greater Poison
 #92 - 100: Apply Deadly Poison
 
-POISON_KEG_SERIALS = [0x407FC67C, 0x407FC663, 0x407FC63B, 0x407FC642]
-MAX_LEVEL = 92
+POISON_KEG_SERIALS = [0x4023D4E5, 0x40D4A14A, 0x40D4A1A9]
+MAX_LEVEL = 100
 
 for kegSerial in POISON_KEG_SERIALS:
     
@@ -59,6 +59,6 @@ for kegSerial in POISON_KEG_SERIALS:
             Target.TargetExecute(poison)
         Target.WaitForTarget(10000, False)
         Target.TargetExecute(weapon)
-        Misc.Pause(10000)
+        Misc.Pause(8000)
         
 

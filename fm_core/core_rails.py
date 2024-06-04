@@ -453,16 +453,19 @@ def run_rail_loop_single(
             if bankRunebookSerial != None and bankRuneGumpButton != None:
                 canPlayerProceed = False
                 do_banking(bankRunebookSerial, bankRuneGumpButton)
+                Misc.Pause(2500)    
                 rails_stats("start")
                 
             if cubRunebookSerial != None and cubRuneGumpButton != None and cubSourceContainerSerial != None and cubDestinationContainerSerial != None:
                 canPlayerProceed = False
                 do_clean_up_britain(cubRunebookSerial, cubRuneGumpButton, cubSourceContainerSerial, cubDestinationContainerSerial)
+                Misc.Pause(2500)    
                 
             if len(vendorRunebookSerialsAndGumpButtons) > 0:
                 canPlayerProceed = False
                 for vendorRunebookSerial, vendorRuneGumpButton in vendorRunebookSerialsAndGumpButtons:
                     do_vendor_sell(vendorRunebookSerial, vendorRuneGumpButton)
+                    Misc.Pause(2500)    
 
             if pathRunebookSerial != None and pathRuneGumpButton != None:
                 canPlayerProceed = True

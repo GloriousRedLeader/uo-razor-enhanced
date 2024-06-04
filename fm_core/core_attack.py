@@ -49,7 +49,8 @@ def run_dex_loop(
     # 0 - Disabled, dont do anything
     # 1 - Use primary ability whatever it may be
     # 2 - Use secondary ability whatever it may be
-    # 3 - Use lightning strike 
+    # 3 - Use lightning strike (bushido)
+    # 4 - Use focus attack (ninjitsu)
     specialAbilityType = 0,
 
     # Time between special ability activations. Make smaller when youve got the mana to attack
@@ -81,10 +82,18 @@ def run_dex_loop(
     
     # Whether to enable the Bushido skill Confidence. Typically lasts ~5 seconds
     # and lets us restore health and stamina maybe.
-    useConfidence = 0,
+    #useConfidence = 0,
+    # Whether to use a bushido skill. These are the mutually exclusive stances only.
+    # 0 = No stance, do nothing
+    # 1 = Confidence, restores stats when parry
+    # 2 = Evasion, can parry magic, good
+    # 3 = Counter Attack, more dps
+    bushidoStance = 0,
     
     # Recast confidence after this many miliseconds
-    confidenceDelayMs = 5000,
+    #confidenceDelayMs = 5000,
+    # Recast whatever stance above after this many miliseconds
+    bushidoStanceDelayMs = 5000,
 
     # Whether we should invoke the honor virtue before attacking something. I think
     # the target needs to be at full health for this to work. Maybe not all servers
@@ -118,7 +127,7 @@ def run_dex_loop(
     Timer.Create( 'dexDiscordTimer', 5000 )
     Timer.Create( 'dexConsecrateWeaponTimer', 2000 )
     Timer.Create( 'dexDivineFuryTimer', 3000 )
-    Timer.Create( 'dexConfidenceTimer', 6000 )
+    Timer.Create( 'dexBushidoStanceTimer', 6000 )
     Timer.Create( 'petCommandTimer', 1500 )
     
     # Always enable on start
@@ -151,9 +160,14 @@ def run_dex_loop(
             Timer.Create( 'dexDivineFuryTimer', divineFuryDelayMs )
             Misc.Pause(actionDelayMs)
             
-        if useConfidence == 1 and Timer.Check( 'dexConfidenceTimer' ) == False:
+        if bushidoStance == 1 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
             cast_until_works(lambda: Spells.CastBushido("Confidence", True))
-            Timer.Create( 'dexConfidenceTimer', confidenceDelayMs )
+            Timer.Create( 'dexBushidoStanceTimer', bushidoStanceDelayMs )
+            Misc.Pause(actionDelayMs)
+            
+        if bushidoStance == 2 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
+            cast_until_works(lambda: Spells.CastBushido("Evasion", True))
+            Timer.Create( 'dexBushidoStanceTimer', bushidoStanceDelayMs )
             Misc.Pause(actionDelayMs)
             
         if Timer.Check( 'dexSpecialAbilityDelayTimer' ) == False:
@@ -166,6 +180,11 @@ def run_dex_loop(
             elif specialAbilityType == 3:
                 if not Player.BuffsExist("Lightning Strike"):
                     Spells.CastBushido("Lightning Strike", True)
+            elif specialAbilityType == 4:
+                print("This needs work, there is no buff for focus attack. TODO")
+                print(Player.BuffsExist("Focus Attack"))
+                if not Player.BuffsExist("Focus Attack"):
+                    Spells.CastNinjitsu("Focus Attack", True)
             else:
                 Player.HeadMessage( 78, 'No weapon special selected' )
             Timer.Create( 'dexSpecialAbilityDelayTimer', specialAbilityDelayMs )   
@@ -279,10 +298,12 @@ def run_ss_loop (
                     
                 #if not Player.HasSecondarySpecial and Player.Mana >= ssManaCost:
                 if ssAbility == 1:
-                    if not Player.HasPrimarySpecial:
+                    #if not Player.HasPrimarySpecial:
+                    if not Player.HasSpecial:
                         Player.WeaponPrimarySA( )
                 elif ssAbility == 2:
-                    if not Player.HasSecondarySpecial:
+                    #if not Player.HasSecondarySpecial:
+                    if not Player.HasSpecial:
                         Player.WeaponSecondarySA( )
 
                 Misc.Pause(250)
