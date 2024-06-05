@@ -109,6 +109,13 @@ def run_dex_loop(
     # Limits pet commands since it spams the world.
     petCommandDelayMs = 5000,
     
+    # Whether we should use mirror images. This is a nice defnese move you can
+    # use instealth to absorb a hit when you miss on a shadow strike
+    useMirrorImage = 0,
+    
+    # Cast mirror images this often. They disappear something like every 30 - 60 seconds.
+    mirrorImageDelayMs = 10000,    
+    
     # This will stop character from auto attacking if disabled.
     # Adding this while I level my vet skill so I dont kill things
     # too quickly.
@@ -129,6 +136,7 @@ def run_dex_loop(
     Timer.Create( 'dexDivineFuryTimer', 3000 )
     Timer.Create( 'dexBushidoStanceTimer', 6000 )
     Timer.Create( 'petCommandTimer', 1500 )
+    Timer.Create( 'dexMirrorImageTimer', 8000 )
     
     # Always enable on start
     Misc.SetSharedValue("core_loops_enabled", 1)
@@ -154,18 +162,20 @@ def run_dex_loop(
             cast_until_works(lambda: Spells.CastChivalry("Consecrate Weapon"))
             Timer.Create( 'dexConsecrateWeaponTimer', consecrateWeaponDelayMs )
             Misc.Pause(actionDelayMs)
-            
-        if useDivineFury == 1 and Timer.Check( 'dexDivineFuryTimer' ) == False:
+        elif useDivineFury == 1 and Timer.Check( 'dexDivineFuryTimer' ) == False:
             cast_until_works(lambda: Spells.CastChivalry("Divine Fury"))
             Timer.Create( 'dexDivineFuryTimer', divineFuryDelayMs )
+            Misc.Pause(actionDelayMs)
+        elif useMirrorImage == 1 and Timer.Check( 'dexMirrorImageTimer' ) == False:
+            cast_until_works(lambda: Spells.CastNinjitsu("Mirror Image"))
+            Timer.Create( 'dexMirrorImageTimer', mirrorImageDelayMs )
             Misc.Pause(actionDelayMs)
             
         if bushidoStance == 1 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
             cast_until_works(lambda: Spells.CastBushido("Confidence", True))
             Timer.Create( 'dexBushidoStanceTimer', bushidoStanceDelayMs )
             Misc.Pause(actionDelayMs)
-            
-        if bushidoStance == 2 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
+        elif bushidoStance == 2 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
             cast_until_works(lambda: Spells.CastBushido("Evasion", True))
             Timer.Create( 'dexBushidoStanceTimer', bushidoStanceDelayMs )
             Misc.Pause(actionDelayMs)
@@ -189,7 +199,8 @@ def run_dex_loop(
                 Player.HeadMessage( 78, 'No weapon special selected' )
             Timer.Create( 'dexSpecialAbilityDelayTimer', specialAbilityDelayMs )   
             
-        eligible = get_mobs_exclude_serials(6)
+        #eligible = get_mobs_exclude_serials(6)
+        eligible = get_mobs_exclude_serials(6, namesToExclude = [Player.Name])
         if len(eligible) > 0:   
             nearest = Mobiles.Select(eligible, 'Nearest')
             if Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=12:            
@@ -252,20 +263,50 @@ def run_ss_loop (
     # Setting this to 0 to disable makes no sense
     ssAbility = 1,
     
+    # Whether the infected strike abiltiy is primary, second, or disabled (0)
+    poisonAbility = 0,
+    
     # Whether we should invoke the honor virtue before attacking something. I think
     # the target needs to be at full health for this to work. Maybe not all servers
     # are up to date with this. Default value is 0 which means dont honor target.
     # Useful for Bushido I think, who knows.
     # Refer to the dex_loop_use_honor shared variable.
-    useHonor = 0):
+    useHonor = 0,
+    
+    # Flag that tells us to use the Chiv consecrate weapon ability. This is the default
+    # value (0 = disabled, 1 = enabled)
+    useConsecrateWeapon = 0,
+
+    # Delay in miliseconds before recasting consecrate weapon. This is the default value.
+    consecrateWeaponDelayMs = 10000,
+
+    # Flag with a value of 1 means to periodically cast divine fury, otherwise it is
+    # disabled. This is the default value.
+    useDivineFury = 0,
+
+    # Time in miliseconds between activations of divine fury. This is the default value.
+    divineFuryDelayMs = 10000,
+    
+    # Whether we should use mirror images. This is a nice defnese move you can
+    # use instealth to absorb a hit when you miss on a shadow strike
+    useMirrorImage = 0,
+    
+    # Cast mirror images this often. They disappear something like every 30 - 60 seconds.
+    mirrorImageDelayMs = 10000
+    
+    ):
 
     # These are fairly static controls. Adjust as needed based on latency.
     #journalEntryDelayMilliseconds = 200
-    #actionDelayMs = 650
+    actionDelayMs = 650
     lastHonoredSerial = None
+    lastPoisonedSerial = None
 
     # Initial timer creation, not super important.
     Timer.Create( 'dexPingTimer', 1 )
+    Timer.Create( 'dexConsecrateWeaponTimer', 2000 )
+    Timer.Create( 'dexDivineFuryTimer', 3000 )
+    Timer.Create( 'dexMirrorImageTimer', 8000 )
     
     # Always enable on start
     Misc.SetSharedValue("core_loops_enabled", 1)
@@ -282,7 +323,21 @@ def run_ss_loop (
             Player.HeadMessage( 78, 'SS Loop Running...' )
             Timer.Create( 'dexPingTimer', 3000 )
             
-        eligible = get_mobs_exclude_serials(6)
+        if useConsecrateWeapon == 1 and Timer.Check( 'dexConsecrateWeaponTimer' ) == False:
+            cast_until_works(lambda: Spells.CastChivalry("Consecrate Weapon"))
+            Timer.Create( 'dexConsecrateWeaponTimer', consecrateWeaponDelayMs )
+            Misc.Pause(actionDelayMs)
+        elif useDivineFury == 1 and Timer.Check( 'dexDivineFuryTimer' ) == False:
+            cast_until_works(lambda: Spells.CastChivalry("Divine Fury"))
+            Timer.Create( 'dexDivineFuryTimer', divineFuryDelayMs )
+            Misc.Pause(actionDelayMs)
+        elif useMirrorImage == 1 and Timer.Check( 'dexMirrorImageTimer' ) == False:
+            cast_until_works(lambda: Spells.CastNinjitsu("Mirror Image"))
+            Timer.Create( 'dexMirrorImageTimer', mirrorImageDelayMs )
+            Misc.Pause(actionDelayMs)
+            
+        # Excluding player from targeting his mirror images (they disrupt this script)
+        eligible = get_mobs_exclude_serials(6, namesToExclude = [Player.Name])
         if len(eligible) > 0:   
             nearest = Mobiles.Select(eligible, 'Nearest')
             if Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=6:            
@@ -296,15 +351,27 @@ def run_ss_loop (
                     Target.TargetExecute(nearest);
                     lastHonoredSerial = nearest.Serial
                     
-                #if not Player.HasSecondarySpecial and Player.Mana >= ssManaCost:
-                if ssAbility == 1:
-                    #if not Player.HasPrimarySpecial:
-                    if not Player.HasSpecial:
+                # Either poison or SS strike, priority to poison
+                if lastPoisonedSerial != nearest.Serial and poisonAbility != 0 and not nearest.Poisoned:
+                    Player.HeadMessage(68, "GOING TO POISON!")
+                    if poisonAbility == 1 and not Player.HasPrimarySpecial:
                         Player.WeaponPrimarySA( )
-                elif ssAbility == 2:
-                    #if not Player.HasSecondarySpecial:
-                    if not Player.HasSpecial:
-                        Player.WeaponSecondarySA( )
+                    elif poisonAbility == 2 and not Player.HasSecondarySpecial:
+                        Player.WeaponSecondarySA()
+                        
+                    lastPoisonedSerial = nearest.Serial
+
+                else:
+                        
+                    #if not Player.HasSecondarySpecial and Player.Mana >= ssManaCost:
+                    if ssAbility == 1:
+                        #if not Player.HasPrimarySpecial:
+                        if not Player.HasSpecial:
+                            Player.WeaponPrimarySA( )
+                    elif ssAbility == 2:
+                        #if not Player.HasSecondarySpecial:
+                        if not Player.HasSpecial:
+                            Player.WeaponSecondarySA( )
 
                 Misc.Pause(250)
                 
@@ -318,6 +385,8 @@ def run_ss_loop (
                     else:
                         Player.HeadMessage(38, "Hidden, no special, no attack")
                         Target.Cancel()
+                        
+                
         
             
         Misc.Pause(500)

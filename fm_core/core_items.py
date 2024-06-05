@@ -1,8 +1,10 @@
 # Razor Enhanced Scripts for Ultima Online by
-#	GRL  
-#	https://github.com/GloriousRedLeader/uo-razor-enhanced
-#	2024-03-26
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2024-03-26
 # Use at your own risk. 
+
+DAGGER_STATIC_IDS = [0x0F52]
 
 AXE_STATIC_IDS = [0x0F49]
 

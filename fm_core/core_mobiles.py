@@ -1,7 +1,7 @@
 # Razor Enhanced Scripts for Ultima Online by
-#	GRL  
-#	https://github.com/GloriousRedLeader/uo-razor-enhanced
-#	2024-03-26
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2024-03-26
 # Use at your own risk. 
 
 from System.Collections.Generic import List
@@ -16,7 +16,7 @@ def range_mobile( mobile ):
 # This is the most inefficient thing known to man. But it does 
 # kind of work. If you feed to select a list of mobiles and exclude
 # some of them based on a list of serials, this will do it.
-def get_mobs_exclude_serials (range, checkLineOfSight = False, serialsToExclude = []):
+def get_mobs_exclude_serials (range, checkLineOfSight = False, serialsToExclude = [], namesToExclude = []):
     fil = Mobiles.Filter()
     fil.Enabled = True
     fil.RangeMax = range
@@ -25,8 +25,10 @@ def get_mobs_exclude_serials (range, checkLineOfSight = False, serialsToExclude 
     fil.Friend = False
     fil.CheckLineOfSight = checkLineOfSight
     mobs = Mobiles.ApplyFilter(fil)
-
-    listValid = [m.Serial for m in mobs if m.Serial not in serialsToExclude]
+    
+    namesToExclude = ["omg arthur"]
+    listValid = [m.Serial for m in mobs if m.Serial not in serialsToExclude and m.Name not in namesToExclude]
+    #listValid = [m.Serial for m in mobs if m.Serial not in serialsToExclude]
 
     if len(listValid) == 0:
         return []

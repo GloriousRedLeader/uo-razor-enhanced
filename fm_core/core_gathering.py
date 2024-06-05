@@ -1,6 +1,6 @@
 from Scripts.fm_core.core_player import find_first_in_container_by_ids, find_first_in_hands_by_id
 from Scripts.fm_core.core_rails import go_to_tile
-from Scripts.fm_core.core_items import AXE_STATIC_IDS, LOG_STATIC_IDS, TREE_STATIC_IDS
+from Scripts.fm_core.core_items import AXE_STATIC_IDS, LOG_STATIC_IDS, TREE_STATIC_IDS, DAGGER_STATIC_IDS
 from System.Collections.Generic import List
 import sys
 
@@ -164,3 +164,30 @@ def chop_trees_in_area(tileRange = 10, weightLimit = 350, cutLogsToBoards = Fals
         Misc.Pause(1000)
         swap_weapon(originalItemsInHands[1])
         Misc.Pause(4000)
+        
+            
+# Variation of above that will get kindling usinga knife
+def get_kindling_in_area(tileRange = 10, weightLimit = 350):
+    global treenumber, treeposx, treeposy, DAGGER_STATIC_IDS
+    
+    Misc.SendMessage("Getting Kindling", 123)
+    dagger = find_first_in_container_by_ids(DAGGER_STATIC_IDS, Player.Backpack)
+    
+    ScanStatic(tileRange)
+    i = 0
+    Misc.SendMessage("Total tree number {}".format(treenumber))
+    while i < treenumber:
+        Misc.SendMessage("Moving to a tree")
+        go_to_tile(treeposx[i] - 1, treeposy[i] - 1, 88.0)
+        CutTree(i, dagger, weightLimit)
+        
+        i = i + 1
+        Misc.Pause(500)
+        
+    treeposx = []
+    treeposy = []
+    treeposz = []
+    treegfx = []
+    treenumber = 0
+
+    Misc.SendMessage("All done", 123) 

@@ -1,22 +1,6 @@
 import sys
 print("Training Ninjitsu")
 
-while True:
-    if not Player.Visible:
-        Player.Walk("North")
-        Player.Walk("North")
-        Player.Walk("East")
-        Player.Walk("East")
-        Player.Walk("East")
-        Player.Walk("South")
-        Player.Walk("South")
-        Player.Walk("West")
-        Player.Walk("West")
-        Player.Walk("West")
-        
-    Misc.Pause(400)
-    
-sys.exit()
 
 # At 50 do this
 #while not Player.IsGhost:  
@@ -44,6 +28,27 @@ while Player.GetSkillValue("Ninjitsu") < MAX_LEVEL:
     Misc.Pause(400)
 
 sys.exit()
+
+
+
+
+while True: 
+    if not Player.Visible:
+        Player.Walk("North")
+        Player.Walk("North")
+        Player.Walk("East")
+        Player.Walk("East")
+        Player.Walk("East")
+        Player.Walk("South")
+        Player.Walk("South")
+        Player.Walk("West")
+        Player.Walk("West")
+        Player.Walk("West")
+        
+    Misc.Pause(400)
+    
+sys.exit()
+
 
 
 # at 40 do this
