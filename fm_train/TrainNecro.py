@@ -28,7 +28,7 @@
 #90 - 100: Cast Lich Form
 #100 - 120: Cast Vampiric Embrace
 
-while True:
+while Player.GetSkillValue('Necromancy') < 85:
     Necro = Player.GetSkillValue('Necromancy')
     if Necro < 35 and Player.Mana > 7:
         Spells.CastNecro('Curse Weapon')
@@ -65,7 +65,7 @@ while True:
         break
         
 
-while False:
+while True:
     SS = Player.GetSkillValue('Spirit Speak')
     if SS < Player.GetSkillCap('Spirit Speak'):
         Player.UseSkill("Spirit Speak")

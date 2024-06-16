@@ -1,10 +1,10 @@
 #------Vars
 
 #arrange these in the order that you would like to train the skill.  Remove any if you do not want to train them.
-#order = ["picking","detect", "taste","camp","hide","arms","item", "removetrap"]
+#order = ["track", "picking","detect", "taste","camp","hide","arms","item", "removetrap"]
 #order = ["picking","detect", "taste","camp","hide","arms","item"]
 
-order = ["camp"]
+order = ["track"]
 #order = ["taste"]
 
 mainpack = Mobiles.FindBySerial( Player.Serial ).Backpack
@@ -38,6 +38,12 @@ shortPause = 1200
 
 
 #----------
+
+if "track" in order:
+    Player.HeadMessage(38, "Doing Tracking")
+    while Player.GetRealSkillValue("Tracking") < Player.GetSkillCap("Tracking"):
+        Player.UseSkill("Tracking")
+        Misc.Pause(3000)
 
 
 if "removetrap" in order:

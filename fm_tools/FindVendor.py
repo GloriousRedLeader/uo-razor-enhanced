@@ -1,7 +1,7 @@
 # Razor Enhanced Scripts for Ultima Online by
-#	GRL  
-#	https://github.com/GloriousRedLeader/uo-razor-enhanced
-#	2024-03-26
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2024-03-26
 # Use at your own risk. 
 
 # This is an example of how to find a vendor in a sea of vendors.
@@ -11,7 +11,10 @@
 from Scripts.fm_core.core_mobiles import find_vendor_by_name
 
 # Just replace this with your vendors name and walk around mashing this script. 
-VENDOR_NAME = "DEALS"
+# 790k
+VENDOR_NAME = "Florence"
+# 700k
+VENDOR_NAME = "Luthien"
 
 # Search within this many tiles
 VENDOR_RANGE = 15
@@ -19,7 +22,7 @@ VENDOR_RANGE = 15
 vendor = find_vendor_by_name(vendorName = VENDOR_NAME, vendorRange = VENDOR_RANGE)
 
 if vendor != None:
-    for i in range(1, 3):
+    for i in range(1, 10):
         Mobiles.Message(vendor,78,"^ IM HERE ^",False)
         Mobiles.Message(vendor,48,"^ IM HERE ^",False)
         Mobiles.Message(vendor,28,"^ IM HERE ^",False)

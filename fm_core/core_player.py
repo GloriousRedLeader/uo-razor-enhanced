@@ -125,5 +125,5 @@ def move_all_items_from_container(sourceContainerSerial, destinationContainerSer
     for item in Items.FindBySerial(sourceContainerSerial).Contains:
         Player.HeadMessage(455, "Junking item {}".format(item.Name))
         Items.Move(item, destinationContainerSerial, item.Amount)
-        Misc.Pause(1800)
+        Misc.Pause(800)
     #Player.HeadMessage(455, "[done] Cleaing up Britain...")

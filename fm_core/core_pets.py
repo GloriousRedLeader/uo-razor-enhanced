@@ -27,15 +27,20 @@
 # You could also just manually stop / start your attack loop script. 
 # But if youre playing different characters on different servers with different 
 # script names, that becomes hard to track. So instead we can use this shared variable.
+import time
 
 Timer.Create("vetLoopPetWarning", 1)
+
+LAST_PET_REZZED = { "serial": None, "ready": None }
 
 # Bandages the pet if youre close enough and its either poisoned or below the 
 # specified health percentage.
 # You should not use this method, instead use run_vet_bot() below which will
 # loop and do all the good stuff.
-def vet_pets( healthPercent, petSerials, containerSerial, bandageDelayMs, healSpellName = None ):
+def vet_pets( healthPercent, petSerials, containerSerial, bandageDelayMs, rezDelayMs, healSpellName = None ):
 
+    global LAST_PET_REZZED
+    
     atLeastOnePetFound = False
     atLeastOnePetMissing = False
     
@@ -49,17 +54,43 @@ def vet_pets( healthPercent, petSerials, containerSerial, bandageDelayMs, healSp
         pets.append(pet)
     pets.sort(key = lambda pet: pet.Hits)
     
+    print("---------- - - - - ------------------")
     for pet in pets:
+        print(f"Pet Name: { pet.Name } Health: { pet.Hits } / { pet.HitsMax } ")
+    
+    #for pet in pets:
+    if len(pets) > 0:
+        pet = pets[0]
 
         petCurrentHealthPercent = getHealthPercent(pet)
         if petCurrentHealthPercent < healthPercent or pet.Poisoned or pet.Hits == 0:
+        #if petCurrentHealthPercent < healthPercent or pet.Poisoned or pet.IsGhost:
             #if runToPet and Player.DistanceTo(petID) > 2:
             #    pathFindToPet()
             if Player.DistanceTo(pet) <= 2 and not Player.BuffsExist('Veterinary'):
+            
+            
                 if pet.Hits == 0:
                     Player.HeadMessage(88, "Rezzing {}".format(pet.Name))
                 else:
                     Player.HeadMessage(88, "Bandaging {}".format(pet.Name))
+            
+                #moreTimeForRezzing = 0
+                #canRezPet = False
+                #if LAST_PET_REZZED is not None:
+                #    if pet.Serial == LAST_PET_REZZED["serial"] and time.time() > LAST_PET_REZZED["ready"]:
+                #        canRezPet = True
+                #    elif pet.Serial != LAST_PET_REZZED["serial"]:
+                #        canRezPet = True
+                #        
+                #if pet.Hits == 0 and canRezPet:
+                #    Player.HeadMessage(88, "Rezzing {}".format(pet.Name))
+                #    moreTimeForRezzing = rezDelayMs
+                #    LAST_PET_REZZED = { "serial": pet.Serial, "ready": time.time() + 3000 }
+                #elif not pet.IsGhost:
+                #    Player.HeadMessage(88, "Bandaging {}".format(pet.Name, pet.IsGhost))
+                #else:
+                #    continue
 
                 bandage = Items.FindByID(0x0E21, 0, containerSerial)
                 #Items.UseItem(bandage, petSerial)
@@ -163,6 +194,10 @@ def run_vet_loop (
     # fingers can slip bandaging an aneemal.
     bandageDelayMs = 2000,
     
+    # Wait this long after rezzing a pet before doing anythign else,
+    # otherwise it may start bandaging something else (bandage time is faster than rez time?)
+    rezDelayMs = 3000,
+    
     # Optionally provide a heal spell name if you really want to get serious
     # Currently will only use this if pet is < 50% health. Can have things like
     # "Greater Heal" or "Close Wounds".
@@ -187,7 +222,7 @@ def run_vet_loop (
                 Player.HeadMessage(88, "Vet Loop Running")
                 Timer.Create("vetLoopTimer", 3000)
 
-            vet_pets(healthPercent, petSerials, containerSerial, bandageDelayMs, healSpellName)
+            vet_pets(healthPercent, petSerials, containerSerial, bandageDelayMs, rezDelayMs, healSpellName)
             Misc.Pause(500)
             continue
 

@@ -4,9 +4,10 @@
 
 import sys # buy upto 40 in newhaven 3495, 2414
 
-while True:
+while Player.GetSkillValue('Bushido') < 50:
     Misc.Pause(1)
     Bushido = Player.GetSkillValue('Bushido')
+    
     if Bushido >= 25 and Bushido < 60 and Player.Mana >= 10:
         Spells.CastBushido('Confidence')
         Misc.Pause(2500)

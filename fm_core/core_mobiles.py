@@ -26,7 +26,7 @@ def get_mobs_exclude_serials (range, checkLineOfSight = False, serialsToExclude 
     fil.CheckLineOfSight = checkLineOfSight
     mobs = Mobiles.ApplyFilter(fil)
     
-    namesToExclude = ["omg arthur"]
+    #namesToExclude = ["omg arthur"]
     listValid = [m.Serial for m in mobs if m.Serial not in serialsToExclude and m.Name not in namesToExclude]
     #listValid = [m.Serial for m in mobs if m.Serial not in serialsToExclude]
 

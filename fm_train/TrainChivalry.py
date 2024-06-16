@@ -4,8 +4,9 @@
 
 Misc.SendMessage("Training Chiv")
 
-while True:
+while Player.GetRealSkillValue("Chivalry") < 70:
     skillValue = Player.GetRealSkillValue("Chivalry")
+    
     if skillValue < 90:
         Spells.CastChivalry("Holy Light")
     elif skillValue < 100:

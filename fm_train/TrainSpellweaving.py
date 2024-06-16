@@ -25,21 +25,21 @@ while True:
             Spells.CastSpellweaving('Immolating Weapon')
             Misc.Pause(2200)   
        
-        if Spellweaving >= 36 and Spellweaving < 58  and Player.Mana > 40:
+        if Spellweaving >= 36 and Spellweaving < 58  and Player.Mana > 35:
             Spells.CastSpellweaving('Reaper Form')
             Misc.Pause(4000)  
            
-        if Spellweaving >= 58 and Spellweaving < 74  and Player.Mana > 60:
+        if Spellweaving >= 58 and Spellweaving < 74  and Player.Mana > 35:
             Spells.CastSpellweaving('Essence Of Wind')
             Misc.Pause(5000)
 
-        if Spellweaving >= 74 and Spellweaving < 92  and Player.Mana > 60:
+        if Spellweaving >= 74 and Spellweaving < 92  and Player.Mana > 35:
             Spells.CastSpellweaving('Wildfire')
             Target.WaitForTarget(4000,False)
             Target.Self()
             Misc.Pause(5000) 
 
-        if Spellweaving >= 92 and Spellweaving != Player.GetSkillCap('Spell Weaving') and Player.Mana > 60:
+        if Spellweaving >= 92 and Spellweaving != Player.GetSkillCap('Spell Weaving') and Player.Mana > 35:
             if Player.Hits < 50:
                 Spells.CastSpellweaving('Gift Of Renewal')
                 Target.WaitForTarget(4000,False)

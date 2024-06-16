@@ -4,6 +4,8 @@
 #   2024-03-26
 # Use at your own risk. 
 
+DEADLY_POISON_POT_IDS = [0x0F0A]
+
 DAGGER_STATIC_IDS = [0x0F52]
 
 AXE_STATIC_IDS = [0x0F49]
