@@ -4,7 +4,7 @@
 
 import sys # buy upto 40 in newhaven 3495, 2414
 
-while Player.GetSkillValue('Bushido') < 50:
+while Player.GetSkillValue('Bushido') < 100:
     Misc.Pause(1)
     Bushido = Player.GetSkillValue('Bushido')
     

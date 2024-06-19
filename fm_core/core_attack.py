@@ -61,11 +61,22 @@ def run_dex_loop(
     # Flag whether to discord target, 1 means yes, 0 means no, any other value is undefined.
     # What you see below is the default value. When set this will search for
     # a random instrument in your pack and use that. No guarantees.
-    useDiscord = 0,
+    #useDiscord = 0,
 
     # The time in miliseconds to wait between discord attempts. Probably a more dynamic
     # way of doing this but I dont care. This is the default value. 
-    discordDelayMs = 10000,
+    #discordDelayMs = 10000,
+    
+    # Whether to use a bard ability.  When set this will search for
+    # a random instrument in your pack and use that. No guarantees.
+    # 0 = No ability
+    # 1 = Discord the target
+    # 2 = Peacemake self (aoe peacemake)
+    bardAbility = 0,
+    
+    # The time in miliseconds to wait between discord attempts. Probably a more dynamic
+    # way of doing this but I dont care. This is the default value. 
+    bardDelayMs = 10000,
 
     # Flag that tells us to use the Chiv consecrate weapon ability. This is the default
     # value (0 = disabled, 1 = enabled)
@@ -135,7 +146,7 @@ def run_dex_loop(
 
     Timer.Create( 'dexPingTimer', 1 )
     Timer.Create( 'dexSpecialAbilityDelayTimer', 1000 )
-    Timer.Create( 'dexDiscordTimer', 5000 )
+    Timer.Create( 'dexBardTimer', 1 )
     Timer.Create( 'dexConsecrateWeaponTimer', 2000 )
     Timer.Create( 'dexDivineFuryTimer', 3000 )
     Timer.Create( 'dexBushidoStanceTimer', 1 )
@@ -225,7 +236,7 @@ def run_dex_loop(
                     Target.TargetExecute(nearest);
                     lastHonoredSerial = nearest.Serial
                 
-                if useDiscord == 1 and Timer.Check( 'dexDiscordTimer' ) == False:
+                if bardAbility == 1 and Timer.Check( 'dexBardTimer' ) == False:
                     Player.UseSkill("Discordance")
                     Misc.Pause(journalEntryDelayMilliseconds) 
                     if Journal.SearchByType( 'What instrument shall you play?', 'System' ):
@@ -235,11 +246,26 @@ def run_dex_loop(
                             sys.exit()
                         Target.WaitForTarget( 2000, True )
                         Target.TargetExecute( instrument )
-                
                     Target.WaitForTarget( 2000, True )
                     Target.TargetExecute( nearest )
-                    Timer.Create( 'dexDiscordTimer', discordDelayMs )
+                    Timer.Create( 'dexDiscordTimer', bardDelayMs )
                     Player.HeadMessage(78, "Discorded {}".format(nearest.Name))
+                    
+                elif bardAbility == 2 and Timer.Check( 'dexBardTimer' ) == False:
+                    Player.UseSkill("Peacemaking")
+                    Misc.Pause(journalEntryDelayMilliseconds) 
+                    if Journal.SearchByType( 'What instrument shall you play?', 'System' ):
+                        instrument = find_instrument( Player.Backpack )
+                        if instrument == None:
+                            Misc.SendMessage( 'No instrument to discord with!', 38 )
+                            sys.exit()
+                        Target.WaitForTarget( 2000, True )
+                        Target.TargetExecute( instrument )
+                    Target.WaitForTarget( 2000, True )
+                    Target.TargetExecute( nearest )
+                    #Target.Self()
+                    Timer.Create( 'dexBardTimer', bardDelayMs )
+                    Player.HeadMessage(78, "Peacemaking {}".format(nearest.Name))
                     
                 if usePets == 1 and Timer.Check('petCommandTimer') == False:
                     if Player.DistanceTo(nearest)<=6:

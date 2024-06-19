@@ -4,7 +4,7 @@
 
 Misc.SendMessage("Training Chiv")
 
-while Player.GetRealSkillValue("Chivalry") < 70:
+while Player.GetRealSkillValue("Chivalry") < 100:
     skillValue = Player.GetRealSkillValue("Chivalry")
     
     if skillValue < 90:
@@ -14,7 +14,7 @@ while Player.GetRealSkillValue("Chivalry") < 70:
     else:
         break
         
-    Misc.Pause(5000)
+    Misc.Pause(2000)
     Player.HeadMessage(888, "Your skill is {}".format(skillValue))        
 
 Misc.SendMessage("Done training")
