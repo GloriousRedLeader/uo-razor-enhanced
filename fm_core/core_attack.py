@@ -223,7 +223,9 @@ def run_dex_loop(
                 Player.HeadMessage( 78, 'No weapon special selected' )
             Timer.Create( 'dexSpecialAbilityDelayTimer', specialAbilityDelayMs )   
             
-        eligible = get_mobs_exclude_serials(attackRange, namesToExclude = [Player.Name, "a reaper"])
+        #eligible = get_mobs_exclude_serials(attackRange, namesToExclude = [Player.Name, "a reaper"])
+        #eligible = get_mobs_exclude_serials(attackRange, namesToExclude = [])
+        eligible = get_mobs_exclude_serials(attackRange, namesToExclude = ["a horde minion"])
         if len(eligible) > 0:   
             nearest = Mobiles.Select(eligible, 'Nearest')
             if Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=12:            
