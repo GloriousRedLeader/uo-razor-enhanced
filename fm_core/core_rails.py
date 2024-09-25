@@ -481,6 +481,7 @@ def run_rail_loop_single(
         else:
             Misc.SendMessage("Provide a rune to farming location or move character there yourself", 38)
             Player.HeadMessage(38, "[error] Single Rail Loop stopped")
+            sys.exit()
             
 
 
