@@ -174,7 +174,9 @@ def leash_pets (
         Player.HeadMessage(38, "At least one pet missing.")
 
 # This is the public API you should use when running a pet heal bot
-# in the background.
+# in the background. You will need to get your pet serials first. To do that
+# use razor enhanced, go to scripts, and click the "Inspect" button at top right.
+# Target your pet and it will display the serial. Done.
 def run_vet_loop (
     
     # An array of serials for your pets. You must provide this.
@@ -183,7 +185,9 @@ def run_vet_loop (
     # to too.
     petSerials = [], 
     
-    # Container where your bandages live. Defautls to player backpack.
+    # Container where your bandages live. Defautls to player backpack. You can change
+	# this to a different bag. Use Razor Enhanced and click "Inspect" to get your preferred
+	# bag's serial.
     containerSerial = Player.Backpack, 
     
     # Only bandage things when their health is below this percent.

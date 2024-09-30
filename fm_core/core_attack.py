@@ -57,15 +57,6 @@ def run_dex_loop(
     # Time between special ability activations. Make smaller when youve got the mana to attack
     # more frequently. This is the default value. 
     specialAbilityDelayMs = 1000,
-
-    # Flag whether to discord target, 1 means yes, 0 means no, any other value is undefined.
-    # What you see below is the default value. When set this will search for
-    # a random instrument in your pack and use that. No guarantees.
-    #useDiscord = 0,
-
-    # The time in miliseconds to wait between discord attempts. Probably a more dynamic
-    # way of doing this but I dont care. This is the default value. 
-    #discordDelayMs = 10000,
     
     # Whether to use a bard ability.  When set this will search for
     # a random instrument in your pack and use that. No guarantees.
@@ -346,9 +337,7 @@ def run_ss_loop (
     useMirrorImage = 0,
     
     # Cast mirror images this often. They disappear something like every 30 - 60 seconds.
-    mirrorImageDelayMs = 10000
-    
-    ):
+    mirrorImageDelayMs = 10000):
 
     # These are fairly static controls. Adjust as needed based on latency.
     #journalEntryDelayMilliseconds = 200

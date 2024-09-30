@@ -206,7 +206,8 @@ def recall(
 
 # Main entry point into auto farming. Will recall to runes in different books,
 # follow a path of coords assocaited with that rune, and kill stuff / loot stuff.
-# Right now only works with sacred journey.
+# Right now only works with sacred journey. There is a simpler option that will just walk
+# along the same path over and over. See run_rail_loop_single.
 def run_rail_loop_multi(
 
     # runebooks a List of constructs that contain these properties:
@@ -364,9 +365,14 @@ def rails_stats(option):
 #        Player.HeadMessage(48, "No need to return to base...")
 
 # Run a single route. The only required argument is a set of coordinates. You can get more fancy
-# By providing runes for banks, vendors and of course the starting patth.
+# By providing runes for banks, vendors and of course the starting patth. It will attempt to recall
+# to the bank and deposit items if you provide the runebook information - but that is buggy. I wouldn't
+# recommend it.
 def run_rail_loop_single(
-    # (Required) This is a list of coordinates to travel.
+    # (Required) This is a list of coordinates to travel. See core_routes for a list of available, pre-defined routes.
+	# You can generate your own using the rails tool. It's easy. Just load up the script in fm_tools/RailRecorder.py
+	# and start adding points. Walk to a location, click add point. When you're done hit save. Open the file. It 
+	# will contain a list of coordinates you can paste here. Your character will walk around like an idiot.
     path,
 
     # (Optional) This is the runebook serial that contains our farm location rune.
