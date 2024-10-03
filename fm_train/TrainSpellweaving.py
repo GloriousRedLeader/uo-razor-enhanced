@@ -1,6 +1,7 @@
 def Meditate():
     if Player.Mana != Player.ManaMax:
         Player.UseSkill("Meditation")
+        Misc.Pause(1000)
 
     #print("Pausing while we meditate")
     #Misc.Pause(10000)

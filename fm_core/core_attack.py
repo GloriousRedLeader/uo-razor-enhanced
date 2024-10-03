@@ -327,8 +327,6 @@ def run_ss_loop (
     # 5 = momentum strike
     bushidoStance = 0,
     
-    # Recast confidence after this many miliseconds
-    #confidenceDelayMs = 5000,
     # Recast whatever stance above after this many miliseconds
     bushidoStanceDelayMs = 5000,    
     
