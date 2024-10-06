@@ -1,10 +1,10 @@
 HOW_MANY_TIMES_TO_BEEP = 5
 
 Player.HeadMessage(58, "SoTW boss scanner is running!")
-
+# Real string in game: The Master of the Hunt has arrived to the South-East...
 while True:
     Misc.Pause(1000)
-    if Journal.Search("The Master of The Hunt has") or Journal.Search("Freyr has"):
+    if Journal.Search("The Master of the Hunt has") or Journal.Search("Freyr"):
         Journal.Clear()
         for i in range(0, HOW_MANY_TIMES_TO_BEEP):
             Misc.Beep()

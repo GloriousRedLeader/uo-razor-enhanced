@@ -1,11 +1,12 @@
 #------Vars
 
+# Note remove trap doesn't work. Use the dedicated script.
+
 #arrange these in the order that you would like to train the skill.  Remove any if you do not want to train them.
 #order = ["track", "picking","detect", "taste","camp","hide","arms","item", "removetrap"]
 #order = ["picking","detect", "taste","camp","hide","arms","item"]
-
-order = ["track"]
-#order = ["taste"]
+#order = ["picking", "hide", "arms", "item", "taste"]
+order = ["detect", "taste","camp","hide","arms","item"]
 
 mainpack = Mobiles.FindBySerial( Player.Serial ).Backpack
 
@@ -41,9 +42,32 @@ shortPause = 1200
 
 if "track" in order:
     Player.HeadMessage(38, "Doing Tracking")
-    while Player.GetRealSkillValue("Tracking") < Player.GetSkillCap("Tracking"):
-        Player.UseSkill("Tracking")
-        Misc.Pause(3000)
+    #while Player.GetRealSkillValue("Tracking") < Player.GetSkillCap("Tracking"):
+    #    Player.UseSkill("Tracking")
+    #    Misc.Pause(3000)
+        
+        
+        
+    trackingTimerMilliseconds = 8000
+    Misc.SendMessage( 'Beginning Tracking training' )
+
+    Player.UseSkill( 'Tracking' )
+    # Skill cooldown is 10,000 ms, but adding an extra 200 ms in case of latency issues
+    Timer.Create( 'trackingTimer', trackingTimerMilliseconds )
+    # while skill can increase and player is not dead
+    while not Player.IsGhost and Player.GetSkillValue( 'Tracking' ) < Player.GetSkillCap( 'Tracking' ):
+        if not Timer.Check( 'trackingTimer' ):
+            # Cooldown has finished, we can use the skill again and reset the timer
+            Player.UseSkill( 'Tracking' )
+            Gumps.WaitForGump( 2976808305, 2000 )
+            Gumps.SendAction( 2976808305, 4 )
+            Gumps.WaitForGump( 2976808305, 2000 )
+            Gumps.SendAction( 2976808305, 0 )
+            Timer.Create( 'trackingTimer', trackingTimerMilliseconds )
+
+    Player.HeadMessage( 38, 'Congratulations! Your Tracking is now at its skill cap!' )        
+        
+        
 
 
 if "removetrap" in order:
