@@ -800,6 +800,11 @@ def run_mage_loop(
     # Whether to use this spell before applying each dot and curse 0 = disabled, 1 = enabled
     useEvilOmenBeforeDotsAndCurses = 0,
     
+    # Toggles death ray. Requires magery mastery. There is no timer because this remains
+    # active until you move or you are interrupted or the creature dies. It will attempt to
+    # reapply immediately. 0 = disabled, 1 = enabled
+    useDeathRay = 0,
+    
     # Whether to use this spell 0 = disabled, 1 = enabled
     useWildfire = 0,
     
@@ -884,6 +889,12 @@ def run_mage_loop(
                     mobToAttack = nearest
         
         if mobToAttack != None:
+            if useDeathRay == 1 and not Player.BuffsExist("Death Ray"):
+                Spells.CastMastery("Death Ray")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(mobToAttack)
+                Misc.Pause(actionDelayMs)
+                
             if useCorpseSkin == 1 and Timer.Check( 'corpseSkinTimer' ) == False:
                 if useEvilOmenBeforeDotsAndCurses == 1:
                     Spells.CastNecro("Evil Omen")
