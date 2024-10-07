@@ -69,7 +69,6 @@ def find_vendor_by_name (vendorName, vendorRange = 10):
 # Returns mobiles for pets or friends. Just provide names.
 # Noterieties:  blue = 1, green = 2, gray = 3, gray crim = 4, orange = 5, red = 6, yellow = 7
 def get_friends_by_names (friendNames = [], range = 8):
-    Misc.SendMessage("YEAH")
     fil = Mobiles.Filter()
     fil.Enabled = True
     fil.RangeMax = range
