@@ -186,8 +186,8 @@ def run_vet_loop (
     petSerials = [], 
     
     # Container where your bandages live. Defautls to player backpack. You can change
-	# this to a different bag. Use Razor Enhanced and click "Inspect" to get your preferred
-	# bag's serial.
+    # this to a different bag. Use Razor Enhanced and click "Inspect" to get your preferred
+    # bags serial.
     containerSerial = Player.Backpack, 
     
     # Only bandage things when their health is below this percent.

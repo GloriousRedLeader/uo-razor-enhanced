@@ -5,6 +5,7 @@
 # Use at your own risk. 
 
 from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
+from Scripts.fm_core.core_mobiles import get_friends_by_names
 from Scripts.fm_core.core_player import find_instrument
 from Scripts.fm_core.core_spells import cast_until_works
 import sys
@@ -748,7 +749,6 @@ def run_buff_loop_only (
                         Player.ChatSay("All Follow Me")
                     Timer.Create( 'petCommandTimer', petCommandDelayMs )
                     
-                    
         else:
             if usePets == 1 and Timer.Check('petCommandTimer') == False:
                 Player.ChatSay("All Follow Me")
@@ -757,13 +757,27 @@ def run_buff_loop_only (
                 #Player.Attack(nearest)
             
         Misc.Pause(500)
-
-# Great for single target nukes. Prompts to pick a target and will start casting.
+        
+# Will cast AOE at player location and single target spells on closest mobs. Can also focus
+# a specific mob if you want to focus on a boss.
 # Set preferred delays in between each spell. Your main nukes should have no delay really.
-def run_mage_single_target_loop(
+def run_mage_loop(
 
+    # How to pick your target for single target spells.
+    # 0 = Nearest enemy. Default.
+    # 1 = Prompt for target once at start of script. Useful for bosses.
+    mobSelectMethod = 0,
+    
+    # Names of pets or blue characters you want to heal, cure if they are in range.
+    # Note that you still need to enable useCure / useGreaterHeal etc.
+    friendNames = [],
+    
     # Buffer in MS between attacks, otherwise we get "You have not yet recovered"
     actionDelayMs = 1000,
+    
+    # Only look for mobs and pets/friends inside of this range. IF they are farther, then
+    # dont heal them / dont attack them.
+    range = 8,
 
     # Whether to use this spell 0 = disabled, 1 = enabled
     usePoisonStrike = 0,
@@ -786,88 +800,6 @@ def run_mage_single_target_loop(
     # Whether to use this spell before applying each dot and curse 0 = disabled, 1 = enabled
     useEvilOmenBeforeDotsAndCurses = 0,
     
-    # Whether to cure yourself or your pet
-    useCure = 0,
-    
-    # Whether to heal yourself or your pet
-    useGreaterHeal = 0
-):
-    
-    Timer.Create( 'magePingTimer', 3000 )
-    Timer.Create( 'poisonStrikeTimer', 1 )
-    Timer.Create( 'strangleTimer', 1 )
-    Timer.Create( 'corpseSkinTimer', 1 )
-
-    Misc.SetSharedValue("core_loops_enabled", 1)
-    
-    MSG = "Select an enemy to attack"
-    Player.HeadMessage(118, MSG)
-    mob = Mobiles.FindBySerial(Target.PromptTarget(MSG))
-    
-    MSG = "Select a pet to heal (ESC for none)"
-    Player.HeadMessage(118, MSG)
-    pet = Mobiles.FindBySerial(Target.PromptTarget(MSG))
-    
-    Player.ChatSay("All Guard Me")
-    
-    while not Player.IsGhost:
-        
-        if Misc.ReadSharedValue("core_loops_enabled") != 1:
-            Misc.Pause(500)
-            if Timer.Check( 'magePingTimer' ) == False:
-                Player.HeadMessage( 118, 'MageSingleTargetLoop Paused...' )
-                Timer.Create( 'magePingTimer', 1000)
-            continue
-        
-        if Timer.Check( 'magePingTimer' ) == False:
-            Player.HeadMessage( 118, 'MageSingleTargetLoop Running...' )
-            Timer.Create( 'magePingTimer', 3000 )
-
-        if not Player.Visible:
-            Misc.Pause(500)
-            continue  
-      
-        # Continue loop before doing harmul actions, focus on healing/curing.
-        if heal_player_and_pet(actionDelayMs, useCure, useGreaterHeal, pet) == True:
-            continue      
-    
-        if useCorpseSkin == 1 and Timer.Check( 'corpseSkinTimer' ) == False:
-            if useEvilOmenBeforeDotsAndCurses == 1:
-                Spells.CastNecro("Evil Omen")
-                Target.WaitForTarget(10000, False)
-                Target.TargetExecute(mob)
-                Misc.Pause(actionDelayMs)
-            Spells.CastNecro("Corpse Skin")
-            Target.WaitForTarget(10000, False)
-            Target.TargetExecute(mob)
-            Timer.Create( 'corpseSkinTimer', corpseSkinDelayMs )
-            Misc.Pause(actionDelayMs)
-
-        if useStrangle == 1 and Timer.Check( 'strangleTimer' ) == False:
-            if useEvilOmenBeforeDotsAndCurses == 1:
-                Spells.CastNecro("Evil Omen")
-                Target.WaitForTarget(10000, False)
-                Target.TargetExecute(mob)
-                Misc.Pause(actionDelayMs)
-            Spells.CastNecro("Strangle")
-            Target.WaitForTarget(10000, False)
-            Target.TargetExecute(mob)
-            Timer.Create( 'strangleTimer', strangleDelayMs ) 
-            Misc.Pause(actionDelayMs) 
-    
-        if usePoisonStrike == 1:
-            Spells.CastNecro("Poison Strike")
-            Target.WaitForTarget(10000, False)
-            Target.TargetExecute(mob)
-            Misc.Pause(actionDelayMs)
-            
-# Great for single target nukes. Prompts to pick a target and will start casting.
-# Set preferred delays in between each spell. Your main nukes should have no delay really.
-def run_mage_aoe_loop(
-
-    # Buffer in MS between attacks, otherwise we get "You have not yet recovered"
-    actionDelayMs = 1000,
-
     # Whether to use this spell 0 = disabled, 1 = enabled
     useWildfire = 0,
     
@@ -884,20 +816,26 @@ def run_mage_aoe_loop(
     useCure = 0,
     
     # Whether to heal yourself or your pet
-    useGreaterHeal = 0
+    useGreaterHeal = 0,
     
+    # Only heal things that are below this percent HP
+    healThreshold = 0.70    
 ):
     
     Timer.Create( 'magePingTimer', 3000 )
+    Timer.Create( 'poisonStrikeTimer', 1 )
+    Timer.Create( 'strangleTimer', 1 )
+    Timer.Create( 'corpseSkinTimer', 1 )
     Timer.Create( 'wildfireTimer', 1 )
     Timer.Create( 'witherTimer', 1 )
 
     Misc.SetSharedValue("core_loops_enabled", 1)
     
-    MSG = "Select a pet to heal (ESC for none)"
-    Player.HeadMessage(118, MSG)
-    pet = Mobiles.FindBySerial(Target.PromptTarget(MSG))
-    
+    if mobSelectMethod == 1:
+        MSG = "Select an enemy to attack"
+        Player.HeadMessage(118, MSG)
+        mob = Mobiles.FindBySerial(Target.PromptTarget(MSG))
+        
     Player.ChatSay("All Guard Me")
     
     while not Player.IsGhost:
@@ -905,22 +843,23 @@ def run_mage_aoe_loop(
         if Misc.ReadSharedValue("core_loops_enabled") != 1:
             Misc.Pause(500)
             if Timer.Check( 'magePingTimer' ) == False:
-                Player.HeadMessage( 118, 'MageAOELoop Paused...' )
+                Player.HeadMessage( 118, 'MageLoop Paused...' )
                 Timer.Create( 'magePingTimer', 1000)
             continue
         
         if Timer.Check( 'magePingTimer' ) == False:
-            Player.HeadMessage( 118, 'MageAOELoop Running...' )
+            Player.HeadMessage( 118, 'MageLoop 2 Running...' )
             Timer.Create( 'magePingTimer', 3000 )
 
         if not Player.Visible:
             Misc.Pause(500)
-            continue
-    
+            continue  
+      
         # Continue loop before doing harmul actions, focus on healing/curing.
-        if heal_player_and_pet(actionDelayMs, useCure, useGreaterHeal, pet) == True:
-            continue
- 
+        if heal_player_and_friends(friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
+            continue  
+        
+        # AOE Spells, no target needed
         if useWildfire == 1 and Timer.Check( 'wildfireTimer' ) == False:
             Spells.CastSpellweaving("Wildfire")
             Target.WaitForTarget(10000, False)
@@ -931,51 +870,108 @@ def run_mage_aoe_loop(
         if useWither == 1 and Timer.Check( 'witherTimer' ) == False:
             Spells.CastNecro("Wither")
             Timer.Create( 'witherTimer', witherDelayMs ) 
-            Misc.Pause(actionDelayMs) 
+            Misc.Pause(actionDelayMs)             
+    
+        # Single target spells below. Need to find a target
+        mobToAttack = None
+        if mobSelectMethod == 1:
+            mobToAttack = mob
+        else:
+            eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])
+            if len(eligible) > 0:   
+                nearest = Mobiles.Select(eligible, 'Nearest')
+                if Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest) <= range: 
+                    mobToAttack = nearest
+        
+        if mobToAttack != None:
+            if useCorpseSkin == 1 and Timer.Check( 'corpseSkinTimer' ) == False:
+                if useEvilOmenBeforeDotsAndCurses == 1:
+                    Spells.CastNecro("Evil Omen")
+                    Target.WaitForTarget(10000, False)
+                    Target.TargetExecute(mobToAttack)
+                    Misc.Pause(actionDelayMs)
+                Spells.CastNecro("Corpse Skin")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(mobToAttack)
+                Timer.Create( 'corpseSkinTimer', corpseSkinDelayMs )
+                Misc.Pause(actionDelayMs)
+
+            if useStrangle == 1 and Timer.Check( 'strangleTimer' ) == False:
+                if useEvilOmenBeforeDotsAndCurses == 1:
+                    Spells.CastNecro("Evil Omen")
+                    Target.WaitForTarget(10000, False)
+                    Target.TargetExecute(mobToAttack)
+                    Misc.Pause(actionDelayMs)
+                Spells.CastNecro("Strangle")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(mobToAttack)
+                Timer.Create( 'strangleTimer', strangleDelayMs ) 
+                Misc.Pause(actionDelayMs) 
+        
+            if usePoisonStrike == 1:
+                Spells.CastNecro("Poison Strike")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(mobToAttack)
+                Misc.Pause(actionDelayMs)
   
 # An internal function but it can be used as a main heal loop if desired.  
 # casts cure on player and pet, also heals with greater heal
 # if life is below threshold. Returns true if a heal / cure was attempted.
 # This is so the calling function can decide whether to call this again before
 # doing other stuff like continuing to attack.
-def heal_player_and_pet(
+def heal_player_and_friends(
+
+    # Pets, friends, etc. These are names (string).
+    friendNames = [],
+    
+    # If friends and pets are farther than this, dont bother with this.
+    range = 8,
 
     # Buffer in MS between heal actions, otherwise we get "You have not yet recovered"
     actionDelayMs = 1000,
 
     # Only heal when pet/player life is below this threshold
-    threshold = 0.7, 
+    healThreshold = 0.7, 
     
     # Whether to cure yourself or your pet
     useCure = 0,
     
     # Whether to heal yourself or your pet
-    useGreaterHeal = 0,    
-    
-    # Pet object if provided, optional
-    pet = None
+    useGreaterHeal = 0   
 ):
+    didSomeHealing = False
     
+    if useCure == 0 and useGreaterHeal == 0:
+        return False
+
     if useCure == 1 and Player.Poisoned:
         Spells.CastMagery("Cure")
         Target.WaitForTarget(10000, False)
         Target.Self()
         Misc.Pause(actionDelayMs)
+        didSomeHealing = True
         
-    if useCure == 1 and pet is not None and pet.Poisoned:
-        Spells.CastMagery("Cure")
-        Target.WaitForTarget(10000, False)
-        Target.TargetExecute(pet)
-        Misc.Pause(actionDelayMs)        
-        
-    if useGreaterHeal and Player.Hits < Player.HitsMax:
+    if useGreaterHeal == 1 and Player.Hits / Player.HitsMax < healThreshold:
         Spells.CastMagery("Greater Heal")
         Target.WaitForTarget(10000, False)
         Target.Self()
         Misc.Pause(actionDelayMs)
+        didSomeHealing = True
         
-    if useGreaterHeal and pet is not None and pet.Hits / pet.HitsMax < 0.6:
-        Spells.CastMagery("Greater Heal")
-        Target.WaitForTarget(10000, False)
-        Target.TargetExecute(pet)
-        Misc.Pause(actionDelayMs)        
+    friendMobiles = get_friends_by_names(friendNames)
+    for friendMobile in friendMobiles:
+        if useCure == 1 and friendMobile.Poisoned:
+            Spells.CastMagery("Cure")
+            Target.WaitForTarget(10000, False)
+            Target.TargetExecute(friendMobile)
+            Misc.Pause(actionDelayMs)        
+            didSomeHealing = True
+            
+        if useGreaterHeal == 1 and friendMobile.Hits / friendMobile.HitsMax < healThreshold:
+            Spells.CastMagery("Greater Heal")
+            Target.WaitForTarget(10000, False)
+            Target.TargetExecute(friendMobile)
+            Misc.Pause(actionDelayMs)        
+            didSomeHealing = True
+
+    return didSomeHealing
