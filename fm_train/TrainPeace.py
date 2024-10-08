@@ -47,20 +47,26 @@ def TrainPeacemaking():
             # Wait for the target to finish clearing
             Misc.Pause(targetClearDelayMilliseconds )
 
-            Player.UseSkill( 'Peacemaking' )
+            #Player.UseSkill( 'Peacemaking' )
 
             # Wait for the journal entry to come up
-            Misc.Pause( journalEntryDelayMilliseconds )
+            #Misc.Pause( journalEntryDelayMilliseconds )
 
             # Handle the Journal response
-            if Journal.SearchByType( 'What instrument shall you play?', 'Regular' ):
-                instrument = find_first_in_container_by_ids(INSTRUMENT_STATIC_IDS, Player.Backpack)
-                #instrument = FindInstrument( Player.Backpack )
-                if instrument == None:
-                    Misc.Message( 'No instrument to peacemake with.', 1100 )
-                    return
-                Target.WaitForTarget( 2000, True )
-                Target.TargetExecute( instrument )
+            #if Journal.SearchByType( 'What instrument shall you play?', 'Regular' ):
+            instrument = find_first_in_container_by_ids(INSTRUMENT_STATIC_IDS, Player.Backpack)
+                ##instrument = FindInstrument( Player.Backpack )
+            if instrument == None:
+                Misc.Message( 'No instrument to peacemake with.', 1100 )
+                return
+             #Target.WaitForTarget( 2000, True )
+            
+            Items.UseItem(instrument)
+            Misc.Pause(1000)
+             
+            Player.UseSkill( 'Peacemaking' )
+             
+            #Target.TargetExecute( instrument )
 
             Target.WaitForTarget( 2000, True )
             Target.TargetExecute( Player.Serial )
@@ -76,10 +82,10 @@ def TrainPeacemaking():
                 # Skill was used successfully, even if the enemy was not successfully put to peace
                 Timer.Create( 'peacemakingTimer', peacemakingTimerMilliseconds )
             elif Journal.SearchByType( 'You have no chance of calming that creature', 'Regular' ):
-                # We weren't able to use the skill, indicate as such by not waiting for the typical cooldown
+                # We werent able to use the skill, indicate as such by not waiting for the typical cooldown
                 Timer.Create( 'peacemakingTimer', 1 )
             else:
-                # We weren't able to use the skill, indicate as such by not waiting for the typical cooldown
+                # We werent able to use the skill, indicate as such by not waiting for the typical cooldown
                 Timer.Create( 'peacemakingTimer', 1 )
 
             Journal.Clear()
