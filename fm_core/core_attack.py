@@ -778,6 +778,12 @@ def run_mage_loop(
     # Only look for mobs and pets/friends inside of this range. IF they are farther, then
     # dont heal them / dont attack them.
     range = 8,
+    
+    # Use Arcane Empowerment (spell weaving) 0 = disabled, 1 = enabled
+    useArcaneEmpowerment = 0,
+    
+    # Time in millesconds between casts of arcane empowerment.
+    arcaneEmpowermentDelayMs = 35000,
 
     # Whether to use this spell 0 = disabled, 1 = enabled
     usePoisonStrike = 0,
@@ -785,17 +791,23 @@ def run_mage_loop(
     # Lower number like 10 means to spam repeatadly, number of MS in between usages
     poisonStrikeDelayMs = 10,
     
+    # Use this spell. Requires magery mastery, 0 = disabled, 1 = enabled. 
+    #useEtherealBlast = 0,
+    
+    # The time in milliseconds in between cast attempts for this spell
+    #etherealBlastDelayMs = 1000 * 60 * 15,
+    
     # Whether to use this spell 0 = disabled, 1 = enabled
     useStrangle = 0,
     
     # Change to an appropriate value for strangle spell, number of MS in between usages
-    strangleDelayMs = 30000,
+    strangleDelayMs = 60000,
     
     # Whether to use this spell 0 = disabled, 1 = enabled
     useCorpseSkin = 0,
     
     # Change to an appropriate value, number of MS in between usages
-    corpseSkinDelayMs = 30000,
+    corpseSkinDelayMs = 60000,
     
     # Whether to use this spell before applying each dot and curse 0 = disabled, 1 = enabled
     useEvilOmenBeforeDotsAndCurses = 0,
@@ -804,6 +816,10 @@ def run_mage_loop(
     # active until you move or you are interrupted or the creature dies. It will attempt to
     # reapply immediately. 0 = disabled, 1 = enabled
     useDeathRay = 0,
+    
+    # Will use shadow word death on eligible targets until they die. This is more of a toggle.
+    # 0 = disabled, 1 = enabled
+    useWordOfDeath = 0,
     
     # Whether to use this spell 0 = disabled, 1 = enabled
     useWildfire = 0,
@@ -828,6 +844,7 @@ def run_mage_loop(
 ):
     
     Timer.Create( 'magePingTimer', 3000 )
+    Timer.Create( 'arcaneEmpowermentTimer', 1 )
     Timer.Create( 'poisonStrikeTimer', 1 )
     Timer.Create( 'strangleTimer', 1 )
     Timer.Create( 'corpseSkinTimer', 1 )
@@ -864,19 +881,12 @@ def run_mage_loop(
         if heal_player_and_friends(friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
             continue  
         
-        # AOE Spells, no target needed
-        if useWildfire == 1 and Timer.Check( 'wildfireTimer' ) == False:
-            Spells.CastSpellweaving("Wildfire")
-            Target.WaitForTarget(10000, False)
-            Target.TargetExecute(Player.Position.X, Player.Position.Y, Player.Position.Z)
-            Timer.Create( 'wildfireTimer', wildfireDelayMs )
-            Misc.Pause(actionDelayMs)
-
-        if useWither == 1 and Timer.Check( 'witherTimer' ) == False:
-            Spells.CastNecro("Wither")
-            Timer.Create( 'witherTimer', witherDelayMs ) 
-            Misc.Pause(actionDelayMs)             
-    
+        if useArcaneEmpowerment == 1 and Timer.Check( 'arcaneEmpowermentTimer' ) == False and not Player.BuffsExist("Arcane Empowerment"):
+            Spells.CastSpellweaving("Arcane Empowerment")    
+            Misc.Pause(4000)    
+            Timer.Create( 'arcaneEmpowermentTimer', arcaneEmpowermentDelayMs )
+            continue
+        
         # Single target spells below. Need to find a target
         mobToAttack = None
         if mobSelectMethod == 1:
@@ -889,12 +899,48 @@ def run_mage_loop(
                     mobToAttack = nearest
         
         if mobToAttack != None:
+            
+            # Aoe
+            if useWildfire == 1 and Timer.Check( 'wildfireTimer' ) == False:
+                Spells.CastSpellweaving("Wildfire")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(Player.Position.X, Player.Position.Y, Player.Position.Z)
+                Timer.Create( 'wildfireTimer', wildfireDelayMs )
+                Misc.Pause(actionDelayMs)
+
+            elif useWither == 1 and Timer.Check( 'witherTimer' ) == False:
+                Spells.CastNecro("Wither")
+                Timer.Create( 'witherTimer', witherDelayMs ) 
+                Misc.Pause(actionDelayMs)  
+            
+            # Continue loop before doing harmul actions, focus on healing/curing.
+            if heal_player_and_friends(friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
+                continue                
+                    
+            # Nukes    
             if useDeathRay == 1 and not Player.BuffsExist("Death Ray"):
                 Spells.CastMastery("Death Ray")
                 Target.WaitForTarget(10000, False)
                 Target.TargetExecute(mobToAttack)
-                Misc.Pause(actionDelayMs)
+                Misc.Pause(actionDelayMs)                
                 
+            elif useWordOfDeath == 1 and mobToAttack is not None and mobToAttack.Hits is not None and mobToAttack.Hits > 0 and mobToAttack.HitsMax is not None and mobToAttack.HitsMax > 0 and mobToAttack.Hits / mobToAttack.HitsMax < 0.30:
+                Spells.CastSpellweaving("Word of Death")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(mobToAttack)
+                Misc.Pause(actionDelayMs)
+            elif usePoisonStrike == 1  and Timer.Check( 'poisonStrikeTimer' ) == False:
+                Spells.CastNecro("Poison Strike")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(mobToAttack)
+                Timer.Create( 'poisonStrikeTimer', poisonStrikeDelayMs )
+                Misc.Pause(actionDelayMs)
+
+            # Continue loop before doing harmul actions, focus on healing/curing.
+            if heal_player_and_friends(friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
+                continue
+
+            # Curses    
             if useCorpseSkin == 1 and Timer.Check( 'corpseSkinTimer' ) == False:
                 if useEvilOmenBeforeDotsAndCurses == 1:
                     Spells.CastNecro("Evil Omen")
@@ -906,8 +952,7 @@ def run_mage_loop(
                 Target.TargetExecute(mobToAttack)
                 Timer.Create( 'corpseSkinTimer', corpseSkinDelayMs )
                 Misc.Pause(actionDelayMs)
-
-            if useStrangle == 1 and Timer.Check( 'strangleTimer' ) == False:
+            elif useStrangle == 1 and Timer.Check( 'strangleTimer' ) == False:
                 if useEvilOmenBeforeDotsAndCurses == 1:
                     Spells.CastNecro("Evil Omen")
                     Target.WaitForTarget(10000, False)
@@ -917,13 +962,7 @@ def run_mage_loop(
                 Target.WaitForTarget(10000, False)
                 Target.TargetExecute(mobToAttack)
                 Timer.Create( 'strangleTimer', strangleDelayMs ) 
-                Misc.Pause(actionDelayMs) 
-        
-            if usePoisonStrike == 1:
-                Spells.CastNecro("Poison Strike")
-                Target.WaitForTarget(10000, False)
-                Target.TargetExecute(mobToAttack)
-                Misc.Pause(actionDelayMs)
+                Misc.Pause(actionDelayMs)                
   
 # An internal function but it can be used as a main heal loop if desired.  
 # casts cure on player and pet, also heals with greater heal
@@ -978,7 +1017,7 @@ def heal_player_and_friends(
             Misc.Pause(actionDelayMs)        
             didSomeHealing = True
             
-        if useGreaterHeal == 1 and friendMobile.Hits / friendMobile.HitsMax < healThreshold:
+        if useGreaterHeal == 1 and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold:
             Spells.CastMagery("Greater Heal")
             Target.WaitForTarget(10000, False)
             Target.TargetExecute(friendMobile)
