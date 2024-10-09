@@ -31,8 +31,8 @@ def go_to_tile(x, y, timeoutSeconds = -1):
     route.Timeout = timeoutSeconds
     res = PathFinding.Go(route)
     
-    total = "{:.2f}".format(time.time() - start_time)
-    Misc.SendMessage("It took {} seconds to generate route ({})".format(total, res), 48)
+    #total = "{:.2f}".format(time.time() - start_time)
+    #Misc.SendMessage("It took {} seconds to generate route ({})".format(total, res), 48)
     return res
 
 # This method moves our character next to the x, y provided (not on top of it)
@@ -370,9 +370,9 @@ def rails_stats(option):
 # recommend it.
 def run_rail_loop_single(
     # (Required) This is a list of coordinates to travel. See core_routes for a list of available, pre-defined routes.
-	# You can generate your own using the rails tool. It's easy. Just load up the script in fm_tools/RailRecorder.py
-	# and start adding points. Walk to a location, click add point. When you're done hit save. Open the file. It 
-	# will contain a list of coordinates you can paste here. Your character will walk around like an idiot.
+    # You can generate your own using the rails tool. It's easy. Just load up the script in fm_tools/RailRecorder.py
+    # and start adding points. Walk to a location, click add point. When you're done hit save. Open the file. It 
+    # will contain a list of coordinates you can paste here. Your character will walk around like an idiot.
     path,
 
     # (Optional) This is the runebook serial that contains our farm location rune.

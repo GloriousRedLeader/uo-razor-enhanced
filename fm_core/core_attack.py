@@ -995,7 +995,7 @@ def heal_player_and_friends(
         Misc.Pause(actionDelayMs)
         didSomeHealing = True
         
-    if useGreaterHeal == 1 and Player.Hits / Player.HitsMax < healThreshold:
+    if useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold:
         Spells.CastMagery("Greater Heal")
         Target.WaitForTarget(10000, False)
         Target.Self()
@@ -1011,7 +1011,7 @@ def heal_player_and_friends(
             Misc.Pause(actionDelayMs)        
             didSomeHealing = True
             
-        if useGreaterHeal == 1 and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits:
+        if useGreaterHeal == 1 and not friendMobile.Poisoned and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits:
             Spells.CastMagery("Greater Heal")
             Target.WaitForTarget(10000, False)
             Target.TargetExecute(friendMobile)
