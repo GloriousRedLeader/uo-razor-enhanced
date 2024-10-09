@@ -1,6 +1,6 @@
 from Scripts.fm_core.core_attack import run_mage_loop
 
-Player.HeadMessage( 118, 'STARTING SINGLE MAGE LOOP' )
+Player.HeadMessage( 118, 'STARTING MAGE SINGLE LOOP' )
 
 run_mage_loop(
 
@@ -19,30 +19,45 @@ run_mage_loop(
     # Only look for mobs and pets/friends inside of this range. IF they are farther, then
     # dont heal them / dont attack them.
     range = 10,
+    
+    # Use Arcane Empowerment (spell weaving) 0 = disabled, 1 = enabled
+    useArcaneEmpowerment = 1,
+    
+    # Time in millesconds between casts of arcane empowerment.
+    arcaneEmpowermentDelayMs = 35000,    
 
     # Whether to use this spell 0 = disabled, 1 = enabled
-    usePoisonStrike = 0,
+    usePoisonStrike = 1,
     
     # Lower number like 10 means to spam repeatadly, number of MS in between usages
-    poisonStrikeDelayMs = 10,
+    poisonStrikeDelayMs = 3000,
     
     # Whether to use this spell 0 = disabled, 1 = enabled
     useStrangle = 1,
     
     # Change to an appropriate value for strangle spell, number of MS in between usages
-    strangleDelayMs = 30000,
+    strangleDelayMs = 60000,
     
     # Whether to use this spell 0 = disabled, 1 = enabled
     useCorpseSkin = 1,
     
     # Change to an appropriate value, number of MS in between usages
-    corpseSkinDelayMs = 30000,
+    corpseSkinDelayMs = 60000,
     
     # Whether to use this spell before applying each dot and curse 0 = disabled, 1 = enabled
     useEvilOmenBeforeDotsAndCurses = 1,
     
+    # Toggles death ray. Requires magery mastery. There is no timer because this remains
+    # active until you move or you are interrupted or the creature dies. It will attempt to
+    # reapply immediately. 0 = disabled, 1 = enabled
+    useDeathRay = 0,
+    
+    # Will use shadow word death on eligible targets until they die. This is more of a toggle.
+    # 0 = disabled, 1 = enabled
+    useWordOfDeath = 1,    
+    
     # Whether to use this spell 0 = disabled, 1 = enabled
-    useWildfire = 1,
+    useWildfire = 0,
     
     # Lower number like 10 means to spam repeatadly, number of MS in between usages
     wildfireDelayMs = 30000,

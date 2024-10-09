@@ -791,12 +791,6 @@ def run_mage_loop(
     # Lower number like 10 means to spam repeatadly, number of MS in between usages
     poisonStrikeDelayMs = 10,
     
-    # Use this spell. Requires magery mastery, 0 = disabled, 1 = enabled. 
-    #useEtherealBlast = 0,
-    
-    # The time in milliseconds in between cast attempts for this spell
-    #etherealBlastDelayMs = 1000 * 60 * 15,
-    
     # Whether to use this spell 0 = disabled, 1 = enabled
     useStrangle = 0,
     
@@ -1017,7 +1011,7 @@ def heal_player_and_friends(
             Misc.Pause(actionDelayMs)        
             didSomeHealing = True
             
-        if useGreaterHeal == 1 and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold:
+        if useGreaterHeal == 1 and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits:
             Spells.CastMagery("Greater Heal")
             Target.WaitForTarget(10000, False)
             Target.TargetExecute(friendMobile)
