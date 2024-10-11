@@ -10,6 +10,7 @@ strings = [
     "a venom steed"
 ]
 
+Journal.Clear()
 while True:
     Misc.Pause(1000)
     for search in strings:
