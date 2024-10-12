@@ -763,6 +763,10 @@ def run_buff_loop_only (
 # Set preferred delays in between each spell. Your main nukes should have no delay really.
 def run_mage_loop(
 
+    # Give it a fun name in case you have different versions, e.g.
+    # Mage AOE Loop or Mage Single Target Loop
+    loopName = "Mage Loop",
+
     # How to pick your target for single target spells.
     # 0 = Nearest enemy. Default.
     # 1 = Prompt for target once at start of script. Useful for bosses.
@@ -859,12 +863,12 @@ def run_mage_loop(
         if Misc.ReadSharedValue("core_loops_enabled") != 1:
             Misc.Pause(500)
             if Timer.Check( 'magePingTimer' ) == False:
-                Player.HeadMessage( 118, 'MageLoop Paused...' )
+                Player.HeadMessage( 128, "{} Paused...".format(loopName) )
                 Timer.Create( 'magePingTimer', 1000)
             continue
         
         if Timer.Check( 'magePingTimer' ) == False:
-            Player.HeadMessage( 118, 'MageLoop 2 Running...' )
+            Player.HeadMessage( 128, "{} Running...".format(loopName) )
             Timer.Create( 'magePingTimer', 3000 )
 
         if not Player.Visible:
@@ -981,7 +985,11 @@ def heal_player_and_friends(
     useCure = 0,
     
     # Whether to heal yourself or your pet
-    useGreaterHeal = 0   
+    useGreaterHeal = 0
+   
+   # Provide name of player or pet to use gift of renewal.
+   # This is a tricky one. Will attempt to 
+   #giftOfRenwalTarget = None 
 ):
     didSomeHealing = False
     

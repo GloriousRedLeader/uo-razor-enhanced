@@ -82,7 +82,7 @@ def do_route(path, range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 
             rails_stats("report_head")
             
             if not go_to_tile(coord[0],coord[1], pathFindingTimeoutSeconds):
-                Misc.SendMessage("Cant make it to target, aborting this rune", 38)
+                Misc.SendMessage("Cant make it to target, aborting this coord", 38)
                 break
             
             Player.HeadMessage(48, "Weve arrived at sector {}".format(sectorId))
