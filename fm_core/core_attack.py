@@ -841,7 +841,7 @@ def run_mage_loop(
     healThreshold = 0.70    
 ):
     
-    Timer.Create( 'magePingTimer', 3000 )
+    Timer.Create( 'magePingTimer', 1 )
     Timer.Create( 'arcaneEmpowermentTimer', 1 )
     Timer.Create( 'poisonStrikeTimer', 1 )
     Timer.Create( 'strangleTimer', 1 )
@@ -938,8 +938,13 @@ def run_mage_loop(
             if heal_player_and_friends(friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
                 continue
 
-            # Curses    
-            if useCorpseSkin == 1 and Timer.Check( 'corpseSkinTimer' ) == False:
+            # Curses (this is weird, but use word of death instead of curses if you can)
+            if useWordOfDeath == 1 and mobToAttack is not None and mobToAttack.Hits is not None and mobToAttack.Hits > 0 and mobToAttack.HitsMax is not None and mobToAttack.HitsMax > 0 and mobToAttack.Hits / mobToAttack.HitsMax < 0.30:
+                Spells.CastSpellweaving("Word of Death")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(mobToAttack)
+                Misc.Pause(actionDelayMs) 
+            elif useCorpseSkin == 1 and Timer.Check( 'corpseSkinTimer' ) == False:
                 if useEvilOmenBeforeDotsAndCurses == 1:
                     Spells.CastNecro("Evil Omen")
                     Target.WaitForTarget(10000, False)
