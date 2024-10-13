@@ -45,6 +45,11 @@ import sys
 # 455 - white   PLAYER / ITEMS
 
 def run_dex_loop(
+
+    # Give it a fun name in case you have different versions, e.g.
+    # DexLoop Single Targert, DexLoop AOE, etc.
+    loopName = "DexLoop",
+
     # This is my special convention. It represents abilities that are toggled and
     # activated by next auto attack. These are what the possible values are:
     # 0 - Disabled, dont do anything
@@ -153,12 +158,12 @@ def run_dex_loop(
         if Misc.ReadSharedValue("core_loops_enabled") != 1:
             Misc.Pause(500)
             if Timer.Check( 'dexPingTimer' ) == False:
-                Player.HeadMessage( 78, 'DexxerLoop Paused...' )
+                Player.HeadMessage( 78, "{} Paused...".format(loopName) )
                 Timer.Create( 'dexPingTimer', 1000)
             continue
         
         if Timer.Check( 'dexPingTimer' ) == False:
-            Player.HeadMessage( 78, 'DexxerLoop Running...' )
+            Player.HeadMessage( 78, "{} Running...".format(loopName) )
             Timer.Create( 'dexPingTimer', 3000 )
 
         if not Player.Visible:
@@ -1008,7 +1013,7 @@ def heal_player_and_friends(
         Misc.Pause(actionDelayMs)
         didSomeHealing = True
         
-    if useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold:
+    if useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
         Spells.CastMagery("Greater Heal")
         Target.WaitForTarget(10000, False)
         Target.Self()
