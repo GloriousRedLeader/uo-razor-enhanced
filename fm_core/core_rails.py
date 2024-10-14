@@ -134,6 +134,53 @@ def do_route(path, range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 
                 break
     Player.HeadMessage(48, "Done in this zone!")
     
+    
+# range is the number of tiles to search for monsters in each "sector"
+# autoLootBufferMs is the time in MS to stand around like an idiot before moving
+# on after a monster dies. Gives the auto looter a little bit of extra time to grab
+# gold. 0 means its disabled and no wait.
+# pathFindingTimeoutSeconds is a float that represents number of seconds before quitting
+# on a path. It is a value passed to the pathfinding method. The Pathfinding algorithm 
+# could go on for days. Instead of derping, just give up after this many seconds and 
+# move on with your life.
+def defend(range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 3.0):
+    
+    rails_stats("start")   
+    
+    while True:
+        rails_stats("report_head")
+        
+        Misc.Pause(1000)
+        
+        eligible = get_mobs_exclude_serials(range, True) 
+
+        if len(eligible) > 0:  
+            Player.HeadMessage(48, "Found {} things to attack".format(len(eligible)))    
+            nearest = Mobiles.Select(eligible, 'Nearest')
+            
+            while Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=range:            
+                Mobiles.Message(nearest,68,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
+                
+                res = go_to_tile(nearest.Position.X, nearest.Position.Y, pathFindingTimeoutSeconds)
+                
+                Misc.Pause(250)
+                    
+            # Always pause for some amount because the world will end
+            rails_stats("report_head")
+            Misc.Pause(1000)
+            
+            # Pause a little longer if we are prioritizing gold so the auto looter can have a moment
+            # dont do this in shitty places like deceipt.
+            # The check for goToNearestAttempts is a general rule that tells us whether the monster
+            # got away or not. It is more likely that there is loot and the monster is dead if attempts 
+            # is greater than zero.
+            if autoLootBufferMs > 0 and goToNearestAttempts > 0:
+                Player.HeadMessage(48, "Pausing a little extra for more loot")
+                Misc.Pause(autoLootBufferMs)
+        else:
+            Player.HeadMessage(48, "Nothing left in sector")
+            
+    
 # Move that fat ass. Looks like some serious information is needed here.
 # All parameters are required.
 def recall(

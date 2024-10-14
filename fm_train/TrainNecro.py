@@ -28,7 +28,7 @@
 #90 - 100: Cast Lich Form
 #100 - 120: Cast Vampiric Embrace
 
-while Player.GetSkillValue('Necromancy') < 110:
+while Player.GetSkillValue('Necromancy') < Player.GetSkillCap('Necromancy'):
     Necro = Player.GetSkillValue('Necromancy')
     if Necro < 35 and Player.Mana > 7:
         Spells.CastNecro('Curse Weapon')

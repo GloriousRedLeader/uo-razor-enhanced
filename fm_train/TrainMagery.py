@@ -27,11 +27,11 @@ def Meditate():
         Player.UseSkill("Meditation")
 
     #print("Pausing while we meditate")
-    #Misc.Pause(10000)
+    Misc.Pause(3000)
     while Player.BuffsExist('Meditation') and Player.Mana != Player.ManaMax:
         Misc.Pause(1000)
 
-while Player.GetSkillValue("Magery") < 120:
+while Player.GetSkillValue("Magery") < Player.GetSkillCap('Magery'):
     if Player.Mana <= 23:
         Meditate()
     else:
