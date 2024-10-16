@@ -830,6 +830,12 @@ def run_mage_loop(
     # Lower number like 10 means to spam repeatadly, number of MS in between usages
     wildfireDelayMs = 10000,
     
+    # Whether to use the thunderstorm spellweaving spell.
+    useThunderstorm = 0,
+    
+    # Time in milliseconds before recasting
+    thunderstormDelayMs = 10000,
+    
     # Whether to use this spell 0 = disabled, 1 = enabled
     useWither = 0,
     
@@ -853,6 +859,7 @@ def run_mage_loop(
     Timer.Create( 'corpseSkinTimer', 1 )
     Timer.Create( 'wildfireTimer', 1 )
     Timer.Create( 'witherTimer', 1 )
+    Timer.Create( 'thunderstormTimer', 1 )
 
     Misc.SetSharedValue("core_loops_enabled", 1)
     
@@ -910,7 +917,10 @@ def run_mage_loop(
                 Target.TargetExecute(Player.Position.X, Player.Position.Y, Player.Position.Z)
                 Timer.Create( 'wildfireTimer', wildfireDelayMs )
                 Misc.Pause(actionDelayMs)
-
+            elif useThunderstorm == 1 and Timer.Check( 'thunderstormTimer' ) == False:
+                Spells.CastSpellweaving("Thunderstorm")
+                Timer.Create( 'thunderstormTimer', thunderstormDelayMs ) 
+                Misc.Pause(actionDelayMs)      
             elif useWither == 1 and Timer.Check( 'witherTimer' ) == False:
                 Spells.CastNecro("Wither")
                 Timer.Create( 'witherTimer', witherDelayMs ) 

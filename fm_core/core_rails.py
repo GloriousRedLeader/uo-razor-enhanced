@@ -150,7 +150,7 @@ def defend(range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 3.0):
     while True:
         rails_stats("report_head")
         
-        Misc.Pause(1000)
+        Misc.Pause(2000)
         
         eligible = get_mobs_exclude_serials(range, True) 
 
@@ -164,10 +164,6 @@ def defend(range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 3.0):
                 res = go_to_tile(nearest.Position.X, nearest.Position.Y, pathFindingTimeoutSeconds)
                 
                 Misc.Pause(250)
-                    
-            # Always pause for some amount because the world will end
-            rails_stats("report_head")
-            Misc.Pause(1000)
             
             # Pause a little longer if we are prioritizing gold so the auto looter can have a moment
             # dont do this in shitty places like deceipt.
@@ -179,6 +175,7 @@ def defend(range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 3.0):
                 Misc.Pause(autoLootBufferMs)
         else:
             Player.HeadMessage(48, "Nothing left in sector")
+            Misc.Pause(1000)
             
     
 # Move that fat ass. Looks like some serious information is needed here.

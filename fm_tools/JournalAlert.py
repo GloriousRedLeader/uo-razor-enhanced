@@ -11,7 +11,7 @@
 
 # Configs
 HOW_MANY_TIMES_TO_BEEP = 5
-HOW_OFTEN_TO_PING_MS = 3000
+HOW_OFTEN_TO_PING_MS = 5000
 STRINGS_TO_LOOK_FOR = [
     "The Master of the Hunt has",
     "You sense a dark presence",
