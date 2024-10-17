@@ -67,6 +67,7 @@ ginseng = 0x0F85
 garlic = 0x0F84
 
 def checkRegs(reg1, reg2, reg3, reg4):
+    
     global stoCont
     if Items.BackpackCount(reg1,0x0000) < 5:
         Misc.Pause(1100)
@@ -96,6 +97,7 @@ def checkRegs(reg1, reg2, reg3, reg4):
         Items.Move(Reg,Player.Backpack.Serial,100)
         Misc.Pause(1100)
 
+    # scrolls
     if Items.BackpackCount(0x0EF3,0x0000) < 5:
         Misc.Pause(1100)
         Reg = Items.FindByID(0x0EF3,0x0000,stoCont)
