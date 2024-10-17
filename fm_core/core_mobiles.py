@@ -96,3 +96,17 @@ def get_friends_by_names (friendNames = [], range = 8):
     mobs = Mobiles.ApplyFilter(fil)
 
     return mobs
+
+# Returns mobiles for pets or friends. Just provide names.
+# Noterieties:  blue = 1, green = 2, gray = 3, gray crim = 4, orange = 5, red = 6, yellow = 7
+def get_blues_in_range(range = 8):
+    fil = Mobiles.Filter()
+    fil.Enabled = True
+    fil.RangeMax = range
+    fil.Notorieties = List[Byte](bytes([1, 2]))
+    fil.IsGhost = False
+    fil.Friend = False
+    fil.CheckLineOfSight = True
+    mobs = Mobiles.ApplyFilter(fil)
+
+    return mobs

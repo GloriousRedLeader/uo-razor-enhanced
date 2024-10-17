@@ -6,6 +6,7 @@
 
 from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
 from Scripts.fm_core.core_mobiles import get_friends_by_names
+from Scripts.fm_core.core_mobiles import get_blues_in_range
 from Scripts.fm_core.core_player import find_instrument
 from Scripts.fm_core.core_spells import cast_until_works
 import sys
@@ -777,6 +778,9 @@ def run_mage_loop(
     # 1 = Prompt for target once at start of script. Useful for bosses.
     mobSelectMethod = 0,
     
+    # 0 = Heal only names in friendNames, 1 = heal any blue in range
+    friendSelectMethod = 0,
+    
     # Names of pets or blue characters you want to heal, cure if they are in range.
     # Note that you still need to enable useCure / useGreaterHeal etc.
     friendNames = [],
@@ -888,7 +892,7 @@ def run_mage_loop(
             continue  
       
         # Continue loop before doing harmul actions, focus on healing/curing.
-        if heal_player_and_friends(friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
+        if heal_player_and_friends(friendSelectMethod, friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
             continue  
         
         if useArcaneEmpowerment == 1 and Timer.Check( 'arcaneEmpowermentTimer' ) == False and not Player.BuffsExist("Arcane Empowerment"):
@@ -927,7 +931,7 @@ def run_mage_loop(
                 Misc.Pause(actionDelayMs)  
             
             # Continue loop before doing harmul actions, focus on healing/curing.
-            if heal_player_and_friends(friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
+            if heal_player_and_friends(friendSelectMethod, friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
                 continue                
                     
             # Nukes    
@@ -950,7 +954,7 @@ def run_mage_loop(
                 Misc.Pause(actionDelayMs)
 
             # Continue loop before doing harmul actions, focus on healing/curing.
-            if heal_player_and_friends(friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
+            if heal_player_and_friends(friendSelectMethod, friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
                 continue
 
             # Curses (this is weird, but use word of death instead of curses if you can)
@@ -989,6 +993,9 @@ def run_mage_loop(
 # doing other stuff like continuing to attack.
 def heal_player_and_friends(
 
+    # 0 = Heal only names in friendNames, 1 = heal any blue in range
+    friendSelectMethod = 0,
+    
     # Pets, friends, etc. These are names (string).
     friendNames = [],
     
@@ -1029,21 +1036,38 @@ def heal_player_and_friends(
         Target.Self()
         Misc.Pause(actionDelayMs)
         didSomeHealing = True
-        
-    friendMobiles = get_friends_by_names(friendNames)
-    for friendMobile in friendMobiles:
-        if useCure == 1 and friendMobile.Poisoned:
-            Spells.CastMagery("Cure")
-            Target.WaitForTarget(10000, False)
-            Target.TargetExecute(friendMobile)
-            Misc.Pause(actionDelayMs)        
-            didSomeHealing = True
-            
-        if useGreaterHeal == 1 and not friendMobile.Poisoned and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits:
-            Spells.CastMagery("Greater Heal")
-            Target.WaitForTarget(10000, False)
-            Target.TargetExecute(friendMobile)
-            Misc.Pause(actionDelayMs)        
-            didSomeHealing = True
+       
+    if friendSelectMethod == 0: 
+        friendMobiles = get_friends_by_names(friendNames, range)
+        for friendMobile in friendMobiles:
+            if useCure == 1 and friendMobile.Poisoned:
+                Spells.CastMagery("Cure")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(friendMobile)
+                Misc.Pause(actionDelayMs)        
+                didSomeHealing = True
+                
+            if useGreaterHeal == 1 and not friendMobile.Poisoned and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits and friendMobile.Hits > 0:
+                Spells.CastMagery("Greater Heal")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(friendMobile)
+                Misc.Pause(actionDelayMs)        
+                didSomeHealing = True
+    elif friendSelectMethod == 1:
+        friendMobiles = get_blues_in_range(range)
+        for friendMobile in friendMobiles:
+            if useCure == 1 and friendMobile.Poisoned:
+                Spells.CastMagery("Cure")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(friendMobile)
+                Misc.Pause(actionDelayMs)        
+                didSomeHealing = True
+                
+            if useGreaterHeal == 1 and not friendMobile.Poisoned and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits and friendMobile.Hits > 0:
+                Spells.CastMagery("Greater Heal")
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(friendMobile)
+                Misc.Pause(actionDelayMs)        
+                didSomeHealing = True
 
     return didSomeHealing
