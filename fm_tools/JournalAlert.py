@@ -30,12 +30,13 @@ while True:
     
     for search in STRINGS_TO_LOOK_FOR:
         if Journal.Search(search):
+            found = Journal.GetLineText(search,False)
             Journal.Clear()
             for i in range(0, HOW_MANY_TIMES_TO_BEEP):
                 Misc.Beep()
-                Player.HeadMessage( 28, '^^ Journal Alert ^^' )
-                Player.HeadMessage( 38, '^^ Journal Alert ^^' )
-                Player.HeadMessage( 48, '^^ Journal Alert ^^' )
+                Player.HeadMessage( 28, "^^ Journal Alert: {} ^^".format(found) )
+                #Player.HeadMessage( 38, "^^ Journal Alert: {} ^^".format(found) )
+                Player.HeadMessage( 48, "^^ Journal Alert: {} ^^".format(found) )
                 Misc.Pause(1000) 
 
     Misc.Pause(1000)      

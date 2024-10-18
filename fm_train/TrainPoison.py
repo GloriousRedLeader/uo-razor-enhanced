@@ -14,8 +14,8 @@
 #70 - 92: Apply Greater Poison
 #92 - 100: Apply Deadly Poison
 
-POISON_KEG_SERIALS = [0x4023D4E5, 0x40D4A14A, 0x40D4A1A9]
-MAX_LEVEL = 100
+POISON_KEG_SERIALS = [0x407FC64D]
+MAX_LEVEL = 30
 
 for kegSerial in POISON_KEG_SERIALS:
     
