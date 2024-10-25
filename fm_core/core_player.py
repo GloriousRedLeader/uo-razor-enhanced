@@ -8,6 +8,10 @@
 
 from Scripts.fm_core.core_items import INSTRUMENT_STATIC_IDS
 
+# Gets one item by item name from backpack
+def find_first_in_container_by_name(itemName, container = Player.Backpack.Serial):
+    return Items.FindByName(itemName, -1, container, 1)
+
 # Takes a list of itemIDs and returns the first one it finds.
 def find_first_in_container_by_ids(itemIDs, container):
     for itemID in itemIDs:
