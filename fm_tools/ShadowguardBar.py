@@ -17,7 +17,7 @@ itemName = "a bottle of Liquor"
 Timer.Create( 'pingTimer', 1 )    
 
 PING_TIMER_DELAY_MS = 3000
-LOOP_NAME = "Shadowguard-Bar"
+LOOP_NAME = "SG-Bar"
 
 while True:
     
