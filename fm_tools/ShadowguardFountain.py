@@ -17,13 +17,35 @@ import re
 # and once purified it will direct to a statue.
     
 PULSE_MS = 1000
-LOOP_NAME = "SG-Armory"
+LOOP_NAME = "SG-Fountain"
+CANAL_NAME = "Canal"
 CORRUPTED_PHYLACTERY_NAME = "Corrupt Phylactery"
 PURIFIED_PHYLACTERY_NAME = "Purified Phylactery"
 STATUE_NAME = "Cursed Suit of Armor"
 FLAME_NAME = "Purifying Flames"
 
 Player.HeadMessage( 111, "{} [running]".format(LOOP_NAME) )
+
+def pick_up_canal():
+    filter = Items.Filter()
+    filter.OnGround = 1
+    filter.RangeMax = 8
+    filter.Name = CANAL_NAME
+    items = Items.ApplyFilter(filter)
+    item = Items.Select(items,"Nearest")
+    if item is not None:
+        Items.Message(item, 58, "^ Here ^")
+        if Player.DistanceTo(item) < 3:
+            Items.Move(item, Player.Backpack.Serial, 1)
+            Player.HeadMessage( 58, "{} [looted canal piece]".format(LOOP_NAME) )    
+            Misc.Pause(650)
+
+
+while True:
+    pick_up_canal()
+    Misc.Pause(PULSE_MS)
+
+sys.exit()
 
 def get_nearest_statue():
     filter = Items.Filter()

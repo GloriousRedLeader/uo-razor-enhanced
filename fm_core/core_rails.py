@@ -410,7 +410,7 @@ def rails_stats(option):
 
 # Run a single route. The only required argument is a set of coordinates. You can get more fancy
 # By providing runes for banks, vendors and of course the starting patth. It will attempt to recall
-# to the bank and deposit items if you provide the runebook information - but that is buggy. I wouldn't
+# to the bank and deposit items if you provide the runebook information - but that is buggy. I wouldnt
 # recommend it.
 def run_rail_loop_single(
     # (Required) This is a list of coordinates to travel. See core_routes for a list of available, pre-defined routes.
