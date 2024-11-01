@@ -1,6 +1,10 @@
 # MUST HAVE REQUIRED NINJA TO ATTEMPT SHADOWJUMP
 # best to start in an area between north south trees with visible tiles between
 
+while not Player.IsGhost:
+    Player.UseSkill("Hiding")
+    Misc.Pause(3000)
+
 while not Player.IsGhost:   
     #if Player.Visible:
     #    Spells.CastNinjitsu("Mirrorimage")

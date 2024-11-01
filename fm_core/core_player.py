@@ -124,10 +124,41 @@ def open_bank_and_resupply(
     
 # Nice utility to just move junk from one bag to another.
 def move_all_items_from_container(sourceContainerSerial, destinationContainerSerial):
-    #Player.HeadMessage(455, "[start] Cleaing up Britain...")
-    items = Items.FindBySerial(sourceContainerSerial)
     for item in Items.FindBySerial(sourceContainerSerial).Contains:
         Player.HeadMessage(455, "Junking item {}".format(item.Name))
         Items.Move(item, destinationContainerSerial, item.Amount)
         Misc.Pause(800)
-    #Player.HeadMessage(455, "[done] Cleaing up Britain...")
+        
+def move_number_of_items_from_container():
+    
+    print("How many items?")
+    Journal.Clear()
+    while True:
+        res = Journal.GetTextByName(Player.Name)
+        if len(res) > 0:
+            maxNum = int(res[0])
+            break
+        Misc.Pause(250)    
+    
+    #Player.HeadMessage(455, "[start] Cleaing up Britain...")
+    source = Target.PromptTarget("Pick source container")
+    
+    destination = Target.PromptTarget("Pick target container")
+    
+    Items.UseItem(source)
+    Misc.Pause(650)
+    Items.UseItem(destination)
+    Misc.Pause(650)
+
+    #maxNum = 50
+    currentNum = 0
+    #items = Items.FindBySerial(source.Serial)
+    for item in Items.FindBySerial(source).Contains:
+        Player.HeadMessage(455, "Moving item #{}: {}".format(currentNum, item.Name))
+        Items.Move(item, destination, item.Amount)
+        Misc.Pause(650)
+        
+        if currentNum >= maxNum:
+            Player.HeadMessage(455, "Done. Moved {}/{}".format(currentNum, maxNum))
+            return
+        currentNum = currentNum + 1            
