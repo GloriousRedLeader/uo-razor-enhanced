@@ -1,6 +1,9 @@
 from Scripts.fm_core.core_player import find_first_in_container_by_ids, find_first_in_hands_by_id
+from Scripts.fm_core.core_player import move_all_items_from_container
+from Scripts.fm_core.core_player import move_item_to_container_by_id
 from Scripts.fm_core.core_rails import go_to_tile
-from Scripts.fm_core.core_items import AXE_STATIC_IDS, LOG_STATIC_IDS, TREE_STATIC_IDS, DAGGER_STATIC_IDS
+from Scripts.fm_core.core_mobiles import get_friends_by_names
+from Scripts.fm_core.core_items import AXE_STATIC_IDS, LOG_STATIC_IDS, TREE_STATIC_IDS, DAGGER_STATIC_IDS, BOARD_STATIC_IDS
 from System.Collections.Generic import List
 import sys
 
@@ -8,7 +11,7 @@ import sys
 # Note I did modify this and make it much worse. Use the one linked above.
 
 # Pastrami
-CHOP_DELAY = 1000
+CHOP_DELAY = 2000
 
 # Variabili Sistema
 tileinfo = List[Statics.TileInfo]
@@ -54,7 +57,7 @@ def ScanStatic(tileRange):
                 for tile in tileinfo:
                     for staticid in TREE_STATIC_IDS:
                         if staticid == tile.StaticID:
-                            Misc.SendMessage('--> Albero X: %i - Y: %i - Z: %i' % (minx, miny, tile.StaticZ), 66)
+                            Misc.SendMessage('--> Albero X: %i - Y: %i - Z: %i - GFX: %i' % (minx, miny, tile.StaticZ, tile.StaticID), 66)
                             treeposx.Add(minx)
                             treeposy.Add(miny)
                             treeposz.Add(tile.StaticZ)
@@ -85,9 +88,12 @@ def CutTree( spotnumber, axe, weightLimit ):
     Journal.Clear()
     Items.UseItem(axe)
     Target.WaitForTarget(4000)
+    print(spotnumber, treeposx[spotnumber], treeposy[spotnumber], treeposz[spotnumber], treegfx[spotnumber])
     Target.TargetExecute(treeposx[spotnumber], treeposy[spotnumber], treeposz[spotnumber], treegfx[spotnumber])
+    
     Misc.Pause(CHOP_DELAY)
-    if Journal.Search("not enough wood"):
+    #if Journal.Search("not enough wood"):
+    if Journal.Search("There's not enough wood here to harvest."):
         Misc.SendMessage("--> Cambio albero", 77)
     elif Journal.Search("That is too far away"):
         blockcount = blockcount + 1
@@ -125,10 +131,32 @@ def chop_trees_in_area(
     cutLogsToBoards = False, 
     
     # After chopping wood, you can drop the wood on teh ground. Useful i you are just gaining skill.
-    dropOnGround = False):
+    dropOnGround = False,
+    
+    # If you have a beetle
+    packAnimalNames = []
+    ):
         
     global treenumber, treeposx, treeposy, AXE_STATIC_IDS
     
+    
+    tileinfo = List[Statics.TileInfo]
+    treeposx = []
+    treeposy = []
+    treeposz = []
+    treegfx = []
+    treenumber = 0
+    blockcount = 0    
+                
+#    packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
+#    if len(packAnimals) > 0:
+#        for packAnimal in packAnimals:
+#            print(packAnimal.Name, packAnimal.Backpack.Weight)
+#            if packAnimal.Backpack.Weight < 1350:
+#                for boardStaticID in BOARD_STATIC_IDS:
+#                    move_item_to_container_by_id(boardStaticID, Player.Backpack, packAnimal.Backpack.Serial)
+#    return
+
     Misc.SendMessage("--> Avvio Patramie", 77)  
     Misc.SendMessage("Eqipping Axe", 123)
     
@@ -158,7 +186,16 @@ def chop_trees_in_area(
             Target.WaitForTarget(4000)
             Target.WaitForTarget(10000, False)
             Target.TargetExecute(logs.Serial)
-        i = i + 1
+            
+        packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
+        if len(packAnimals) > 0:
+            for packAnimal in packAnimals:
+                print(packAnimal.Name, packAnimal.Backpack.Weight)
+                if packAnimal.Backpack.Weight < 1350:
+                    for boardStaticID in BOARD_STATIC_IDS:
+                        move_item_to_container_by_id(boardStaticID, Player.Backpack, packAnimal.Backpack.Serial)
+                    
+            i = i + 1
         Misc.Pause(500)
         
     treeposx = []

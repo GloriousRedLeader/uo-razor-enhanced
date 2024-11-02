@@ -122,6 +122,18 @@ def open_bank_and_resupply(
         print("Currenlty have {} / {} of itemID in backpack".format(count, amount))
     #Player.HeadMessage(455, "[done] Resupplying...")
     
+def move_item_to_container_by_id(itemID, sourceContainer, destinationContainerSerial):
+    while True:
+        item = find_in_container_by_id(itemID, sourceContainer, color = -1, ignoreContainer = [])
+        if item is not None:
+            move_item_to_container(item, destinationContainerSerial)
+        else:
+            break
+    
+def move_item_to_container(item, destinationContainerSerial):
+    Items.Move(item, destinationContainerSerial, item.Amount)
+    Misc.Pause(800)
+    
 # Nice utility to just move junk from one bag to another.
 def move_all_items_from_container(sourceContainerSerial, destinationContainerSerial):
     for item in Items.FindBySerial(sourceContainerSerial).Contains:
