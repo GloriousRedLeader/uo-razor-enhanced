@@ -141,6 +141,27 @@ def move_all_items_from_container(sourceContainerSerial, destinationContainerSer
         Items.Move(item, destinationContainerSerial, item.Amount)
         Misc.Pause(800)
         
+def move_all_items_of_type_to_container():
+    itemSerial = Target.PromptTarget("Which item type? Click one.")
+    #source = Target.PromptTarget("Pick source container")
+    destinationSerial = Target.PromptTarget("Pick target container")
+    
+    
+    #Items.UseItem(source)
+    #Misc.Pause(650)
+    Items.UseItem(destinationSerial)
+    Misc.Pause(650)
+    
+    
+    
+    item = Items.FindBySerial(itemSerial)
+    if item is not None:
+        print(item.ItemID, item.Container, item.Container)
+        sourceContainer = Items.FindBySerial(item.Container)
+        #move_item_to_container_by_id(itemID, sourceContainer, destinationContainerSerial):
+        move_item_to_container_by_id(item.ItemID, sourceContainer, destinationSerial)
+    #move_item_to_container_by_id(itemID = item.ItemID, sourceContainer = source, destinationContainerSerial = destination.Serial)   
+        
 def move_number_of_items_from_container():
     
     print("How many items?")
