@@ -31,8 +31,8 @@ def go_to_tile(x, y, timeoutSeconds = -1):
     route.Timeout = timeoutSeconds
     res = PathFinding.Go(route)
     
-    #total = "{:.2f}".format(time.time() - start_time)
-    #Misc.SendMessage("It took {} seconds to generate route ({})".format(total, res), 48)
+    total = "{:.2f}".format(time.time() - start_time)
+    Misc.SendMessage("It took {} seconds to generate route ({})".format(total, res), 48)
     return res
 
 # This method moves our character next to the x, y provided (not on top of it)

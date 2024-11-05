@@ -10,6 +10,8 @@ import sys
 # All credit to: https://github.com/hampgoodwin/razorenhancedscripts/blob/master/LumberjackingScanTile.py
 # Note I did modify this and make it much worse. Use the one linked above.
 
+Misc.Resync()
+
 # Pastrami
 CHOP_DELAY = 2000
 
@@ -23,6 +25,7 @@ treenumber = 0
 blockcount = 0
 
 def RangeTree( spotnumber ):
+    global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
     if (Player.Position.X - 1) == treeposx[spotnumber] and (Player.Position.Y + 1) == treeposy[spotnumber]:
         return True
     elif (Player.Position.X - 1) == treeposx[spotnumber] and (Player.Position.Y - 1) == treeposy[spotnumber]:
@@ -43,7 +46,7 @@ def RangeTree( spotnumber ):
         return False
     
 def ScanStatic(tileRange): 
-    global treenumber, treeposx, treeposy, TREE_STATIC_IDS
+    global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
     Misc.SendMessage("--> Inizio Scansione Tile", 77)
     minx = Player.Position.X - tileRange
     maxx = Player.Position.X + tileRange
@@ -71,8 +74,10 @@ def ScanStatic(tileRange):
     Misc.SendMessage('--> Totale Alberi: %i' % (treenumber), 77)
     
 def CutTree( spotnumber, axe, weightLimit ):
-    global CHOP_DELAY
-    global blockcount
+    global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
+    Target.Cancel()
+    Misc.Pause(1000)
+    
     if Target.HasTarget():
         Misc.SendMessage("--> Blocco rilevato target residuo, cancello!", 77)
         Target.Cancel()
@@ -92,8 +97,13 @@ def CutTree( spotnumber, axe, weightLimit ):
     Target.TargetExecute(treeposx[spotnumber], treeposy[spotnumber], treeposz[spotnumber], treegfx[spotnumber])
     
     Misc.Pause(CHOP_DELAY)
+    
+#    cut_drop_and_move_boards(axe, cutLogsToBoards = False, dropOnGround = False, packAnimalNames = []):
+    
+    
     #if Journal.Search("not enough wood"):
     if Journal.Search("There's not enough wood here to harvest."):
+        # '
         Misc.SendMessage("--> Cambio albero", 77)
     elif Journal.Search("That is too far away"):
         blockcount = blockcount + 1
@@ -104,10 +114,12 @@ def CutTree( spotnumber, axe, weightLimit ):
         else:
             CutTree(spotnumber, axe, weightLimit)
     else:
+        Misc.SendMessage("Recursive Call on this tree")
         CutTree(spotnumber, axe, weightLimit)
         
 # Too heavy. Turn to boards. Praise Be.
 def logs_to_boards(container, axe):
+    global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
     logs = find_first_item_by_id(LOG_STATIC_IDS, Player.Backpack)
     if logs != None:
         Items.UseItem(axe)
@@ -137,16 +149,18 @@ def chop_trees_in_area(
     packAnimalNames = []
     ):
         
-    global treenumber, treeposx, treeposy, AXE_STATIC_IDS
+    Misc.Resync()
+    global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
     
     
-    tileinfo = List[Statics.TileInfo]
-    treeposx = []
-    treeposy = []
-    treeposz = []
-    treegfx = []
-    treenumber = 0
-    blockcount = 0    
+    
+    #tileinfo = List[Statics.TileInfo]
+    #treeposx = []
+    #treeposy = []
+    #treeposz = []
+    #treegfx = []
+    #treenumber = 0
+    #blockcount = 0    
                 
 #    packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
 #    if len(packAnimals) > 0:
@@ -165,7 +179,7 @@ def chop_trees_in_area(
     if axe == None:
         axe = find_first_item_by_id(AXE_STATIC_IDS, Player.Backpack)
         if axe == None:
-            Misc.SendMessage("You don't have an axe foo", 38)
+            Misc.SendMessage("You dont have an axe foo", 38)
             sys.exit()
         originalItemsInHands = swap_weapon(axe)
 
@@ -174,35 +188,36 @@ def chop_trees_in_area(
     Misc.SendMessage("Total tree number {}".format(treenumber))
     while i < treenumber:
         Misc.SendMessage("Moving to a tree")
-        go_to_tile(treeposx[i] - 1, treeposy[i] - 1, 88.0)
+        #go_to_tile(treeposx[i] - 1, treeposy[i] - 1, 88.0)
+        go_to_tile(treeposx[i] - 1, treeposy[i] - 1, 5.0)
         CutTree(i, axe, weightLimit)
+        cut_drop_and_move_boards(axe, cutLogsToBoards, dropOnGround, packAnimalNames)
         
-        logs = find_first_in_container_by_ids(LOG_STATIC_IDS, Player.Backpack)
-        if logs != None and dropOnGround:
-            Player.HeadMessage(48, "Dropping Logs on ground")
-            Items.MoveOnGround(logs,0,Player.Position.X - 1, Player.Position.Y + 1, 0)
-        elif logs != None and cutLogsToBoards:
-            Items.UseItem(axe)
-            Target.WaitForTarget(4000)
-            Target.WaitForTarget(10000, False)
-            Target.TargetExecute(logs.Serial)
-            
-        packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
-        if len(packAnimals) > 0:
-            for packAnimal in packAnimals:
-                print(packAnimal.Name, packAnimal.Backpack.Weight)
-                if packAnimal.Backpack.Weight < 1350:
-                    for boardStaticID in BOARD_STATIC_IDS:
-                        move_item_to_container_by_id(boardStaticID, Player.Backpack, packAnimal.Backpack.Serial)
+#        logs = find_first_in_container_by_ids(LOG_STATIC_IDS, Player.Backpack)
+#        if logs != None and dropOnGround:
+#            Player.HeadMessage(48, "Dropping Logs on ground")
+#            Items.MoveOnGround(logs,0,Player.Position.X - 1, Player.Position.Y + 1, 0)
+#        elif logs != None and cutLogsToBoards:
+#            Items.UseItem(axe)
+#            Target.WaitForTarget(10000, False)
+#            Target.TargetExecute(logs.Serial)
+#            
+#        packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
+#        if len(packAnimals) > 0:
+#            for packAnimal in packAnimals:
+#                print(packAnimal.Name, packAnimal.Backpack.Weight)
+#                if packAnimal.Backpack.Weight < 1350:
+#                    for boardStaticID in BOARD_STATIC_IDS:
+#                        move_item_to_container_by_id(boardStaticID, Player.Backpack, packAnimal.Backpack.Serial)
                     
-            i = i + 1
+        i = i + 1
         Misc.Pause(500)
         
-    treeposx = []
-    treeposy = []
-    treeposz = []
-    treegfx = []
-    treenumber = 0
+    #treeposx = []
+    #treeposy = []
+    #treeposz = []
+    #treegfx = []
+    #treenumber = 0
 
     Misc.SendMessage("Re-qeuipping shitter", 123) 
     
@@ -215,6 +230,25 @@ def chop_trees_in_area(
         Misc.Pause(1000)
         swap_weapon(originalItemsInHands[1])
         Misc.Pause(4000)
+        
+def cut_drop_and_move_boards(axe, cutLogsToBoards = False, dropOnGround = False, packAnimalNames = []):
+    global treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
+    logs = find_first_in_container_by_ids(LOG_STATIC_IDS, Player.Backpack)
+    if logs != None and dropOnGround:
+        Player.HeadMessage(48, "Dropping Logs on ground")
+        Items.MoveOnGround(logs,0,Player.Position.X - 1, Player.Position.Y + 1, 0)
+    elif logs != None and cutLogsToBoards:
+        Items.UseItem(axe)
+        Target.WaitForTarget(10000, False)
+        Target.TargetExecute(logs.Serial)
+        
+    packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
+    if len(packAnimals) > 0:
+        for packAnimal in packAnimals:
+            print(packAnimal.Name, packAnimal.Backpack.Weight)
+            if packAnimal.Backpack.Weight < 1350:
+                for boardStaticID in BOARD_STATIC_IDS:
+                    move_item_to_container_by_id(boardStaticID, Player.Backpack, packAnimal.Backpack.Serial)    
         
             
 # Variation of above that will get kindling usinga knife
