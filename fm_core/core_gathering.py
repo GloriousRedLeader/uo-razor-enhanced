@@ -10,7 +10,7 @@ import sys
 # All credit to: https://github.com/hampgoodwin/razorenhancedscripts/blob/master/LumberjackingScanTile.py
 # Note I did modify this and make it much worse. Use the one linked above.
 
-Misc.Resync()
+#Misc.Resync()
 
 # Pastrami
 CHOP_DELAY = 2000
@@ -47,6 +47,12 @@ def RangeTree( spotnumber ):
     
 def ScanStatic(tileRange): 
     global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
+    
+    treeposx.Clear()
+    treeposy.Clear()
+    treeposz.Clear()
+    treegfx.Clear()
+    
     Misc.SendMessage("--> Inizio Scansione Tile", 77)
     minx = Player.Position.X - tileRange
     maxx = Player.Position.X + tileRange
