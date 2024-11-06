@@ -7,6 +7,7 @@
 # Player related functions like looking through items in backpack or equipped items.
 
 from Scripts.fm_core.core_items import INSTRUMENT_STATIC_IDS
+from Scripts.fm_core.core_mobiles import get_friends_by_names
 
 # Gets one item by item name from backpack
 def find_first_in_container_by_name(itemName, container = Player.Backpack.Serial):
@@ -195,3 +196,33 @@ def move_number_of_items_from_container():
             Player.HeadMessage(455, "Done. Moved {}/{}".format(currentNum, maxNum))
             return
         currentNum = currentNum + 1            
+
+        
+def drop_all_items_from_container_to_floor():
+    
+    source = Target.PromptTarget("Pick source container")
+    
+    #Items.UseItem(source)
+    #Misc.Pause(650)
+    
+    container = Mobiles.FindBySerial(source)
+    
+    
+
+    #for item in Items.FindBySerial(source).Contains:
+    for item in Items.FindBySerial(container.Serial).Contains:        
+        Player.HeadMessage(455, "Moving item #{}: {}".format(currentNum, item.Name))
+        Items.DropItemGroundSelf(item, item.Amount())
+        Misc.Pause(650)
+
+def drop_all_items_from_pack_animal_to_floor(packAnimalNames = []):
+    currentNum = 1        
+    packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
+    if len(packAnimals) > 0:
+        for packAnimal in packAnimals:
+            for item in Mobiles.FindBySerial( packAnimal.Serial ).Backpack.Contains:
+                Player.HeadMessage(455, "Moving item #{} {}".format(currentNum, item.Name))
+                #Items.DropItemGroundSelf(item, item.Amount)
+                Items.MoveOnGround(item, 0, Player.Position.X - 1, Player.Position.Y + 1, 0)
+                Misc.Pause(650)
+                currentNum = currentNum + 1
