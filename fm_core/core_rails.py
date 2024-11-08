@@ -15,6 +15,14 @@ import time
 
 CORE_LOOP_DELAY_MS = 650
 
+# Runs this many tiles forward according to player direction
+# Not super useful, but helps with mining script or if you just
+# want to go in a straight line.
+def move(x):
+    for _ in range(x):
+        Player.Run(Player.Direction)
+        Misc.Pause(200)
+
 # Can potentially swap implementation to use this pathfinder:
 # https://github.com/YulesRules/Ultima-Online-Razor-Enhanced-Pathfinding/blob/main/README.md
 # The timeout value is in seconds. It is a float. 

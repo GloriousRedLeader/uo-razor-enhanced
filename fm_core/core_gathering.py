@@ -1,19 +1,39 @@
-from Scripts.fm_core.core_player import find_first_in_container_by_ids, find_first_in_hands_by_id
-from Scripts.fm_core.core_player import move_all_items_from_container
-from Scripts.fm_core.core_player import move_item_to_container_by_id
-from Scripts.fm_core.core_rails import go_to_tile
-from Scripts.fm_core.core_mobiles import get_friends_by_names
-from Scripts.fm_core.core_items import AXE_STATIC_IDS, LOG_STATIC_IDS, TREE_STATIC_IDS, DAGGER_STATIC_IDS, BOARD_STATIC_IDS
+# Razor Enhanced Scripts for Ultima Online by
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2024-03-26
+# Use at your own risk. 
+
+
 from System.Collections.Generic import List
 import sys
+from System import Byte, Int32
+from Scripts.fm_core.core_player import find_first_in_container_by_ids
+from Scripts.fm_core.core_player import find_first_in_hands_by_id
+from Scripts.fm_core.core_player import move_all_items_from_container
+from Scripts.fm_core.core_player import move_item_to_container_by_id
+from Scripts.fm_core.core_player import find_in_container_by_id
+from Scripts.fm_core.core_player import find_first_in_container_by_name
+from Scripts.fm_core.core_mobiles import get_friends_by_names
+from Scripts.fm_core.core_rails import move
+from Scripts.fm_core.core_rails import go_to_tile
+from Scripts.fm_core.core_items import AXE_STATIC_IDS
+from Scripts.fm_core.core_items import LOG_STATIC_IDS
+from Scripts.fm_core.core_items import TREE_STATIC_IDS
+from Scripts.fm_core.core_items import DAGGER_STATIC_IDS
+from Scripts.fm_core.core_items import BOARD_STATIC_IDS
+from Scripts.fm_core.core_items import MINER_TOOLS_STATIC_IDS
+from Scripts.fm_core.core_items import ORE_STATIC_IDS
+from Scripts.fm_core.core_items import INGOT_STATIC_IDS
 
-# All credit to: https://github.com/hampgoodwin/razorenhancedscripts/blob/master/LumberjackingScanTile.py
-# Note I did modify this and make it much worse. Use the one linked above.
 
-#Misc.Resync()
+# Lumberjacking original author: https://github.com/hampgoodwin/razorenhancedscripts/blob/master/LumberjackingScanTile.py
+# Mining original author: https://github.com/getoldgaming/razor-enhanced-/blob/master/autoMiner.py
+# Note I did modify these and make them much worse. Use the one linked above.
 
 # Pastrami
 CHOP_DELAY = 2000
+PAUSE_DELAY_MS = 1000
 
 # Variabili Sistema
 tileinfo = List[Statics.TileInfo]
@@ -282,3 +302,70 @@ def get_kindling_in_area(tileRange = 10, weightLimit = 350):
     treenumber = 0
 
     Misc.SendMessage("All done", 123) 
+    
+def run_mining_loop(
+    # Required. Your fire beetles name.
+    forgeAnimalName = None,
+    
+    # Required. One or more blue beetle names.
+    packAnimalNames = []):
+    
+    def getMinerTool():
+        for minerToolStaticID in MINER_TOOLS_STATIC_IDS:
+            miningTool = find_in_container_by_id(minerToolStaticID, Player.Backpack)
+            if miningTool is not None:
+                return miningTool    
+
+    def smelt_ore(forgeAnimalName):
+        forgeAnimals = get_friends_by_names(friendNames = [forgeAnimalName], range = 2)
+        if len(forgeAnimals) > 0:
+            for oreId in ORE_STATIC_IDS:
+                item = find_in_container_by_id(oreId, Player.Backpack)
+                if item is not None:
+                    Items.UseItem(item)
+                    Target.WaitForTarget(5000, True)
+                    Target.TargetExecute(forgeAnimals[0])
+            Misc.Pause(PAUSE_DELAY_MS)     
+        else:
+            print("No forge animal found")
+
+
+    def move_ingots_to_pack_animal(packAnimalNames):    
+        packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
+        if len(packAnimals) > 0:
+            for packAnimal in packAnimals:
+                print(packAnimal.Name, packAnimal.Backpack.Weight)
+                if packAnimal.Backpack.Weight < 1350:
+                    for ingotStaticID in INGOT_STATIC_IDS:
+                        move_item_to_container_by_id(ingotStaticID, Player.Backpack, packAnimal.Backpack.Serial)                
+                        
+    def readJournal():
+        if Journal.Search('no metal') or Journal.Search("You can't mine there."):
+            Journal.Clear()
+            return True
+        else:
+            Journal.Clear()
+            return False
+                
+    while True:
+        smelt_ore(forgeAnimalName)
+        move_ingots_to_pack_animal(packAnimalNames)
+        
+        
+        miningTool = getMinerTool()
+        Journal.Clear()
+        Items.UseItem(miningTool)
+        Target.WaitForTarget(5000, True)
+        Target.TargetExecuteRelative(Player.Serial, 1)
+        Misc.Pause(PAUSE_DELAY_MS)
+        
+        #smelt_ore()
+        #move_ingots_to_pack_animal()
+        
+        boolMove = readJournal()
+        if boolMove:
+            move(2)
+            
+
+        Misc.Pause(PAUSE_DELAY_MS)
+        
