@@ -14,9 +14,11 @@ from Scripts.fm_core.core_player import move_all_items_from_container
 from Scripts.fm_core.core_player import move_item_to_container_by_id
 from Scripts.fm_core.core_player import find_in_container_by_id
 from Scripts.fm_core.core_player import find_first_in_container_by_name
+from Scripts.fm_core.core_player import find_all_in_container_by_id
 from Scripts.fm_core.core_mobiles import get_friends_by_names
 from Scripts.fm_core.core_rails import move
 from Scripts.fm_core.core_rails import go_to_tile
+from Scripts.fm_core.core_rails import get_tile_in_front
 from Scripts.fm_core.core_items import AXE_STATIC_IDS
 from Scripts.fm_core.core_items import LOG_STATIC_IDS
 from Scripts.fm_core.core_items import TREE_STATIC_IDS
@@ -146,17 +148,18 @@ def CutTree( spotnumber, axe, weightLimit ):
 # Too heavy. Turn to boards. Praise Be.
 def logs_to_boards(container, axe):
     global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
-    logs = find_first_item_by_id(LOG_STATIC_IDS, Player.Backpack)
-    if logs != None:
+    #logs = find_first_item_by_id(LOG_STATIC_IDS, Player.Backpack)
+    log = find_in_container_by_id(LOG_STATIC_IDS, Player.Backpack)
+    if log != None:
         Items.UseItem(axe)
         Target.WaitForTarget(4000)
         Target.WaitForTarget(10000, False)
-        Target.TargetExecute(logs.Serial)
+        Target.TargetExecute(log.Serial)
             
 # Makes a box around where player is standing and chops trees inside. The
 # size of the box is determined by tileRange.
 # You will need an axe equipped I believe.
-def chop_trees_in_area(
+def run_lumberjacking_loop(
     # Makes a square tileRange * tileRange and will search for trees inside of it. So,
     # all you have to do is place yourself near a bunch of trees and hit the hotkey that
     # runs this function.
@@ -175,39 +178,20 @@ def chop_trees_in_area(
     packAnimalNames = []
     ):
         
-    Misc.Resync()
     global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
-    
-    
-    
-    #tileinfo = List[Statics.TileInfo]
-    #treeposx = []
-    #treeposy = []
-    #treeposz = []
-    #treegfx = []
-    #treenumber = 0
-    #blockcount = 0    
-                
-#    packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
-#    if len(packAnimals) > 0:
-#        for packAnimal in packAnimals:
-#            print(packAnimal.Name, packAnimal.Backpack.Weight)
-#            if packAnimal.Backpack.Weight < 1350:
-#                for boardStaticID in BOARD_STATIC_IDS:
-#                    move_item_to_container_by_id(boardStaticID, Player.Backpack, packAnimal.Backpack.Serial)
-#    return
 
     Misc.SendMessage("--> Avvio Patramie", 77)  
     Misc.SendMessage("Eqipping Axe", 123)
     
-    originalItemsInHands = [None, None]
+#    originalItemsInHands = [None, None]
     axe = find_first_in_hands_by_id(AXE_STATIC_IDS)
-    if axe == None:
-        axe = find_first_item_by_id(AXE_STATIC_IDS, Player.Backpack)
-        if axe == None:
-            Misc.SendMessage("You dont have an axe foo", 38)
-            sys.exit()
-        originalItemsInHands = swap_weapon(axe)
+    #axe = find_in_container_by_id(AXE_STATIC_IDS, Player.Backpack)
+#    if axe == None:
+#        axe = find_first_item_by_id(AXE_STATIC_IDS, Player.Backpack)
+#        if axe == None:
+#            Misc.SendMessage("You dont have an axe foo", 38)
+#            sys.exit()
+#        originalItemsInHands = swap_weapon(axe)
 
     ScanStatic(tileRange)
     i = 0
@@ -215,6 +199,7 @@ def chop_trees_in_area(
     while i < treenumber:
         Misc.SendMessage("Moving to a tree")
         #go_to_tile(treeposx[i] - 1, treeposy[i] - 1, 88.0)
+        cut_drop_and_move_boards(axe, cutLogsToBoards, dropOnGround, packAnimalNames)
         go_to_tile(treeposx[i] - 1, treeposy[i] - 1, 5.0)
         CutTree(i, axe, weightLimit)
         cut_drop_and_move_boards(axe, cutLogsToBoards, dropOnGround, packAnimalNames)
@@ -245,29 +230,33 @@ def chop_trees_in_area(
     #treegfx = []
     #treenumber = 0
 
-    Misc.SendMessage("Re-qeuipping shitter", 123) 
+#    Misc.SendMessage("Re-qeuipping shitter", 123) 
     
-    if originalItemsInHands[0] != None:
-        Misc.Pause(1000)
-        swap_weapon(originalItemsInHands[0])
-        Misc.Pause(4000)
-        
-    if originalItemsInHands[1] != None:
-        Misc.Pause(1000)
-        swap_weapon(originalItemsInHands[1])
-        Misc.Pause(4000)
+#    if originalItemsInHands[0] != None:
+#        Misc.Pause(1000)
+#        swap_weapon(originalItemsInHands[0])
+#        Misc.Pause(4000)
+#        
+#    if originalItemsInHands[1] != None:
+#        Misc.Pause(1000)
+#        swap_weapon(originalItemsInHands[1])
+#        Misc.Pause(4000)
         
 def cut_drop_and_move_boards(axe, cutLogsToBoards = False, dropOnGround = False, packAnimalNames = []):
     global treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
-    logs = find_first_in_container_by_ids(LOG_STATIC_IDS, Player.Backpack)
-    if logs != None and dropOnGround:
-        Player.HeadMessage(48, "Dropping Logs on ground")
-        Items.MoveOnGround(logs,0,Player.Position.X - 1, Player.Position.Y + 1, 0)
-    elif logs != None and cutLogsToBoards:
-        Items.UseItem(axe)
-        Target.WaitForTarget(10000, False)
-        Target.TargetExecute(logs.Serial)
-        
+    #logs = find_first_in_container_by_ids(LOG_STATIC_IDS, Player.Backpack)
+    
+    for logStaticID in LOG_STATIC_IDS:
+        logs = find_all_in_container_by_id(logStaticID, containerSerial = Player.Backpack.Serial)
+        for log in logs:
+            if dropOnGround:
+                Player.HeadMessage(48, "Dropping Logs on ground")
+                Items.MoveOnGround(log, 0, Player.Position.X - 1, Player.Position.Y + 1, 0)
+            elif cutLogsToBoards:
+                Items.UseItem(axe)
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(log.Serial)
+                
     packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
     if len(packAnimals) > 0:
         for packAnimal in packAnimals:
@@ -275,7 +264,7 @@ def cut_drop_and_move_boards(axe, cutLogsToBoards = False, dropOnGround = False,
             if packAnimal.Backpack.Weight < 1350:
                 for boardStaticID in BOARD_STATIC_IDS:
                     move_item_to_container_by_id(boardStaticID, Player.Backpack, packAnimal.Backpack.Serial)    
-        
+            
             
 # Variation of above that will get kindling usinga knife
 def get_kindling_in_area(tileRange = 10, weightLimit = 350):
@@ -320,11 +309,14 @@ def run_mining_loop(
         forgeAnimals = get_friends_by_names(friendNames = [forgeAnimalName], range = 2)
         if len(forgeAnimals) > 0:
             for oreId in ORE_STATIC_IDS:
-                item = find_in_container_by_id(oreId, Player.Backpack)
-                if item is not None:
-                    Items.UseItem(item)
+                ores = find_all_in_container_by_id(oreId, Player.Backpack.Serial)
+                for ore in ores:
+                    #item = find_in_container_by_id(oreId, Player.Backpack)
+                    #if item is not None:
+                    Items.UseItem(ore)
                     Target.WaitForTarget(5000, True)
                     Target.TargetExecute(forgeAnimals[0])
+                    Misc.Pause(650)
             Misc.Pause(PAUSE_DELAY_MS)     
         else:
             print("No forge animal found")
@@ -340,23 +332,55 @@ def run_mining_loop(
                         move_item_to_container_by_id(ingotStaticID, Player.Backpack, packAnimal.Backpack.Serial)                
                         
     def readJournal():
-        if Journal.Search('no metal') or Journal.Search("You can't mine there."):
+        if Journal.Search('no metal'):
             Journal.Clear()
             return True
         else:
             Journal.Clear()
             return False
+            
+    # Gets the tile serial. This isnt a trivial task.
+    # Searching by cave floor tile id. Then doing an item search.
+    # The cave floor tile is apparently an item with a serial. That is
+    # how we get the serial.
+    # The tile serial is provided to Target execute. We cant just use
+    # the x,y coords because it doesnt work. It just says you cant mine there.
+    # Also cant use target relative.
+    def get_tile_in_front_serial():
+        tileX, tileY, tileZ = get_tile_in_front()
+        #tileinfo = Statics.GetStaticsLandInfo(tileX, tileY, Player.Map)
+
+        filter = Items.Filter()
+        # 0x053B is Cave floor
+        filter.Graphics = List[Int32]((0x053B))
+        filter.OnGround = True
+        filter.RangeMax = 1
+        items = Items.ApplyFilter(filter)
+        for item in items:
+            if item.Position.X == tileX and item.Position.Y == tileY:
+                return item.Serial
                 
     while True:
         smelt_ore(forgeAnimalName)
+        #Misc.Pause(250)
         move_ingots_to_pack_animal(packAnimalNames)
-        
+        #Misc.Pause(250)
         
         miningTool = getMinerTool()
         Journal.Clear()
         Items.UseItem(miningTool)
         Target.WaitForTarget(5000, True)
-        Target.TargetExecuteRelative(Player.Serial, 1)
+        #Target.TargetExecuteRelative(Player.Serial, 1)
+    #    tileX, tileY, tileZ = get_tile_in_front()
+    #    tileinfo = Statics.GetStaticsLandInfo(tileX, tileY, Player.Map)
+        #Target.TargetExecute(tileX, tileY, tileZ, tileinfo.StaticID)
+        
+        tileSerial = get_tile_in_front_serial()
+        Target.TargetExecute(tileSerial)
+        #Target.TargetExecute(tileX, tileY, tileZ)
+        #print("TILE", tileX, tileY, tileZ)
+        #print("PLAYER", Player.Position.X, Player.Position.Y, Player.Position.Z)
+        
         Misc.Pause(PAUSE_DELAY_MS)
         
         #smelt_ore()

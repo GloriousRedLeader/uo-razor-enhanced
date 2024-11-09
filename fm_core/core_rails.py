@@ -15,6 +15,49 @@ import time
 
 CORE_LOOP_DELAY_MS = 650
 
+# Lifted this from the mining script. Returns the same thing as relative
+# to player +1 based on direction. The relative function doesnt always
+# work for some reason though Target.TargetExecuteRelative(Player.Serial, 1)
+def get_tile_in_front():
+    direction = Player.Direction
+    playerX = Player.Position.X
+    playerY = Player.Position.Y
+    playerZ = Player.Position.Z
+    
+    if direction == 'Up':
+        tileX = playerX - 1
+        tileY = playerY - 1
+        tileZ = playerZ
+    elif direction == 'North':
+        tileX = playerX
+        tileY = playerY - 1
+        tileZ = playerZ
+    elif direction == 'Right':
+        tileX = playerX + 1
+        tileY = playerY - 1
+        tileZ = playerZ
+    elif direction == 'East':
+        tileX = playerX + 1
+        tileY = playerY
+        tileZ = playerZ
+    elif direction == 'Down':
+        tileX = playerX + 1
+        tileY = playerY + 1
+        tileZ = playerZ
+    elif direction == 'South':
+        tileX = playerX
+        tileY = playerY + 1
+        tileZ = playerZ
+    elif direction == 'Left':
+        tileX = playerX - 1
+        tileY = playerY + 1
+        tileZ = playerZ
+    elif direction == 'West':
+        tileX = playerX - 1
+        tileY = playerY
+        tileZ = playerZ
+    return tileX, tileY, tileZ
+
 # Runs this many tiles forward according to player direction
 # Not super useful, but helps with mining script or if you just
 # want to go in a straight line.

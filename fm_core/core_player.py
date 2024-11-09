@@ -8,6 +8,12 @@
 
 from Scripts.fm_core.core_items import INSTRUMENT_STATIC_IDS
 from Scripts.fm_core.core_mobiles import get_friends_by_names
+#from Scripts.fm_core.core_rails import get_tile_in_front
+
+# Gets a list of items by item id
+def find_all_in_container_by_id(itemID, containerSerial = Player.Backpack.Serial):
+    return Items.FindAllByID(itemID, -1, containerSerial, 1)
+    
 
 # Gets one item by item name from backpack
 def find_first_in_container_by_name(itemName, container = Player.Backpack.Serial):
@@ -53,12 +59,13 @@ def find_first_in_hands_by_id(itemIDs):
     return None    
 
 # Returns a single item based on an item id
+# Fix this trash.
 def find_in_hands_by_id(itemID): 
     leftHand = Player.GetItemOnLayer("LeftHand")
-    if leftHand != None:
+    if leftHand != None and leftHand.ItemID == itemID:
         return leftHand
     rightHand = Player.GetItemOnLayer("RightHand")
-    if rightHand != None:
+    if rightHand != None and rightHand.ItemID == itemID:
         return rightHand
     return None
     
@@ -223,6 +230,9 @@ def drop_all_items_from_pack_animal_to_floor(packAnimalNames = []):
             for item in Mobiles.FindBySerial( packAnimal.Serial ).Backpack.Contains:
                 Player.HeadMessage(455, "Moving item #{} {}".format(currentNum, item.Name))
                 #Items.DropItemGroundSelf(item, item.Amount)
+                #tileX, tileY, tileZ = get_tile_in_front()
                 Items.MoveOnGround(item, 0, Player.Position.X - 1, Player.Position.Y + 1, 0)
+                #Items.MoveOnGround(item, 0, tileX, tileY, tileZ)
+                
                 Misc.Pause(650)
                 currentNum = currentNum + 1
