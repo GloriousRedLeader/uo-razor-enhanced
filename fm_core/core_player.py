@@ -168,8 +168,7 @@ def move_all_items_of_type_to_container():
 
     item = Items.FindBySerial(itemSerial)
     if item is not None:
-        print(item.ItemID, item.Container, item.Container)
-        sourceSerial = Items.FindBySerial(item.Container)
+        sourceSerial = Items.FindBySerial(item.Container).Serial
         move_item_to_container_by_id(item.ItemID, sourceSerial, destinationSerial)
 
         
