@@ -27,7 +27,7 @@ from Scripts.fm_core.core_items import BOARD_STATIC_IDS
 from Scripts.fm_core.core_items import MINER_TOOLS_STATIC_IDS
 from Scripts.fm_core.core_items import ORE_STATIC_IDS
 from Scripts.fm_core.core_items import INGOT_STATIC_IDS
-
+from Scripts.fm_core.core_items import STONE_STATIC_IDS
 
 # Lumberjacking original author: https://github.com/hampgoodwin/razorenhancedscripts/blob/master/LumberjackingScanTile.py
 # Mining original author: https://github.com/getoldgaming/razor-enhanced-/blob/master/autoMiner.py
@@ -262,8 +262,8 @@ def cut_drop_and_move_boards(axe, cutLogsToBoards = False, dropOnGround = False,
         for packAnimal in packAnimals:
             print(packAnimal.Name, packAnimal.Backpack.Weight)
             if packAnimal.Backpack.Weight < 1350:
-                for boardStaticID in BOARD_STATIC_IDS:
-                    move_item_to_container_by_id(boardStaticID, Player.Backpack, packAnimal.Backpack.Serial)    
+                for itemStaticID in BOARD_STATIC_IDS:
+                    move_item_to_container_by_id(itemStaticID , Player.Backpack, packAnimal.Backpack.Serial)    
             
             
 # Variation of above that will get kindling usinga knife
@@ -328,8 +328,8 @@ def run_mining_loop(
             for packAnimal in packAnimals:
                 print(packAnimal.Name, packAnimal.Backpack.Weight)
                 if packAnimal.Backpack.Weight < 1350:
-                    for ingotStaticID in INGOT_STATIC_IDS:
-                        move_item_to_container_by_id(ingotStaticID, Player.Backpack, packAnimal.Backpack.Serial)                
+                    for itemStaticID in INGOT_STATIC_IDS + STONE_STATIC_IDS:
+                        move_item_to_container_by_id(itemStaticID, Player.Backpack, packAnimal.Backpack.Serial)                
                         
     def readJournal():
         if Journal.Search('no metal'):

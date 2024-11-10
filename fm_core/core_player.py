@@ -8,30 +8,33 @@
 
 from Scripts.fm_core.core_items import INSTRUMENT_STATIC_IDS
 from Scripts.fm_core.core_mobiles import get_friends_by_names
-#from Scripts.fm_core.core_rails import get_tile_in_front
 
 # Gets a list of items by item id
 def find_all_in_container_by_id(itemID, containerSerial = Player.Backpack.Serial):
     return Items.FindAllByID(itemID, -1, containerSerial, 1)
     
-
 # Gets one item by item name from backpack
-def find_first_in_container_by_name(itemName, container = Player.Backpack.Serial):
-    return Items.FindByName(itemName, -1, container, 1)
+def find_first_in_container_by_name(itemName, containerSerial = Player.Backpack.Serial):
+    return Items.FindByName(itemName, -1, containerSerial, 1)
 
 # Takes a list of itemIDs and returns the first one it finds.
-def find_first_in_container_by_ids(itemIDs, container):
+def find_first_in_container_by_ids(itemIDs, containerSerial):
     for itemID in itemIDs:
-        item = find_in_container_by_id(itemID, container)
+        item = find_in_container_by_id(itemID, containerSerial)
         if item != None:
             return item
     return None
 
 # Method liberated (CREDIT AUTHOR)
-def find_in_container_by_id(itemID, container, color = -1, ignoreContainer = []):
+# This one is pretty much called by all the other functions.
+# Finds one instance of itemID in containerSerial
+# Note that itemID can be a single itemID or a list of itemID
+def find_in_container_by_id(itemID, containerSerial = Player.Backpack.Serial, color = -1, ignoreContainer = []):
     ignoreColor = False
     if color == -1:
         ignoreColor = True
+        
+    container = Items.FindBySerial(containerSerial)
 
     if isinstance( itemID, int ):
         foundItem = next( ( item for item in container.Contains if ( item.ItemID == itemID and ( ignoreColor or item.Hue == color ) ) ), None )
@@ -43,11 +46,11 @@ def find_in_container_by_id(itemID, container, color = -1, ignoreContainer = [])
     if foundItem != None:
         return foundItem
 
-    subcontainers = [ item for item in container.Contains if ( item.IsContainer and not item.Serial in ignoreContainer ) ]
-    for subcontainer in subcontainers:
-        foundItem = find_in_container_by_id( itemID, subcontainer, color, ignoreContainer )
-        if foundItem != None:
-            return foundItem
+    #subcontainers = [ item for item in container.Contains if ( item.IsContainer and not item.Serial in ignoreContainer ) ]
+    #for subcontainer in subcontainers:
+    #    foundItem = find_in_container_by_id( itemID, subcontainer, color, ignoreContainer )
+    #    if foundItem != None:
+    #        return foundItem
 
 # checks list of itemids and returns first one that matches
 # one in either hand.
@@ -105,7 +108,7 @@ def open_bank_and_deposit_items(itemIDs = []):
     depositCount = 0
     for itemID in itemIDs:
         while True:
-            item = find_in_container_by_id(itemID, Player.Backpack)
+            item = find_in_container_by_id(itemID)
             if item == None:
                 break
             Player.HeadMessage(455, "Depositing {}".format(item.Name))
@@ -128,50 +131,68 @@ def open_bank_and_resupply(
     for itemID, amount in itemsNeeded:
         count = Items.ContainerCount(Player.Backpack, itemID, -1, True)
         print("Currenlty have {} / {} of itemID in backpack".format(count, amount))
-    #Player.HeadMessage(455, "[done] Resupplying...")
-    
-def move_item_to_container_by_id(itemID, sourceContainer, destinationContainerSerial):
+
+# Moves all items matching type of itemID from sourceSerial container
+# to destinationSerial container    
+def move_item_to_container_by_id(itemID, sourceSerial, destinationSerial):
     while True:
-        item = find_in_container_by_id(itemID, sourceContainer, color = -1, ignoreContainer = [])
+        item = find_in_container_by_id(itemID, sourceSerial, color = -1, ignoreContainer = [])
         if item is not None:
-            move_item_to_container(item, destinationContainerSerial)
+            move_item_to_container(item, destinationSerial)
         else:
             break
-    
-def move_item_to_container(item, destinationContainerSerial):
-    Items.Move(item, destinationContainerSerial, item.Amount)
+# item is an instance of Item
+# destinationSerial is container serial
+# Moves one stack of the item
+def move_item_to_container(item, destinationSerial):
+    Items.Move(item, destinationSerial, item.Amount)
     Misc.Pause(800)
     
 # Nice utility to just move junk from one bag to another.
-def move_all_items_from_container(sourceContainerSerial, destinationContainerSerial):
-    for item in Items.FindBySerial(sourceContainerSerial).Contains:
+def move_all_items_from_container(sourceSerial, destinationSerial):
+    for item in Items.FindBySerial(sourceSerial).Contains:
         Player.HeadMessage(455, "Junking item {}".format(item.Name))
-        Items.Move(item, destinationContainerSerial, item.Amount)
+        Items.Move(item, destinationSerial, item.Amount)
         Misc.Pause(800)
         
+# Prompts for an item type
+# Source is that items container
+# Destination is prompt
+# Moves all items with that ItemID
 def move_all_items_of_type_to_container():
     itemSerial = Target.PromptTarget("Which item type? Click one.")
-    #source = Target.PromptTarget("Pick source container")
     destinationSerial = Target.PromptTarget("Pick target container")
-    
-    
-    #Items.UseItem(source)
-    #Misc.Pause(650)
+
     Items.UseItem(destinationSerial)
     Misc.Pause(650)
-    
-    
-    
+
     item = Items.FindBySerial(itemSerial)
     if item is not None:
         print(item.ItemID, item.Container, item.Container)
-        sourceContainer = Items.FindBySerial(item.Container)
-        #move_item_to_container_by_id(itemID, sourceContainer, destinationContainerSerial):
-        move_item_to_container_by_id(item.ItemID, sourceContainer, destinationSerial)
-    #move_item_to_container_by_id(itemID = item.ItemID, sourceContainer = source, destinationContainerSerial = destination.Serial)   
+        sourceSerial = Items.FindBySerial(item.Container)
+        move_item_to_container_by_id(item.ItemID, sourceSerial, destinationSerial)
+
         
-def move_number_of_items_from_container():
+# Provide list of item ids.
+# Prompt for source container.
+# Prompt for destination container.
+def move_all_items_by_ids_to_container(itemIDs):
+    sourceSerial = Target.PromptTarget("Pick source container")
+    destinationSerial = Target.PromptTarget("Pick target container")
     
+    Items.UseItem(sourceSerial)
+    Misc.Pause(650)
+    Items.UseItem(destinationSerial)
+    Misc.Pause(650)
+
+    for itemID in itemIDs:
+        move_item_to_container_by_id(itemID, sourceSerial, destinationSerial)
+
+# Enter number of items to move via chat
+# Prompt for source container
+# Prompt for destination container
+# Moves that number of items from source to destination
+def move_number_of_items_from_container():
     print("How many items?")
     Journal.Clear()
     while True:
@@ -181,9 +202,7 @@ def move_number_of_items_from_container():
             break
         Misc.Pause(250)    
     
-    #Player.HeadMessage(455, "[start] Cleaing up Britain...")
     source = Target.PromptTarget("Pick source container")
-    
     destination = Target.PromptTarget("Pick target container")
     
     Items.UseItem(source)
@@ -191,37 +210,29 @@ def move_number_of_items_from_container():
     Items.UseItem(destination)
     Misc.Pause(650)
 
-    #maxNum = 50
     currentNum = 0
-    #items = Items.FindBySerial(source.Serial)
     for item in Items.FindBySerial(source).Contains:
         Player.HeadMessage(455, "Moving item #{}: {}".format(currentNum, item.Name))
         Items.Move(item, destination, item.Amount)
         Misc.Pause(650)
-        
         if currentNum >= maxNum:
             Player.HeadMessage(455, "Done. Moved {}/{}".format(currentNum, maxNum))
             return
         currentNum = currentNum + 1            
 
-        
+# Prompt for source container (must be a pack animal)
+# Drops everything on the ground. May not work.
 def drop_all_items_from_container_to_floor():
-    
     source = Target.PromptTarget("Pick source container")
-    
-    #Items.UseItem(source)
-    #Misc.Pause(650)
-    
     container = Mobiles.FindBySerial(source)
-    
-    
 
-    #for item in Items.FindBySerial(source).Contains:
     for item in Items.FindBySerial(container.Serial).Contains:        
         Player.HeadMessage(455, "Moving item #{}: {}".format(currentNum, item.Name))
         Items.DropItemGroundSelf(item, item.Amount())
         Misc.Pause(650)
 
+# Provide pack animal names as an array
+# Drops their backpack to the floor
 def drop_all_items_from_pack_animal_to_floor(packAnimalNames = []):
     currentNum = 0        
     packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
@@ -229,10 +240,6 @@ def drop_all_items_from_pack_animal_to_floor(packAnimalNames = []):
         for packAnimal in packAnimals:
             for item in Mobiles.FindBySerial( packAnimal.Serial ).Backpack.Contains:
                 Player.HeadMessage(455, "Moving item #{} {}".format(currentNum, item.Name))
-                #Items.DropItemGroundSelf(item, item.Amount)
-                #tileX, tileY, tileZ = get_tile_in_front()
                 Items.MoveOnGround(item, 0, Player.Position.X - 1, Player.Position.Y + 1, 0)
-                #Items.MoveOnGround(item, 0, tileX, tileY, tileZ)
-                
                 Misc.Pause(650)
                 currentNum = currentNum + 1

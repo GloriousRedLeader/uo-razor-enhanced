@@ -17,10 +17,13 @@ from Scripts.fm_core.core_items import MINER_TOOLS_STATIC_IDS
 # Looks for pickaxes in your backpack, sets them all to a resource type.
 
 # Choose one:
+
 # ORE
 #RESOURCE_TYPE = 1
+
 # ORE and STONE
 RESOURCE_TYPE = 2
+
 # STONE
 #RESOURCE_TYPE = 4
 
