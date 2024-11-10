@@ -35,7 +35,7 @@ from Scripts.fm_core.core_items import INGOT_STATIC_IDS
 
 # Pastrami
 CHOP_DELAY = 2000
-PAUSE_DELAY_MS = 1000
+PAUSE_DELAY_MS = 650
 
 # Variabili Sistema
 tileinfo = List[Statics.TileInfo]

@@ -223,7 +223,7 @@ def drop_all_items_from_container_to_floor():
         Misc.Pause(650)
 
 def drop_all_items_from_pack_animal_to_floor(packAnimalNames = []):
-    currentNum = 1        
+    currentNum = 0        
     packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
     if len(packAnimals) > 0:
         for packAnimal in packAnimals:
