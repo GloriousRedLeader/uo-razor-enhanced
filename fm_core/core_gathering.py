@@ -149,7 +149,7 @@ def CutTree( spotnumber, axe, weightLimit ):
 def logs_to_boards(container, axe):
     global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
     #logs = find_first_item_by_id(LOG_STATIC_IDS, Player.Backpack)
-    log = find_in_container_by_id(LOG_STATIC_IDS, Player.Backpack)
+    log = find_in_container_by_id(LOG_STATIC_IDS, Player.Backpack.Serial)
     if log != None:
         Items.UseItem(axe)
         Target.WaitForTarget(4000)
@@ -301,7 +301,7 @@ def run_mining_loop(
     
     def getMinerTool():
         for minerToolStaticID in MINER_TOOLS_STATIC_IDS:
-            miningTool = find_in_container_by_id(minerToolStaticID, Player.Backpack)
+            miningTool = find_in_container_by_id(minerToolStaticID, Player.Backpack.Serial)
             if miningTool is not None:
                 return miningTool    
 
@@ -329,7 +329,7 @@ def run_mining_loop(
                 print(packAnimal.Name, packAnimal.Backpack.Weight)
                 if packAnimal.Backpack.Weight < 1350:
                     for itemStaticID in INGOT_STATIC_IDS + STONE_STATIC_IDS:
-                        move_item_to_container_by_id(itemStaticID, Player.Backpack, packAnimal.Backpack.Serial)                
+                        move_item_to_container_by_id(itemStaticID, Player.Backpack.Serial, packAnimal.Backpack.Serial)                
                         
     def readJournal():
         if Journal.Search('no metal'):
