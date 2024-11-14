@@ -263,7 +263,7 @@ def cut_drop_and_move_boards(axe, cutLogsToBoards = False, dropOnGround = False,
             print(packAnimal.Name, packAnimal.Backpack.Weight)
             if packAnimal.Backpack.Weight < 1350:
                 for itemStaticID in BOARD_STATIC_IDS:
-                    move_item_to_container_by_id(itemStaticID , Player.Backpack, packAnimal.Backpack.Serial)    
+                    move_item_to_container_by_id(itemStaticID , Player.Backpack.Serial, packAnimal.Backpack.Serial)    
             
             
 # Variation of above that will get kindling usinga knife
@@ -311,12 +311,20 @@ def run_mining_loop(
             for oreId in ORE_STATIC_IDS:
                 ores = find_all_in_container_by_id(oreId, Player.Backpack.Serial)
                 for ore in ores:
-                    #item = find_in_container_by_id(oreId, Player.Backpack)
-                    #if item is not None:
+                    Journal.Clear()
                     Items.UseItem(ore)
                     Target.WaitForTarget(5000, True)
                     Target.TargetExecute(forgeAnimals[0])
-                    Misc.Pause(650)
+                    Misc.Pause(PAUSE_DELAY_MS)
+                    if Journal.Search("There is not enough metal-bearing ore in this pile to make an ingot."):
+                        print(ore)
+                        print(ore.Serial)
+                        #Items.DropItemGroundSelf(ore, ore.Amount)
+                        #Items.MoveOnGround(ore, 0, Player.Position.X - 1, Player.Position.Y + 1, 0)
+                        #Items.MoveOnGround(ore, 0, Player.Position.X -1 , Player.Position.Y , 0)
+                        tileX, tileY, tileZ = get_tile_in_front()
+                        Items.MoveOnGround(ore, 0, tileX, tileY , 0)
+                        Misc.Pause(PAUSE_DELAY_MS)
             Misc.Pause(PAUSE_DELAY_MS)     
         else:
             print("No forge animal found")
@@ -332,7 +340,7 @@ def run_mining_loop(
                         move_item_to_container_by_id(itemStaticID, Player.Backpack.Serial, packAnimal.Backpack.Serial)                
                         
     def readJournal():
-        if Journal.Search('no metal'):
+        if Journal.Search('no metal') or Journal.Search('t mine that'):
             Journal.Clear()
             return True
         else:
@@ -388,7 +396,7 @@ def run_mining_loop(
         
         boolMove = readJournal()
         if boolMove:
-            move(2)
+            move(1)
             
 
         Misc.Pause(PAUSE_DELAY_MS)

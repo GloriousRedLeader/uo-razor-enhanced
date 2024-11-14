@@ -12,6 +12,13 @@ from Scripts.fm_core.core_mobiles import get_friends_by_names
 # Gets a list of items by item id
 def find_all_in_container_by_id(itemID, containerSerial = Player.Backpack.Serial):
     return Items.FindAllByID(itemID, -1, containerSerial, 1)
+
+# Gets a list of items by multiple item ids
+def find_all_in_container_by_ids(itemIDs, containerSerial = Player.Backpack.Serial):
+    items = []
+    for itemID in itemIDs:
+        items = items + Items.FindAllByID(itemID, -1, containerSerial, 1)
+    return items
     
 # Gets one item by item name from backpack
 def find_first_in_container_by_name(itemName, containerSerial = Player.Backpack.Serial):
@@ -219,16 +226,17 @@ def move_number_of_items_from_container():
             return
         currentNum = currentNum + 1            
 
+# Commenting out, dont think this works or its used
 # Prompt for source container (must be a pack animal)
 # Drops everything on the ground. May not work.
-def drop_all_items_from_container_to_floor():
-    source = Target.PromptTarget("Pick source container")
-    container = Mobiles.FindBySerial(source)
-
-    for item in Items.FindBySerial(container.Serial).Contains:        
-        Player.HeadMessage(455, "Moving item #{}: {}".format(currentNum, item.Name))
-        Items.DropItemGroundSelf(item, item.Amount())
-        Misc.Pause(650)
+#def drop_all_items_from_container_to_floor():
+#    source = Target.PromptTarget("Pick source container")
+#    container = Mobiles.FindBySerial(source)
+#
+#    for item in Items.FindBySerial(container.Serial).Contains:        
+#        Player.HeadMessage(455, "Moving item #{}: {}".format(currentNum, item.Name))
+#        Items.DropItemGroundSelf(item, item.Amount())
+#        Misc.Pause(650)
 
 # Provide pack animal names as an array
 # Drops their backpack to the floor
