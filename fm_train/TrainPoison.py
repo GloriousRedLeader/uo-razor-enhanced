@@ -25,7 +25,7 @@ from Scripts.fm_core.core_items import POISON_POTION_STATIC_ID
 
 
 #POISON_KEG_SERIALS = [0x407FC64D]
-MAX_LEVEL = 40
+MAX_LEVEL = 100
 
 #def find_all_in_container_by_id(itemID, containerSerial = Player.Backpack.Serial):
 #kegs = find_all_in_container_by_id()
@@ -34,11 +34,9 @@ for keg in kegs:
     print(keg)
     
 #for kegSerial in POISON_KEG_SERIALS:
-for keg in kegs:
-    
-    weapon = Player.GetItemOnLayer('RightHand')
-    while Player.GetSkillValue("Poisoning") < MAX_LEVEL:
-
+weapon = Player.GetItemOnLayer('RightHand')
+while Player.GetSkillValue("Poisoning") < MAX_LEVEL:
+    for keg in kegs:
         poison = Items.FindByID( POISON_POTION_STATIC_ID, -1, Player.Backpack.Serial )
         if poison == None:
             Player.HeadMessage(58, "No more poisons, making one")
@@ -68,16 +66,16 @@ for keg in kegs:
             Player.EquipItem(weapon)
             Misc.Pause(1000)
             
-        Misc.Pause(2000)
-
-        Player.UseSkill("Poisoning")
-        Misc.Pause(1000)
-        Target.WaitForTarget(10000, False)
+        #Misc.Pause(2000)
 
         if poison != None:
+            Misc.Pause(1000)
+            Player.UseSkill("Poisoning")
+            Misc.Pause(1000)
+            Target.WaitForTarget(10000, False)
             Target.TargetExecute(poison)
-        Target.WaitForTarget(10000, False)
-        Target.TargetExecute(weapon)
-        Misc.Pause(8000)
+            Target.WaitForTarget(10000, False)
+            Target.TargetExecute(weapon)
+            Misc.Pause(8000)
         
 

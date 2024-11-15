@@ -1,6 +1,6 @@
 #------Vars
 
-# Note remove trap doesn't work. Use the dedicated script.
+# Note remove trap doesnt work. Use the dedicated script.
 
 #arrange these in the order that you would like to train the skill.  Remove any if you do not want to train them.
 #order = ["track", "picking","detect", "taste","camp","hide","arms","item", "removetrap"]

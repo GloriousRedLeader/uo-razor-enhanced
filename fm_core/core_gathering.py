@@ -28,6 +28,7 @@ from Scripts.fm_core.core_items import MINER_TOOLS_STATIC_IDS
 from Scripts.fm_core.core_items import ORE_STATIC_IDS
 from Scripts.fm_core.core_items import INGOT_STATIC_IDS
 from Scripts.fm_core.core_items import STONE_STATIC_IDS
+from Scripts.fm_core.core_items import SAND_STATIC_IDS
 
 # Lumberjacking original author: https://github.com/hampgoodwin/razorenhancedscripts/blob/master/LumberjackingScanTile.py
 # Mining original author: https://github.com/getoldgaming/razor-enhanced-/blob/master/autoMiner.py
@@ -336,11 +337,11 @@ def run_mining_loop(
             for packAnimal in packAnimals:
                 print(packAnimal.Name, packAnimal.Backpack.Weight)
                 if packAnimal.Backpack.Weight < 1350:
-                    for itemStaticID in INGOT_STATIC_IDS + STONE_STATIC_IDS:
+                    for itemStaticID in INGOT_STATIC_IDS + STONE_STATIC_IDS + SAND_STATIC_IDS:
                         move_item_to_container_by_id(itemStaticID, Player.Backpack.Serial, packAnimal.Backpack.Serial)                
                         
     def readJournal():
-        if Journal.Search('no metal') or Journal.Search('t mine that'):
+        if Journal.Search('no metal') or Journal.Search('t mine that') or Journal.Search('no sand'):
             Journal.Clear()
             return True
         else:
@@ -360,13 +361,15 @@ def run_mining_loop(
 
         filter = Items.Filter()
         # 0x053B is Cave floor
+        # 0x0018 is Sand
         filter.Graphics = List[Int32]((0x053B))
         filter.OnGround = True
         filter.RangeMax = 1
         items = Items.ApplyFilter(filter)
         for item in items:
             if item.Position.X == tileX and item.Position.Y == tileY:
-                return item.Serial
+                return item.Serial, tileX, tileY, tileZ 
+        return None, tileX, tileY, tileZ 
                 
     while True:
         smelt_ore(forgeAnimalName)
@@ -383,8 +386,11 @@ def run_mining_loop(
     #    tileinfo = Statics.GetStaticsLandInfo(tileX, tileY, Player.Map)
         #Target.TargetExecute(tileX, tileY, tileZ, tileinfo.StaticID)
         
-        tileSerial = get_tile_in_front_serial()
-        Target.TargetExecute(tileSerial)
+        tileSerial, tileX, tileY, tileZ  = get_tile_in_front_serial()
+        if tileSerial is not None:
+            Target.TargetExecute(tileSerial)
+        else:
+            Target.TargetExecute(tileX, tileY, tileZ)
         #Target.TargetExecute(tileX, tileY, tileZ)
         #print("TILE", tileX, tileY, tileZ)
         #print("PLAYER", Player.Position.X, Player.Position.Y, Player.Position.Z)
