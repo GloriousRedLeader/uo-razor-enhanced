@@ -65,3 +65,12 @@ KEG_STATIC_IDS = [0x1940]
 EMPTY_BOTTLE_STATIC_ID = 0x0F0E
 
 POISON_POTION_STATIC_ID = 0x0F0A
+
+
+# Corpses are technically items.    
+def get_corpses(range = 2):
+    filter = Items.Filter()
+    filter.OnGround = True
+    filter.RangeMax = range
+    filter.IsCorpse = True
+    return Items.ApplyFilter(filter)
