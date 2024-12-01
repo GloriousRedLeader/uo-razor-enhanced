@@ -6,7 +6,11 @@
 #order = ["track", "picking","detect", "taste","camp","hide","arms","item", "removetrap"]
 #order = ["picking","detect", "taste","camp","hide","arms","item"]
 #order = ["picking", "hide", "arms", "item", "taste"]
-order = ["detect", "taste","camp","hide","arms","item"]
+#order = ["detect", "taste","camp","hide","arms","item"]
+order = ["picking", "item", "track", "detect", "hide"]
+#order = ["removetrap"]
+
+# REMOVE TRAP IS BUSTED. USE DEDICATED SCRIPT.
 
 mainpack = Mobiles.FindBySerial( Player.Serial ).Backpack
 
@@ -71,6 +75,8 @@ if "track" in order:
 
 
 if "removetrap" in order:
+    print("DONT USE THIS. USE DEDICATED SCRIPT TRAINREMOVETRAP.PY")
+    sys.exit()
     #----------Remove Trap heavily stolen from Pacho of Heritage server.  All credit goes to them.
     #   Increase this to see the gump getting solved, will make the puzzle time longer
     visual_delay = 1
@@ -222,6 +228,7 @@ def remTrap():
         if not Gumps.HasGump():
             Target.Cancel()
             continue
+
         gump_data = Gumps.LastGumpRawData()
         # Count of grey points that are possible to traverse.  Used to get the board size instead of a skill level
         midpoint_count = gump_data.count("9720")

@@ -962,7 +962,7 @@ def run_mage_loop(
                 continue                
                     
             # Nukes    
-            if useDeathRay == 1 and not Player.BuffsExist("Death Ray"):
+            if useDeathRay == 1 and not Player.BuffsExist("Death Ray") and Player.BuffsExist("Arcane Empowerment"):
                 Spells.CastMastery("Death Ray")
                 Target.WaitForTarget(10000, False)
                 Target.TargetExecute(mobToAttack)
