@@ -919,8 +919,7 @@ def run_mage_loop(
             continue
             
         # Continue loop before doing harmul actions, focus on healing/curing.
-        if heal_player_and_friends(friendSelectMethod, friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
-            continue  
+        heal_player_and_friends(friendSelectMethod, friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal)
         
         # Single target spells below. Need to find a target
         mobToAttack = None
@@ -958,8 +957,7 @@ def run_mage_loop(
                 Misc.Pause(actionDelayMs)  
             
             # Continue loop before doing harmul actions, focus on healing/curing.
-            if heal_player_and_friends(friendSelectMethod, friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
-                continue                
+            heal_player_and_friends(friendSelectMethod, friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal)
                     
             # Nukes    
             if useDeathRay == 1 and not Player.BuffsExist("Death Ray") and Player.BuffsExist("Arcane Empowerment"):
@@ -980,8 +978,8 @@ def run_mage_loop(
                 Misc.Pause(actionDelayMs)
 
             # Continue loop before doing harmul actions, focus on healing/curing.
-            if heal_player_and_friends(friendSelectMethod, friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal) == True:
-                continue
+            heal_player_and_friends(friendSelectMethod, friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal)
+                
 
             # Curses (this is weird, but use word of death instead of curses if you can)
             if useWordOfDeath == 1 and mobToAttack is not None and mobToAttack.Hits is not None and mobToAttack.Hits > 0 and mobToAttack.HitsMax is not None and mobToAttack.HitsMax > 0 and mobToAttack.Hits / mobToAttack.HitsMax < 0.30:
@@ -1039,7 +1037,7 @@ def run_mage_loop(
 # if life is below threshold. Returns true if a heal / cure was attempted.
 # This is so the calling function can decide whether to call this again before
 # doing other stuff like continuing to attack.
-def heal_player_and_friends(
+def heal_player_and_friends2(
 
     # 0 = Heal only names in friendNames, 1 = heal any blue in range
     friendSelectMethod = 0,
@@ -1119,3 +1117,87 @@ def heal_player_and_friends(
                 didSomeHealing = True
 
     return didSomeHealing
+    
+# An internal function but it can be used as a main heal loop if desired.  
+# casts cure on player and pet, also heals with greater heal
+# if life is below threshold. Returns true if a heal / cure was attempted.
+# This is so the calling function can decide whether to call this again before
+# doing other stuff like continuing to attack.
+def heal_player_and_friends(
+
+    # 0 = Heal only names in friendNames, 1 = heal any blue in range
+    friendSelectMethod = 0,
+    
+    # Pets, friends, etc. These are names (string).
+    friendNames = [],
+    
+    # If friends and pets are farther than this, dont bother with this.
+    range = 8,
+
+    # Buffer in MS between heal actions, otherwise we get "You have not yet recovered"
+    actionDelayMs = 1000,
+
+    # Only heal when pet/player life is below this threshold
+    healThreshold = 0.7, 
+    
+    # Whether to cure yourself or your pet
+    useCure = 0,
+    
+    # Whether to heal yourself or your pet
+    useGreaterHeal = 0
+   
+   # Provide name of player or pet to use gift of renewal.
+   # This is a tricky one. Will attempt to 
+   #giftOfRenwalTarget = None 
+):
+    didSomeHealing = False
+    
+    if useCure == 0 and useGreaterHeal == 0:
+        return False
+
+    while True:
+        
+        # Player is priority
+        while (useCure == 1 and Player.Poisoned) or (useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits):
+            if useCure == 1 and Player.Poisoned:
+                Spells.CastMagery("Arch Cure")
+                Target.WaitForTarget(3000, False)
+                Target.Self()
+                Misc.Pause(actionDelayMs)
+            elif useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
+                Spells.CastMagery("Greater Heal")
+                Target.WaitForTarget(3000, False)
+                Target.Self()
+                Misc.Pause(actionDelayMs)
+            else:
+                break
+                
+        # Now get one friend with lowest life
+        if friendSelectMethod == 0: 
+            friendMobiles = get_friends_by_names(friendNames, range)
+        elif friendSelectMethod == 1:
+            friendMobiles = get_blues_in_range(range)
+            
+        def sort_friends(x, y):
+            return x.Hits / x.HitsMax > y.Hits / y.HitsMax 
+            
+        if len(friendMobiles) > 0:
+            friendMobiles.Sort(sort_friends)
+            friendMobile = friendMobiles[0]
+            #print("Blue Name {}".format(friendMobile.Name))
+            
+            if not (useCure == 1 and friendMobile.Poisoned) and not (useGreaterHeal == 1 and not friendMobile.Poisoned and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits and friendMobile.Hits > 0):
+                break
+            
+            if useCure == 1 and friendMobile.Poisoned:
+                Spells.CastMagery("Arch Cure")
+                Target.WaitForTarget(3000, False)
+                Target.TargetExecute(friendMobile)
+                Misc.Pause(actionDelayMs)        
+            elif useGreaterHeal == 1 and not friendMobile.Poisoned and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits and friendMobile.Hits > 0:
+                Spells.CastMagery("Greater Heal")
+                Target.WaitForTarget(3000, False)
+                Target.TargetExecute(friendMobile)
+                Misc.Pause(actionDelayMs)        
+
+    return False
