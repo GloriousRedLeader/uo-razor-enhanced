@@ -29,6 +29,21 @@ while True:
                 Items.UseItem(snowman.Serial)
                 Timer.Create( 'journalAlertPingTimer', 1 )
                 Misc.Pause(100)
+        else:
+            filter = Items.Filter()
+            #filter.Graphics = List[Int32]((0x053B))
+            filter.Movable = 1
+            filter.OnGround = True
+            filter.RangeMax = 2
+            filter.Name = "Pile of Snowballs"
+            items = Items.ApplyFilter(filter)
+            if len(items) > 0:
+                Timer.Create( 'journalAlertPingTimer', 1 )
+                Items.Move(items[0], Player.Backpack.Serial, items[0].Amount)
+                Misc.Pause(200)
+                    
+                
+                
                 
     snowballs = Items.FindAllByID(SNOWBALL_ID, -1, Player.Backpack.Serial, 1)
     if len(snowballs) > 0:
@@ -48,6 +63,6 @@ while True:
             Target.WaitForTarget(1000, True)
             Target.TargetExecute(mob)
             Timer.Create( 'journalAlertPingTimer', 1 )
-            Misc.Pause(100)
+            Misc.Pause(250)
             
     Misc.Pause(100)
