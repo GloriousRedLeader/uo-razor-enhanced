@@ -25,24 +25,21 @@ while True:
     if len(snowballs) < 10:
         snowman = Items.FindBySerial(SNOWMAN_SERIAL)
         if snowman is not None:
-            if Player.DistanceTo(snowman) < 8:
+            if Player.DistanceTo(snowman) < 15:
                 Items.UseItem(snowman.Serial)
                 Timer.Create( 'journalAlertPingTimer', 1 )
                 Misc.Pause(100)
-        # Uncomment if you want to pick snowballs off the ground.
-        # I find this meh because you tpically need about 10 to kill something.
-        #else:
-        #    filter = Items.Filter()
-        #    #filter.Graphics = List[Int32]((0x053B))
-        #    filter.Movable = 1
-        #    filter.OnGround = True
-        #    filter.RangeMax = 2
-        #    filter.Name = "Pile of Snowballs"
-        #    items = Items.ApplyFilter(filter)
-        #    if len(items) > 0:
-        #        Timer.Create( 'journalAlertPingTimer', 1 )
-        #        Items.Move(items[0], Player.Backpack.Serial, items[0].Amount)
-        #        Misc.Pause(200)
+        
+    filter = Items.Filter()
+    filter.Movable = 1
+    filter.OnGround = True
+    filter.RangeMax = 2
+    filter.Name = "Pile of Snowballs"
+    items = Items.ApplyFilter(filter)
+    if len(items) > 0:
+        Timer.Create( 'journalAlertPingTimer', 1 )
+        Items.Move(items[0], Player.Backpack.Serial, items[0].Amount)
+        Misc.Pause(200)
                 
     snowballs = Items.FindAllByID(SNOWBALL_ID, -1, Player.Backpack.Serial, 1)
     if len(snowballs) > 0:
