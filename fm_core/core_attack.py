@@ -1146,10 +1146,10 @@ def heal_player_and_friends(
     # Whether to heal yourself or your pet
     useGreaterHeal = 0,
     
-    # Paladin spell for healing
+    # Paladin spell for healing, only works on self.
     useCloseWounds = 0,
     
-    # Paladin spell for curing poisons
+    # Paladin spell for curing poisons, only works on self.
     useCleanseByFire = 0
    
    # Provide name of player or pet to use gift of renewal.
@@ -1158,13 +1158,13 @@ def heal_player_and_friends(
 ):
     didSomeHealing = False
     
-    if useCure == 0 and useGreaterHeal == 0:
+    if useCure == 0 and useGreaterHeal == 0 and useCloseWounds == 0 and useCleanseByFire == 0:
         return False
 
     while True:
         
         # Player is priority
-        while (useCure == 1 and Player.Poisoned) or (useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits):
+        while ((useCure == 1 or useCleanseByFire == 1) and Player.Poisoned) or ((useGreaterHeal == 1 or useCloseWounds == 1) and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits):
             if useCure == 1 and Player.Poisoned:
                 Spells.CastMagery("Arch Cure")
                 Target.WaitForTarget(3000, False)

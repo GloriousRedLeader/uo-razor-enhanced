@@ -39,7 +39,7 @@ if "picking" in order:
 
         
 longPause = 10500
-shortPause = 1200
+shortPause = 2500
 
 
 #----------
