@@ -1144,7 +1144,13 @@ def heal_player_and_friends(
     useCure = 0,
     
     # Whether to heal yourself or your pet
-    useGreaterHeal = 0
+    useGreaterHeal = 0,
+    
+    # Paladin spell for healing
+    useCloseWounds = 0,
+    
+    # Paladin spell for curing poisons
+    useCleanseByFire = 0
    
    # Provide name of player or pet to use gift of renewal.
    # This is a tricky one. Will attempt to 
@@ -1164,11 +1170,21 @@ def heal_player_and_friends(
                 Target.WaitForTarget(3000, False)
                 Target.Self()
                 Misc.Pause(actionDelayMs)
+            if useCleanseByFire == 1 and Player.Poisoned:
+                Spells.CastChivalry("Cleanse by Fire")
+                Target.WaitForTarget(3000, False)
+                Target.Self()
+                Misc.Pause(actionDelayMs)                
             elif useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
                 Spells.CastMagery("Greater Heal")
                 Target.WaitForTarget(3000, False)
                 Target.Self()
                 Misc.Pause(actionDelayMs)
+            elif useCloseWounds == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
+                Spells.CastChivalry("Close Wounds")
+                Target.WaitForTarget(3000, False)
+                Target.Self()
+                Misc.Pause(actionDelayMs)                
             else:
                 break
                 

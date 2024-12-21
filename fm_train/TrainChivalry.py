@@ -4,10 +4,16 @@
 
 Misc.SendMessage("Training Chiv")
 
-while Player.GetRealSkillValue("Chivalry") < 100:
+while Player.GetRealSkillValue("Chivalry") < Player.GetSkillCap('Chivalry'):
     skillValue = Player.GetRealSkillValue("Chivalry")
     
-    if skillValue < 90:
+    if skillValue < 45:
+        Spells.CastChivalry("Consecrate Weapon")
+    elif skillValue < 60:
+        Spells.CastChivalry("Divine Fury")
+    elif skillValue < 70:
+        Spells.CastChivalry("Enemy of One")
+    elif skillValue < 90:
         Spells.CastChivalry("Holy Light")
     elif skillValue < 100:
         Spells.CastChivalry("Nobile Sacrifice")
@@ -15,6 +21,5 @@ while Player.GetRealSkillValue("Chivalry") < 100:
         break
         
     Misc.Pause(2000)
-    Player.HeadMessage(888, "Your skill is {}".format(skillValue))        
 
 Misc.SendMessage("Done training")

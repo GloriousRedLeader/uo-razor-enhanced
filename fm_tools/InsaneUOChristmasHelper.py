@@ -9,6 +9,7 @@ from System import Byte, Int32
 
 # InsaneUO Christmas Helper
 
+STOCKING_ID = 0x2BDC
 SNOWMAN_SERIAL = 0x401706EE
 SNOWBALL_ID = 0x0913
 HOW_OFTEN_TO_PING_MS = 3000
@@ -16,6 +17,20 @@ HOW_OFTEN_TO_PING_MS = 3000
 Timer.Create( 'journalAlertPingTimer', 1 )
 
 while True:
+    
+    # Stockings
+    items = Items.FindAllByID(STOCKING_ID,-1, -1, 10, False)
+    for item in items:
+        Journal.Clear()
+        Misc.WaitForContext(item.Serial, 10000)
+        Misc.ContextReply(item.Serial, 0)
+        Misc.Pause(750)    
+        if Journal.Search("minutes before you can use this item"):  
+            pass
+        else:
+            Player.HeadMessage(28, "Stocking used")
+    
+    # Snowballs
     snowballs = Items.FindAllByID(SNOWBALL_ID, -1, Player.Backpack.Serial, 1)
     
     if Timer.Check( 'journalAlertPingTimer' ) == False:
