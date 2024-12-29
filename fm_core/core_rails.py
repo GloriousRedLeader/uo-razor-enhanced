@@ -18,42 +18,42 @@ CORE_LOOP_DELAY_MS = 650
 # Lifted this from the mining script. Returns the same thing as relative
 # to player +1 based on direction. The relative function doesnt always
 # work for some reason though Target.TargetExecuteRelative(Player.Serial, 1)
-def get_tile_in_front():
+def get_tile_in_front(distance = 1):
     direction = Player.Direction
     playerX = Player.Position.X
     playerY = Player.Position.Y
     playerZ = Player.Position.Z
     
     if direction == 'Up':
-        tileX = playerX - 1
-        tileY = playerY - 1
+        tileX = playerX - distance
+        tileY = playerY - distance
         tileZ = playerZ
     elif direction == 'North':
         tileX = playerX
-        tileY = playerY - 1
+        tileY = playerY - distance
         tileZ = playerZ
     elif direction == 'Right':
-        tileX = playerX + 1
-        tileY = playerY - 1
+        tileX = playerX + distance
+        tileY = playerY - distance
         tileZ = playerZ
     elif direction == 'East':
-        tileX = playerX + 1
+        tileX = playerX + distance
         tileY = playerY
         tileZ = playerZ
     elif direction == 'Down':
-        tileX = playerX + 1
-        tileY = playerY + 1
+        tileX = playerX + distance
+        tileY = playerY + distance
         tileZ = playerZ
     elif direction == 'South':
         tileX = playerX
-        tileY = playerY + 1
+        tileY = playerY + distance
         tileZ = playerZ
     elif direction == 'Left':
-        tileX = playerX - 1
-        tileY = playerY + 1
+        tileX = playerX - distance
+        tileY = playerY + distance
         tileZ = playerZ
     elif direction == 'West':
-        tileX = playerX - 1
+        tileX = playerX - distance
         tileY = playerY
         tileZ = playerZ
     return tileX, tileY, tileZ

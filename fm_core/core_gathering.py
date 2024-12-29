@@ -407,3 +407,66 @@ def run_mining_loop(
 
         Misc.Pause(PAUSE_DELAY_MS)
         
+# Auto fishes in all the lands. Works on a boat. Works on a dock.
+# If you are on a boat, you can use the moveTiles param to move boat
+# this many tiles forward after each fish attempt.
+def run_fishing_loop(
+    # How many tiles in front of character to fish
+    fishRange = 3, 
+    
+    # If on a boat, tells the tiller to move forward this many times.
+    moveTiles = 2, 
+    
+    # How long to pause between casts
+    fishDelayMs = 10000):
+        
+    rightHand = Player.GetItemOnLayer("RightHand")
+    if rightHand == None:
+        print("Need a fishing pole")
+        return False
+        
+    while True:
+        Target.Cancel()
+        Items.UseItem(rightHand)
+        Target.WaitForTarget(2000, False)
+        x, y, z = get_tile_in_front(fishRange)
+        
+        # The people who made this game made some questionable decisions.
+        # If we are in britain, the water tile is the land tile.
+        # If we are in tokumo, the water tile is a static tile on top of land tile.
+        # So, we will look for something with the "Wet" flag and go from there.
+        fished = False
+        
+        print("------------- TILE INFO -----------------")
+        tileInfoList = Statics.GetStaticsTileInfo(x, y, Player.Map)
+        print("TileInfo Len = {}".format(len(tileInfoList)))
+        if len(tileInfoList) > 0:
+            for tileInfo in tileInfoList:
+                print("TileInfo 1 StaticID = {}, StaticZ = {}".format(tileInfo.StaticID, tileInfo.StaticZ))
+                val = Statics.GetTileFlag(tileInfo.StaticID,"Wet")
+                print("Is Wet = {}".format(val))
+                if Statics.GetTileFlag(tileInfo.StaticID,"Wet") == True:
+                    print("TargetExecute(x = {}, y = {}, staticZ = {}, staticId = {})".format(x, y, tileInfo.StaticZ, tileInfo.StaticID))
+                    Target.TargetExecute(x, y, tileInfo.StaticZ, tileInfo.StaticID)
+                    fished = True
+                    Misc.Pause(fishDelayMs)
+                    break
+
+        if not fished:
+            print("------------- LAND INFO -----------------")                    
+            landInfo = Statics.GetStaticsLandInfo(x,y,Player.Map)
+            if landInfo is not None:
+                print("LandInfo StaticID = {}, StaticZ = {}".format(landInfo.StaticID, landInfo.StaticZ))
+                val = Statics.GetLandFlag(landInfo.StaticID,"Wet")
+                print("Is Wet = {}".format(val))     
+                if Statics.GetLandFlag(landInfo.StaticID,"Wet"):
+                    print("TargetExecute(x = {}, y = {}, staticZ = {})".format(x, y, landInfo.StaticZ))
+                    Target.TargetExecute(x, y, landInfo.StaticZ)
+                    Misc.Pause(fishDelayMs)
+                    fished = True
+                else:
+                    print("This tile is not wet")
+
+        for i in range(0, moveTiles):
+            Player.ChatSay("forward one")
+            Misc.Pause(500)

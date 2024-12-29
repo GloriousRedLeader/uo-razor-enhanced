@@ -23,7 +23,10 @@ STRINGS_TO_LOOK_FOR = [
     "You sense a dark presence",
     "a putrid steed",
     "a venom steed",
-    "Harvey"
+    "an inferno steed",
+    "a blazing steed",
+    "Ardon"
+ 
 ]
 
 Timer.Create( 'journalAlertPingTimer', 1 )
