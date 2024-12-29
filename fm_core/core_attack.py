@@ -1195,6 +1195,10 @@ def heal_player_and_friends(
             friendMobiles = get_blues_in_range(range)
             
         def sort_friends(x, y):
+            if x is None or y is None:
+                return False
+            if x.HitsMax is None or x.HitsMax == 0 or y.HitsMax is None or y.HitsMax == 0:
+                return False
             return x.Hits / x.HitsMax > y.Hits / y.HitsMax 
             
         if len(friendMobiles) > 0:
