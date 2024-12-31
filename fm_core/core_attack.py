@@ -65,6 +65,14 @@ def run_dex_loop(
     # more frequently. This is the default value. 
     specialAbilityDelayMs = 1000,
     
+    # The warrior mastery. Gives a resist debuff according to weapon type.
+    # Looks like it lasts about 7 seconds at least in pvp. The debuff said
+    # "-10% physical resist" when I used my physical damage sword.
+    useOnslaught = 0,
+    
+    # May need to adjust. Cant tell if this is higher in pvm.
+    onslaughtDelayMs = 8000,
+    
     # Whether to use a bard ability.  When set this will search for
     # a random instrument in your pack and use that. No guarantees.
     # 0 = No ability
@@ -139,11 +147,13 @@ def run_dex_loop(
     journalEntryDelayMilliseconds = 200
     actionDelayMs = 650
     lastHonoredSerial = None
+    onslaughtActive = False
 
     # Initial timer creation, not super important.
 
     Timer.Create( 'dexPingTimer', 1 )
     Timer.Create( 'dexSpecialAbilityDelayTimer', 1000 )
+    Timer.Create( 'dexOnslaughtTimer', 1 )
     Timer.Create( 'dexBardTimer', 1 )
     Timer.Create( 'dexConsecrateWeaponTimer', 2000 )
     Timer.Create( 'dexDivineFuryTimer', 3000 )
@@ -197,7 +207,24 @@ def run_dex_loop(
             Spells.CastBushido("Counter Attack", True)
             Misc.Pause(actionDelayMs)
             
-        if Timer.Check( 'dexSpecialAbilityDelayTimer' ) == False:
+            
+        
+        if onslaughtActive == True:
+            if Journal.Search("You deliver an onslaught of sword strikes"):
+                onslaughtActive = False
+                
+            
+        # Weapon abilities, only one allowed at a time.
+        if onslaughtActive == False and useOnslaught == 1 and Timer.Check( 'dexOnslaughtTimer' ) == False:
+            Journal.Clear()
+            print(Player.BuffsExist("Onslaught"))
+            Spells.CastMastery("Onslaught")
+            Misc.Pause(100)
+            if Journal.Search("You ready an onslaught"):
+                onslaughtActive = True
+                Timer.Create( 'dexOnslaughtTimer', onslaughtDelayMs )   
+                
+        elif onslaughtActive == False and Timer.Check( 'dexSpecialAbilityDelayTimer' ) == False:
             if specialAbilityType == 1:
                 if not Player.HasPrimarySpecial:
                     Player.WeaponPrimarySA()
