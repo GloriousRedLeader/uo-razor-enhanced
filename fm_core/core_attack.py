@@ -8,6 +8,7 @@ from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
 from Scripts.fm_core.core_mobiles import get_friends_by_names
 from Scripts.fm_core.core_mobiles import get_blues_in_range
 from Scripts.fm_core.core_player import find_instrument
+from Scripts.fm_core.core_player import use_bag_of_sending
 from Scripts.fm_core.core_spells import cast_until_works
 import sys
 
@@ -144,6 +145,9 @@ def run_dex_loop(
     # how many tiles to look for enemies and attack them
     attackRange = 6,
     
+    # Hit true to enable auto dumps of gold to bank. Threshold is 50k. Default disabled.
+    useBagOfSending = False,
+    
     # This will stop character from auto attacking if disabled.
     # Adding this while I level my vet skill so I dont kill things
     # too quickly.
@@ -156,6 +160,7 @@ def run_dex_loop(
     actionDelayMs = 250
     lastHonoredSerial = None
     onslaughtActive = False
+    minGold = 50000
 
     # Initial timer creation, not super important.
 
@@ -184,6 +189,9 @@ def run_dex_loop(
         if Timer.Check( 'dexPingTimer' ) == False:
             Player.HeadMessage( 78, "{} Running...".format(loopName) )
             Timer.Create( 'dexPingTimer', 3000 )
+            
+        if useBagOfSending == True and Player.Gold >= minGold:
+            use_bag_of_sending(minGold)
 
         if not Player.Visible:
             Misc.Pause(500)

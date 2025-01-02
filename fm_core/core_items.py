@@ -4,6 +4,8 @@
 #   2024-03-26
 # Use at your own risk. 
 
+GOLD_STATIC_IDS = [0x0EED]
+
 DEADLY_POISON_POT_IDS = [0x0F0A]
 
 DAGGER_STATIC_IDS = [0x0F52]
@@ -67,6 +69,22 @@ EMPTY_BOTTLE_STATIC_ID = 0x0F0E
 POISON_POTION_STATIC_ID = 0x0F0A
 
 WRAITH_FORM_SCROLL_ID = 0x226F
+
+FISH_STATIC_IDS = [
+    0x4303, # Bonito
+    0x4306, # Cape cod
+    0x4307, # Red grouper, Shad, gray snapper, red drum, sunfish, redbelly beam, pumpkinseed sunfish
+    
+    0x09CC, # Bluefish, Haddock, brook trout
+    0x09CD, 
+    0x09CE, # Black seabass
+    0x09CF, # Fish
+    
+    0x44C3, # Torpon, bonefish
+    0x44C4, # Yellowfin tuna, pike
+    0x44C5, # Captain snook
+    0x44C6, # Mahi-mahi
+]
 
 # Corpses are technically items.    
 def get_corpses(range = 2):

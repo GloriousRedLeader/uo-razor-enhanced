@@ -7,6 +7,7 @@
 # Player related functions like looking through items in backpack or equipped items.
 
 from Scripts.fm_core.core_items import INSTRUMENT_STATIC_IDS
+from Scripts.fm_core.core_items import GOLD_STATIC_IDS
 from Scripts.fm_core.core_mobiles import get_friends_by_names
 
 # Gets a list of items by item id
@@ -25,7 +26,7 @@ def find_first_in_container_by_name(itemName, containerSerial = Player.Backpack.
     return Items.FindByName(itemName, -1, containerSerial, 1)
 
 # Takes a list of itemIDs and returns the first one it finds.
-def find_first_in_container_by_ids(itemIDs, containerSerial):
+def find_first_in_container_by_ids(itemIDs, containerSerial = Player.Backpack.Serial):
     for itemID in itemIDs:
         item = find_in_container_by_id(itemID, containerSerial)
         if item != None:
@@ -250,3 +251,18 @@ def drop_all_items_from_pack_animal_to_floor(packAnimalNames = []):
                 Items.MoveOnGround(item, 0, Player.Position.X - 1, Player.Position.Y + 1, 0)
                 Misc.Pause(650)
                 currentNum = currentNum + 1
+                
+def use_bag_of_sending(
+    # Threshold for a single gold stack before sending
+    minGold = 50000):
+
+    bag = find_first_in_container_by_name("a bag of sending", containerSerial = Player.Backpack.Serial)
+    if bag is not None:
+        goldPiles = find_all_in_container_by_ids(GOLD_STATIC_IDS)
+        for goldPile in goldPiles:
+            if goldPile.Amount >= minGold:
+                Items.UseItem(bag)
+                Target.WaitForTarget(1000, False)
+                Target.TargetExecute(goldPile)
+    else:
+        print("No bag of sending found!")

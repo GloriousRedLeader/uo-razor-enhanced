@@ -15,6 +15,7 @@ from Scripts.fm_core.core_player import move_item_to_container_by_id
 from Scripts.fm_core.core_player import find_in_container_by_id
 from Scripts.fm_core.core_player import find_first_in_container_by_name
 from Scripts.fm_core.core_player import find_all_in_container_by_id
+from Scripts.fm_core.core_player import find_all_in_container_by_ids
 from Scripts.fm_core.core_mobiles import get_friends_by_names
 from Scripts.fm_core.core_rails import move
 from Scripts.fm_core.core_rails import go_to_tile
@@ -29,6 +30,7 @@ from Scripts.fm_core.core_items import ORE_STATIC_IDS
 from Scripts.fm_core.core_items import INGOT_STATIC_IDS
 from Scripts.fm_core.core_items import STONE_STATIC_IDS
 from Scripts.fm_core.core_items import SAND_STATIC_IDS
+from Scripts.fm_core.core_items import FISH_STATIC_IDS
 
 # Lumberjacking original author: https://github.com/hampgoodwin/razorenhancedscripts/blob/master/LumberjackingScanTile.py
 # Mining original author: https://github.com/getoldgaming/razor-enhanced-/blob/master/autoMiner.py
@@ -418,7 +420,13 @@ def run_fishing_loop(
     moveTiles = 2, 
     
     # How long to pause between casts
-    fishDelayMs = 10000):
+    fishDelayMs = 10000,
+    
+    # If enabled, searches for dagger in backpack and cuts fish into meat. Useful because fish are heavy.
+    cutFish = False,
+    
+    # If cutFish is enabled, this is the exclude list for fish monger quest. Case insensitive.
+    fishToKeep = None):
         
     rightHand = Player.GetItemOnLayer("RightHand")
     if rightHand == None:
@@ -426,6 +434,24 @@ def run_fishing_loop(
         return False
         
     while True:
+        
+        # Cut fish they are heavy
+        if cutFish == True:
+            dagger = find_first_in_container_by_ids(DAGGER_STATIC_IDS)
+            if dagger is not None:
+                fishies = find_all_in_container_by_ids(FISH_STATIC_IDS)
+                for fish in fishies:
+                    print("Cutting fish {} item id {}".format(fish.Name, fish.ItemID))
+                    if fishToKeep is not None and fish.Name.lower() == fishToKeep.lower():
+                        Player.HeadMessage(28, "Keeping fish {} item id {}".format(fish.Name, fish.ItemID))
+                        continue
+                    Items.UseItem(dagger)
+                    Target.WaitForTarget(1000, False)
+                    Target.TargetExecute(fish)
+            else:
+                print("You have elected to cut fish however no dagger was found in backpack.")
+                return
+                
         Target.Cancel()
         Items.UseItem(rightHand)
         Target.WaitForTarget(2000, False)
@@ -437,14 +463,14 @@ def run_fishing_loop(
         # So, we will look for something with the "Wet" flag and go from there.
         fished = False
         
-        print("------------- TILE INFO -----------------")
+        #print("------------- TILE INFO -----------------")
         tileInfoList = Statics.GetStaticsTileInfo(x, y, Player.Map)
-        print("TileInfo Len = {}".format(len(tileInfoList)))
+        #print("TileInfo Len = {}".format(len(tileInfoList)))
         if len(tileInfoList) > 0:
             for tileInfo in tileInfoList:
-                print("TileInfo 1 StaticID = {}, StaticZ = {}".format(tileInfo.StaticID, tileInfo.StaticZ))
+                #print("TileInfo 1 StaticID = {}, StaticZ = {}".format(tileInfo.StaticID, tileInfo.StaticZ))
                 val = Statics.GetTileFlag(tileInfo.StaticID,"Wet")
-                print("Is Wet = {}".format(val))
+                #print("Is Wet = {}".format(val))
                 if Statics.GetTileFlag(tileInfo.StaticID,"Wet") == True:
                     print("TargetExecute(x = {}, y = {}, staticZ = {}, staticId = {})".format(x, y, tileInfo.StaticZ, tileInfo.StaticID))
                     Target.TargetExecute(x, y, tileInfo.StaticZ, tileInfo.StaticID)
@@ -453,14 +479,14 @@ def run_fishing_loop(
                     break
 
         if not fished:
-            print("------------- LAND INFO -----------------")                    
+            #print("------------- LAND INFO -----------------")                    
             landInfo = Statics.GetStaticsLandInfo(x,y,Player.Map)
             if landInfo is not None:
-                print("LandInfo StaticID = {}, StaticZ = {}".format(landInfo.StaticID, landInfo.StaticZ))
+                #print("LandInfo StaticID = {}, StaticZ = {}".format(landInfo.StaticID, landInfo.StaticZ))
                 val = Statics.GetLandFlag(landInfo.StaticID,"Wet")
-                print("Is Wet = {}".format(val))     
+                #print("Is Wet = {}".format(val))     
                 if Statics.GetLandFlag(landInfo.StaticID,"Wet"):
-                    print("TargetExecute(x = {}, y = {}, staticZ = {})".format(x, y, landInfo.StaticZ))
+                    #print("TargetExecute(x = {}, y = {}, staticZ = {})".format(x, y, landInfo.StaticZ))
                     Target.TargetExecute(x, y, landInfo.StaticZ)
                     Misc.Pause(fishDelayMs)
                     fished = True
