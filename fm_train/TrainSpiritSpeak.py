@@ -8,4 +8,4 @@ while not Player.IsGhost and Player.GetSkillValue('Spirit Speak') < 120:
     #Misc.Pause(3000)
     
     Spells.CastNecro('Vampiric Embrace')
-    Misc.Pause(6000) 
+    Misc.Pause(3500) 

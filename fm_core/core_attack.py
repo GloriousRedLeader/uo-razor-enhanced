@@ -65,6 +65,10 @@ def run_dex_loop(
     # more frequently. This is the default value. 
     specialAbilityDelayMs = 1000,
     
+    # This causes insane damage when combined with weapon specials.
+    # Buff lasts for only a few seconds but at least there is a buff.
+    useShieldBash = 0,
+    
     # The warrior mastery. Gives a resist debuff according to weapon type.
     # Looks like it lasts about 7 seconds at least in pvp. The debuff said
     # "-10% physical resist" when I used my physical damage sword.
@@ -90,6 +94,9 @@ def run_dex_loop(
 
     # Delay in miliseconds before recasting consecrate weapon. This is the default value.
     consecrateWeaponDelayMs = 10000,
+    
+    # Necro spell. Uses buff for recast tracking.
+    useCurseWeapon = 0,
 
     # Flag with a value of 1 means to periodically cast divine fury, otherwise it is
     # disabled. This is the default value.
@@ -145,7 +152,8 @@ def run_dex_loop(
     # These are fairly static controls. Adjust as needed based on latency.
 
     journalEntryDelayMilliseconds = 200
-    actionDelayMs = 650
+    #actionDelayMs = 650
+    actionDelayMs = 250
     lastHonoredSerial = None
     onslaughtActive = False
 
@@ -193,6 +201,9 @@ def run_dex_loop(
             cast_until_works(lambda: Spells.CastNinjitsu("Mirror Image"))
             Timer.Create( 'dexMirrorImageTimer', mirrorImageDelayMs )
             Misc.Pause(actionDelayMs)
+        elif useCurseWeapon == 1 and not Player.BuffsExist("Curse Weapon"):
+            cast_until_works(lambda: Spells.CastNecro("Curse Weapon"))
+            Misc.Pause(actionDelayMs)            
             
         if bushidoStance == 1 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
             cast_until_works(lambda: Spells.CastBushido("Confidence", True))
@@ -207,17 +218,13 @@ def run_dex_loop(
             Spells.CastBushido("Counter Attack", True)
             Misc.Pause(actionDelayMs)
             
-            
-        
         if onslaughtActive == True:
             if Journal.Search("You deliver an onslaught of sword strikes"):
                 onslaughtActive = False
                 
-            
         # Weapon abilities, only one allowed at a time.
         if onslaughtActive == False and useOnslaught == 1 and Timer.Check( 'dexOnslaughtTimer' ) == False:
             Journal.Clear()
-            print(Player.BuffsExist("Onslaught"))
             Spells.CastMastery("Onslaught")
             Misc.Pause(100)
             if Journal.Search("You ready an onslaught"):
@@ -225,28 +232,29 @@ def run_dex_loop(
                 Timer.Create( 'dexOnslaughtTimer', onslaughtDelayMs )   
                 
         elif onslaughtActive == False and Timer.Check( 'dexSpecialAbilityDelayTimer' ) == False:
-            if specialAbilityType == 1:
-                if not Player.HasPrimarySpecial:
-                    Player.WeaponPrimarySA()
-            elif specialAbilityType == 2:
-                if not Player.HasSecondarySpecial:
-                    Player.WeaponSecondarySA()
-            elif specialAbilityType == 3:
-                if not Player.BuffsExist("Lightning Strike"):
-                    Spells.CastBushido("Lightning Strike", True)
-            elif specialAbilityType == 4:
-                print("This needs work, there is no buff for focus attack. TODO")
-                print(Player.BuffsExist("Focus Attack"))
-                if not Player.BuffsExist("Focus Attack"):
-                    Spells.CastNinjitsu("Focus Attack", True)
-            elif specialAbilityType == 5:
-                #print("This needs work, there is no buff for momentum strike. TODO")
-                #print(Player.BuffsExist("Momentum Strike"))
-                if not Player.BuffsExist("Momentum Strike"):
-                    Spells.CastBushido("Momentum Strike", True)
-            else:
-                Player.HeadMessage( 78, 'No weapon special selected' )
-            Timer.Create( 'dexSpecialAbilityDelayTimer', specialAbilityDelayMs )   
+            if useShieldBash == 0 or (useShieldBash == 1 and Player.BuffsExist("Shield Bash")):
+                if specialAbilityType == 1:
+                    if not Player.HasPrimarySpecial:
+                        Player.WeaponPrimarySA()
+                elif specialAbilityType == 2:
+                    if not Player.HasSecondarySpecial:
+                        Player.WeaponSecondarySA()
+                elif specialAbilityType == 3:
+                    if not Player.BuffsExist("Lightning Strike"):
+                        Spells.CastBushido("Lightning Strike", True)
+                elif specialAbilityType == 4:
+                    print("This needs work, there is no buff for focus attack. TODO")
+                    print(Player.BuffsExist("Focus Attack"))
+                    if not Player.BuffsExist("Focus Attack"):
+                        Spells.CastNinjitsu("Focus Attack", True)
+                elif specialAbilityType == 5:
+                    print("This needs work, there is no buff for momentum strike. TODO")
+                    if not Player.BuffsExist("Momentum Strike"):
+                        Spells.CastBushido("Momentum Strike", True)
+                else:
+                    pass
+                    #Player.HeadMessage( 78, 'No weapon special selected' )
+                Timer.Create( 'dexSpecialAbilityDelayTimer', specialAbilityDelayMs )   
             
         #eligible = get_mobs_exclude_serials(attackRange, namesToExclude = [Player.Name, "a reaper"])
         #eligible = get_mobs_exclude_serials(attackRange, namesToExclude = [])
@@ -304,6 +312,8 @@ def run_dex_loop(
                     Timer.Create( 'petCommandTimer', petCommandDelayMs )
 
                 if shouldAttack == True:
+                    if useShieldBash == 1 and not Player.BuffsExist("Shield Bash") and Player.Mana > 22:
+                        Spells.CastMastery("Shield Bash")
                     Player.Attack(nearest)
         else:
             if usePets == 1 and Timer.Check('petCommandTimer') == False:

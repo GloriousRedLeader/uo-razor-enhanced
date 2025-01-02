@@ -5,6 +5,8 @@ while Player.GetSkillValue("Hiding") < Player.GetSkillCap('Hiding'):
     Player.UseSkill("Hiding")
     Misc.Pause(3000)
     #print("Real {} Cap {}".format(Player.GetSkillValue("Hiding"), Player.GetSkillCap('Hiding')))
+    
+sys.exit()
 
 while Player.GetSkillValue("Stealth") < Player.GetSkillCap('Stealth'):
     #if Player.Visible:

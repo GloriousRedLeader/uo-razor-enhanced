@@ -66,6 +66,7 @@ EMPTY_BOTTLE_STATIC_ID = 0x0F0E
 
 POISON_POTION_STATIC_ID = 0x0F0A
 
+WRAITH_FORM_SCROLL_ID = 0x226F
 
 # Corpses are technically items.    
 def get_corpses(range = 2):
