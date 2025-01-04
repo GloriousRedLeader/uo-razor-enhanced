@@ -12,6 +12,7 @@ from Scripts.fm_core.core_player import find_first_in_container_by_ids
 from Scripts.fm_core.core_player import find_first_in_hands_by_id
 from Scripts.fm_core.core_player import move_all_items_from_container
 from Scripts.fm_core.core_player import move_item_to_container_by_id
+from Scripts.fm_core.core_player import move_item_to_container
 from Scripts.fm_core.core_player import find_in_container_by_id
 from Scripts.fm_core.core_player import find_first_in_container_by_name
 from Scripts.fm_core.core_player import find_all_in_container_by_id
@@ -422,12 +423,17 @@ def run_fishing_loop(
     # How long to pause between casts
     fishDelayMs = 10000,
     
-    # If enabled, searches for dagger in backpack and cuts fish into meat. Useful because fish are heavy.
-    cutFish = False,
+    # 0 = Do nothing, leave in backpack
+    # 1 = cut fish with dagger to reduce weight
+    # 2 = place fish in cargo hold of ship
+    fishHandling = 0,
     
-    # If cutFish is enabled, this is the exclude list for fish monger quest. Case insensitive.
+    # If enabled, searches for dagger in backpack and cuts fish into meat. Useful because fish are heavy.
+    #cutFish = False,
+    
+    # Will not do any fishHandling operations on this fish. Leaves it in backpack. Useful for fishing quests.
     fishToKeep = None):
-        
+    
     rightHand = Player.GetItemOnLayer("RightHand")
     if rightHand == None:
         print("Need a fishing pole")
@@ -436,22 +442,35 @@ def run_fishing_loop(
     while True:
         
         # Cut fish they are heavy
-        if cutFish == True:
+        if fishHandling == 1:
             dagger = find_first_in_container_by_ids(DAGGER_STATIC_IDS)
             if dagger is not None:
                 fishies = find_all_in_container_by_ids(FISH_STATIC_IDS)
                 for fish in fishies:
-                    print("Cutting fish {} item id {}".format(fish.Name, fish.ItemID))
-                    if fishToKeep is not None and fish.Name.lower() == fishToKeep.lower():
+                    if fishToKeep is not None and fish.Name.lower().find(fishToKeep.lower()) > -1:
                         Player.HeadMessage(28, "Keeping fish {} item id {}".format(fish.Name, fish.ItemID))
                         continue
+                    print("Cutting fish {} item id {}".format(fish.Name, fish.ItemID))
                     Items.UseItem(dagger)
                     Target.WaitForTarget(1000, False)
                     Target.TargetExecute(fish)
             else:
                 print("You have elected to cut fish however no dagger was found in backpack.")
                 return
-                
+        elif fishHandling == 2:
+            fishies = find_all_in_container_by_ids(FISH_STATIC_IDS)
+            fil = Items.Filter()
+            fil.Name = "cargo hold"
+            fil.RangeMax = 3
+            hatches = Items.ApplyFilter(fil)
+            if len(hatches) > 0:
+                for fish in fishies:
+                    if fishToKeep is not None and fish.Name.lower().find(fishToKeep.lower()) > -1:
+                        Player.HeadMessage(28, "Keeping fish {} item id {}".format(fish.Name, fish.ItemID))
+                        continue
+                    print("Moving fish {} item id {}".format(fish.Name, fish.ItemID))                        
+                    move_item_to_container(fish, hatches[0].Serial)
+                    
         Target.Cancel()
         Items.UseItem(rightHand)
         Target.WaitForTarget(2000, False)

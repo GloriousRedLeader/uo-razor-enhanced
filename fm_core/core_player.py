@@ -159,7 +159,7 @@ def move_item_to_container(item, destinationSerial):
 # Nice utility to just move junk from one bag to another.
 def move_all_items_from_container(sourceSerial, destinationSerial):
     for item in Items.FindBySerial(sourceSerial).Contains:
-        Player.HeadMessage(455, "Junking item {}".format(item.Name))
+        Player.HeadMessage(455, "Moving item {}".format(item.Name))
         Items.Move(item, destinationSerial, item.Amount)
         Misc.Pause(800)
         

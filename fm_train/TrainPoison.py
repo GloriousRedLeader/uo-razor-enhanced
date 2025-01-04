@@ -25,7 +25,8 @@ from Scripts.fm_core.core_items import POISON_POTION_STATIC_ID
 
 
 #POISON_KEG_SERIALS = [0x407FC64D]
-MAX_LEVEL = 100
+MAX_LEVEL = 120
+mage = False
 
 #def find_all_in_container_by_id(itemID, containerSerial = Player.Backpack.Serial):
 #kegs = find_all_in_container_by_id()
@@ -47,24 +48,25 @@ while Player.GetSkillValue("Poisoning") < MAX_LEVEL:
 # 0x0F0A - poison
         poison = Items.FindByID( POISON_POTION_STATIC_ID, -1, Player.Backpack.Serial )
         if poison == None:
-            Player.HeadMessage(38, "No more poisons, quitting")
-            break;
+            Player.HeadMessage(38, "No more poisons, hopefully theres another keg")
+            continue
             
-        while Player.Poisoned:
-            Spells.CastMagery('Arch Cure')
-            Target.WaitForTarget(5000,True)
-            Target.Self()
-            Misc.Pause(1000)
-            Player.EquipItem(weapon)
-            Misc.Pause(1000)
+        if mage == True:
+            while Player.Poisoned:
+                Spells.CastMagery('Arch Cure')
+                Target.WaitForTarget(5000,True)
+                Target.Self()
+                Misc.Pause(1000)
+                Player.EquipItem(weapon)
+                Misc.Pause(1000)
 
-        while Player.Hits < Player.HitsMax:
-            Spells.CastMagery('Greater Heal')
-            Target.WaitForTarget(5000,True)
-            Target.Self()
-            Misc.Pause(1000)
-            Player.EquipItem(weapon)
-            Misc.Pause(1000)
+            while Player.Hits < Player.HitsMax:
+                Spells.CastMagery('Greater Heal')
+                Target.WaitForTarget(5000,True)
+                Target.Self()
+                Misc.Pause(1000)
+                Player.EquipItem(weapon)
+                Misc.Pause(1000)
             
         #Misc.Pause(2000)
 

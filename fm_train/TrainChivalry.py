@@ -4,7 +4,8 @@
 
 Misc.SendMessage("Training Chiv")
 
-while Player.GetRealSkillValue("Chivalry") < Player.GetSkillCap('Chivalry'):
+#while Player.GetRealSkillValue("Chivalry") < Player.GetSkillCap('Chivalry'):
+while Player.GetRealSkillValue("Chivalry") < 85:
     skillValue = Player.GetRealSkillValue("Chivalry")
     
     if skillValue < 45:

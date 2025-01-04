@@ -7,8 +7,8 @@
 #order = ["picking","detect", "taste","camp","hide","arms","item"]
 #order = ["picking", "hide", "arms", "item", "taste"]
 #order = ["detect", "taste","camp","hide","arms","item"]
-order = ["picking", "item", "track", "detect", "hide"]
-#order = ["removetrap"]
+#order = ["picking", "item", "track", "detect", "hide"]
+order = ["taste"]
 
 # REMOVE TRAP IS BUSTED. USE DEDICATED SCRIPT.
 

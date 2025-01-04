@@ -106,6 +106,9 @@ def run_dex_loop(
     # Time in miliseconds between activations of divine fury. This is the default value.
     divineFuryDelayMs = 10000,
     
+    # Checks for the buff, if it doesnt exist, casts it.
+    useEnemyOfOne = 0,
+    
     # Whether to enable the Bushido skill Confidence. Typically lasts ~5 seconds
     # and lets us restore health and stamina maybe.
     #useConfidence = 0,
@@ -141,12 +144,18 @@ def run_dex_loop(
     
     # Cast mirror images this often. They disappear something like every 30 - 60 seconds.
     mirrorImageDelayMs = 10000,   
+    
+    # Chiv spell
+    useRemoveCurse = 0,
+    
+    # Paladin spell for curing poisons, only works on self.
+    useCleanseByFire = 0,
    
     # how many tiles to look for enemies and attack them
     attackRange = 6,
     
-    # Hit true to enable auto dumps of gold to bank. Threshold is 50k. Default disabled.
-    useBagOfSending = False,
+    # If greater than 0 will attempt to use bag of sending when this much gold is present. Default is 0, no bag of sending usage.
+    minGold = 0,
     
     # This will stop character from auto attacking if disabled.
     # Adding this while I level my vet skill so I dont kill things
@@ -156,11 +165,10 @@ def run_dex_loop(
     # These are fairly static controls. Adjust as needed based on latency.
 
     journalEntryDelayMilliseconds = 200
-    #actionDelayMs = 650
-    actionDelayMs = 250
+    actionDelayMs = 1000
+    #actionDelayMs = 250
     lastHonoredSerial = None
     onslaughtActive = False
-    minGold = 50000
 
     # Initial timer creation, not super important.
 
@@ -190,87 +198,102 @@ def run_dex_loop(
             Player.HeadMessage( 78, "{} Running...".format(loopName) )
             Timer.Create( 'dexPingTimer', 3000 )
             
-        if useBagOfSending == True and Player.Gold >= minGold:
+        if minGold > 0 and Player.Gold >= minGold:
             use_bag_of_sending(minGold)
 
         if not Player.Visible:
             Misc.Pause(500)
             continue
+
+        heal_player_and_friends(useCleanseByFire = useCleanseByFire, useRemoveCurse = useRemoveCurse)
             
-        if useConsecrateWeapon == 1 and Timer.Check( 'dexConsecrateWeaponTimer' ) == False:
-            cast_until_works(lambda: Spells.CastChivalry("Consecrate Weapon"))
-            Timer.Create( 'dexConsecrateWeaponTimer', consecrateWeaponDelayMs )
-            Misc.Pause(actionDelayMs)
-        elif useDivineFury == 1 and Timer.Check( 'dexDivineFuryTimer' ) == False:
-            cast_until_works(lambda: Spells.CastChivalry("Divine Fury"))
-            Timer.Create( 'dexDivineFuryTimer', divineFuryDelayMs )
-            Misc.Pause(actionDelayMs)
-        elif useMirrorImage == 1 and Timer.Check( 'dexMirrorImageTimer' ) == False:
-            cast_until_works(lambda: Spells.CastNinjitsu("Mirror Image"))
-            Timer.Create( 'dexMirrorImageTimer', mirrorImageDelayMs )
-            Misc.Pause(actionDelayMs)
-        elif useCurseWeapon == 1 and not Player.BuffsExist("Curse Weapon"):
-            cast_until_works(lambda: Spells.CastNecro("Curse Weapon"))
-            Misc.Pause(actionDelayMs)            
-            
-        if bushidoStance == 1 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
-            cast_until_works(lambda: Spells.CastBushido("Confidence", True))
-            Timer.Create( 'dexBushidoStanceTimer', bushidoStanceDelayMs )
-            Misc.Pause(actionDelayMs)
-        elif bushidoStance == 2 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
-            cast_until_works(lambda: Spells.CastBushido("Evasion", True))
-            Timer.Create( 'dexBushidoStanceTimer', bushidoStanceDelayMs )
-            Misc.Pause(actionDelayMs)
-        elif bushidoStance == 3 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
-            Timer.Create( 'dexBushidoStanceTimer', bushidoStanceDelayMs )
-            Spells.CastBushido("Counter Attack", True)
-            Misc.Pause(actionDelayMs)
-            
-        if onslaughtActive == True:
-            if Journal.Search("You deliver an onslaught of sword strikes"):
-                onslaughtActive = False
-                
-        # Weapon abilities, only one allowed at a time.
-        if onslaughtActive == False and useOnslaught == 1 and Timer.Check( 'dexOnslaughtTimer' ) == False:
-            Journal.Clear()
-            Spells.CastMastery("Onslaught")
-            Misc.Pause(100)
-            if Journal.Search("You ready an onslaught"):
-                onslaughtActive = True
-                Timer.Create( 'dexOnslaughtTimer', onslaughtDelayMs )   
-                
-        elif onslaughtActive == False and Timer.Check( 'dexSpecialAbilityDelayTimer' ) == False:
-            if useShieldBash == 0 or (useShieldBash == 1 and Player.BuffsExist("Shield Bash")):
-                if specialAbilityType == 1:
-                    if not Player.HasPrimarySpecial:
-                        Player.WeaponPrimarySA()
-                elif specialAbilityType == 2:
-                    if not Player.HasSecondarySpecial:
-                        Player.WeaponSecondarySA()
-                elif specialAbilityType == 3:
-                    if not Player.BuffsExist("Lightning Strike"):
-                        Spells.CastBushido("Lightning Strike", True)
-                elif specialAbilityType == 4:
-                    print("This needs work, there is no buff for focus attack. TODO")
-                    print(Player.BuffsExist("Focus Attack"))
-                    if not Player.BuffsExist("Focus Attack"):
-                        Spells.CastNinjitsu("Focus Attack", True)
-                elif specialAbilityType == 5:
-                    print("This needs work, there is no buff for momentum strike. TODO")
-                    if not Player.BuffsExist("Momentum Strike"):
-                        Spells.CastBushido("Momentum Strike", True)
-                else:
-                    pass
-                    #Player.HeadMessage( 78, 'No weapon special selected' )
-                Timer.Create( 'dexSpecialAbilityDelayTimer', specialAbilityDelayMs )   
-            
-        #eligible = get_mobs_exclude_serials(attackRange, namesToExclude = [Player.Name, "a reaper"])
-        #eligible = get_mobs_exclude_serials(attackRange, namesToExclude = [])
         eligible = get_mobs_exclude_serials(attackRange, namesToExclude = ["a horde minion"])
         if len(eligible) > 0:   
             nearest = Mobiles.Select(eligible, 'Nearest')
-            if Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=12:            
+            if Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=10:            
                 Target.SetLast(nearest)
+            
+                if useEnemyOfOne == 1 and not Player.BuffsExist("Enemy Of One"):
+                    Spells.CastChivalry("Enemy Of One")
+                    Misc.Pause(actionDelayMs)            
+                elif useConsecrateWeapon == 1 and Timer.Check( 'dexConsecrateWeaponTimer' ) == False:
+                    cast_until_works(lambda: Spells.CastChivalry("Consecrate Weapon"))
+                    Timer.Create( 'dexConsecrateWeaponTimer', consecrateWeaponDelayMs )
+                    Misc.Pause(actionDelayMs)
+                elif useDivineFury == 1 and Timer.Check( 'dexDivineFuryTimer' ) == False:
+                    cast_until_works(lambda: Spells.CastChivalry("Divine Fury"))
+                    Timer.Create( 'dexDivineFuryTimer', divineFuryDelayMs )
+                    Misc.Pause(actionDelayMs)
+                elif useMirrorImage == 1 and Timer.Check( 'dexMirrorImageTimer' ) == False:
+                    cast_until_works(lambda: Spells.CastNinjitsu("Mirror Image"))
+                    Timer.Create( 'dexMirrorImageTimer', mirrorImageDelayMs )
+                    Misc.Pause(actionDelayMs)
+                elif useCurseWeapon == 1 and not Player.BuffsExist("Curse Weapon"):
+                    cast_until_works(lambda: Spells.CastNecro("Curse Weapon"))
+                    Misc.Pause(actionDelayMs)            
+                    
+                if bushidoStance == 1 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
+                    cast_until_works(lambda: Spells.CastBushido("Confidence", True))
+                    Timer.Create( 'dexBushidoStanceTimer', bushidoStanceDelayMs )
+                    Misc.Pause(actionDelayMs)
+                elif bushidoStance == 2 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
+                    cast_until_works(lambda: Spells.CastBushido("Evasion", True))
+                    Timer.Create( 'dexBushidoStanceTimer', bushidoStanceDelayMs )
+                    Misc.Pause(actionDelayMs)
+                elif bushidoStance == 3 and Timer.Check( 'dexBushidoStanceTimer' ) == False:
+                    Timer.Create( 'dexBushidoStanceTimer', bushidoStanceDelayMs )
+                    Spells.CastBushido("Counter Attack", True)
+                    Misc.Pause(actionDelayMs)
+                    
+                if onslaughtActive == True:
+                    if Journal.Search("You deliver an onslaught of sword strikes"):
+                        onslaughtActive = False
+                        
+                # Weapon abilities, only one allowed at a time.
+                if onslaughtActive == False and useOnslaught == 1 and Timer.Check( 'dexOnslaughtTimer' ) == False:
+                    Journal.Clear()
+                    Spells.CastMastery("Onslaught")
+                    Misc.Pause(100)
+                    if Journal.Search("You ready an onslaught"):
+                        onslaughtActive = True
+                        Timer.Create( 'dexOnslaughtTimer', onslaughtDelayMs )   
+                        
+                elif onslaughtActive == False and Timer.Check( 'dexSpecialAbilityDelayTimer' ) == False:
+                
+                    if useShieldBash == 1 and not Player.BuffsExist("Shield Bash") and Player.Mana > 22:
+                        Spells.CastMastery("Shield Bash")
+                        Misc.Pause(1000)
+                        
+                    if useShieldBash == 0 or (useShieldBash == 1 and Player.BuffsExist("Shield Bash")):
+                    #if True:
+                        if specialAbilityType == 1:
+                            if not Player.HasPrimarySpecial:
+                                Player.WeaponPrimarySA()
+                        elif specialAbilityType == 2:
+                            if not Player.HasSecondarySpecial:
+                                Player.WeaponSecondarySA()
+                        elif specialAbilityType == 3:
+                            if not Player.BuffsExist("Lightning Strike"):
+                                Spells.CastBushido("Lightning Strike", True)
+                        elif specialAbilityType == 4:
+                            print("This needs work, there is no buff for focus attack. TODO")
+                            print(Player.BuffsExist("Focus Attack"))
+                            if not Player.BuffsExist("Focus Attack"):
+                                Spells.CastNinjitsu("Focus Attack", True)
+                        elif specialAbilityType == 5:
+                            print("This needs work, there is no buff for momentum strike. TODO")
+                            if not Player.BuffsExist("Momentum Strike"):
+                                Spells.CastBushido("Momentum Strike", True)
+                        else:
+                            pass
+                            #Player.HeadMessage( 78, 'No weapon special selected' )
+                        Timer.Create( 'dexSpecialAbilityDelayTimer', specialAbilityDelayMs )   
+            
+        #eligible = get_mobs_exclude_serials(attackRange, namesToExclude = ["a horde minion"])
+        #if len(eligible) > 0:   
+        #    nearest = Mobiles.Select(eligible, 'Nearest')
+            #if Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=12:            
+                #Target.SetLast(nearest)
                 
                 if useHonor == 1 and nearest.Serial != lastHonoredSerial:
                     Player.HeadMessage(78, "Honoring {}".format(nearest.Name))
@@ -320,8 +343,8 @@ def run_dex_loop(
                     Timer.Create( 'petCommandTimer', petCommandDelayMs )
 
                 if shouldAttack == True:
-                    if useShieldBash == 1 and not Player.BuffsExist("Shield Bash") and Player.Mana > 22:
-                        Spells.CastMastery("Shield Bash")
+                    #if useShieldBash == 1 and not Player.BuffsExist("Shield Bash") and Player.Mana > 22:
+                    #    Spells.CastMastery("Shield Bash")
                     Player.Attack(nearest)
         else:
             if usePets == 1 and Timer.Check('petCommandTimer') == False:
@@ -1195,7 +1218,11 @@ def heal_player_and_friends(
     useCloseWounds = 0,
     
     # Paladin spell for curing poisons, only works on self.
-    useCleanseByFire = 0
+    useCleanseByFire = 0,
+    
+    # Chivalry spell
+    useRemoveCurse = 0
+    
    
    # Provide name of player or pet to use gift of renewal.
    # This is a tricky one. Will attempt to 
@@ -1203,23 +1230,24 @@ def heal_player_and_friends(
 ):
     didSomeHealing = False
     
-    if useCure == 0 and useGreaterHeal == 0 and useCloseWounds == 0 and useCleanseByFire == 0:
+    if useCure == 0 and useGreaterHeal == 0 and useCloseWounds == 0 and useCleanseByFire == 0 and useRemoveCurse == 0:
         return False
 
     while True:
         
         # Player is priority
-        while ((useCure == 1 or useCleanseByFire == 1) and Player.Poisoned) or ((useGreaterHeal == 1 or useCloseWounds == 1) and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits):
+        #while ((useCure == 1 or useCleanseByFire == 1) and Player.Poisoned) or ((useGreaterHeal == 1 or useCloseWounds == 1) and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits):
+        while (useCure == 1 and Player.Poisoned) or ((useGreaterHeal == 1 or useCloseWounds == 1) and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits):
             if useCure == 1 and Player.Poisoned:
                 Spells.CastMagery("Arch Cure")
                 Target.WaitForTarget(3000, False)
                 Target.Self()
                 Misc.Pause(actionDelayMs)
-            if useCleanseByFire == 1 and Player.Poisoned:
-                Spells.CastChivalry("Cleanse by Fire")
-                Target.WaitForTarget(3000, False)
-                Target.Self()
-                Misc.Pause(actionDelayMs)                
+#            if useCleanseByFire == 1 and Player.Poisoned:
+#                Spells.CastChivalry("Cleanse by Fire")
+#                Target.WaitForTarget(3000, False)
+#                Target.Self()
+#                Misc.Pause(actionDelayMs)                
             elif useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
                 Spells.CastMagery("Greater Heal")
                 Target.WaitForTarget(3000, False)
@@ -1232,7 +1260,18 @@ def heal_player_and_friends(
                 Misc.Pause(actionDelayMs)                
             else:
                 break
-                
+
+        if useCleanseByFire == 1 and Player.Poisoned:
+            Spells.CastChivalry("Cleanse by Fire")
+            Target.WaitForTarget(3000, False)
+            Target.Self()
+            Misc.Pause(actionDelayMs)
+        elif useRemoveCurse == 1 and Player.BuffsExist("Curse"):
+            Spells.CastChivalry("Remove Curse")
+            Target.WaitForTarget(3000, False)
+            Target.Self()
+            Misc.Pause(actionDelayMs)
+        
         # Now get one friend with lowest life
         if friendSelectMethod == 0: 
             friendMobiles = get_friends_by_names(friendNames, range)
@@ -1263,6 +1302,8 @@ def heal_player_and_friends(
                 Spells.CastMagery("Greater Heal")
                 Target.WaitForTarget(3000, False)
                 Target.TargetExecute(friendMobile)
-                Misc.Pause(actionDelayMs)        
+                Misc.Pause(actionDelayMs) 
+        else:
+            break
 
     return False
