@@ -411,11 +411,12 @@ def run_mining_loop(
         Misc.Pause(PAUSE_DELAY_MS)
         
 # Auto fishes in all the lands. Works on a boat. Works on a dock.
-# If you are on a boat, you can use the moveTiles param to move boat
-# this many tiles forward after each fish attempt.
+# If you are on a boat, you can use the moveTiles param to move boat after each fishing attempt.
+# It will say forward one X number of times.
+# Can automatically cut fish. Can automatically store fish in hold.
 def run_fishing_loop(
     # How many tiles in front of character to fish
-    fishRange = 3, 
+    fishRange = 4, 
     
     # If on a boat, tells the tiller to move forward this many times.
     moveTiles = 2, 
@@ -424,15 +425,13 @@ def run_fishing_loop(
     fishDelayMs = 10000,
     
     # 0 = Do nothing, leave in backpack
-    # 1 = cut fish with dagger to reduce weight
-    # 2 = place fish in cargo hold of ship
+    # 1 = cut fish with dagger to reduce weight, makes lots of fish steaks
+    # 2 = place fish in cargo hold of ship, have to be standing near cargo hold
     fishHandling = 0,
     
-    # If enabled, searches for dagger in backpack and cuts fish into meat. Useful because fish are heavy.
-    #cutFish = False,
-    
     # Will not do any fishHandling operations on this fish. Leaves it in backpack. Useful for fishing quests.
-    fishToKeep = None):
+    fishToKeep = None
+):
     
     rightHand = Player.GetItemOnLayer("RightHand")
     if rightHand == None:
