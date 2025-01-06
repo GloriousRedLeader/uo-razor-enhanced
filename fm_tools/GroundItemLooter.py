@@ -65,10 +65,16 @@ while True:
     items = Items.ApplyFilter(filter)
 
     packAnimals = get_friends_by_names(friendNames = PACK_ANIMAL_NAMES, range = 2)
+    for packAnimal in packAnimals:
+        Items.UseItem(packAnimal.Backpack.Serial)
+        Misc.Pause(650)
+        
     for item in items:
       
         if len(packAnimals) > 0:
             for packAnimal in packAnimals:
+                Items.UseItem(packAnimal.Backpack.Serial)
+                Misc.Pause(650)
                 print("Animal: {}, Weight: {}, Items: {}".format(packAnimal.Name, packAnimal.Backpack.Weight, packAnimal.Backpack.Contains.Count))
                 if packAnimal.Backpack.Weight + item.Weight < 1350:
                     if item.IsContainer:
