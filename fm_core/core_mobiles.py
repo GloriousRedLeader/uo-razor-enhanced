@@ -124,3 +124,17 @@ def get_yellows_in_range(range = 8):
     mobs = Mobiles.ApplyFilter(fil)
 
     return mobs
+    
+# Returns the decimal representation of mobile hp, e.g. 0.30 is 30% health
+def get_mobile_percent_hp(mobile):
+    if mobile is not None and mobile.Hits is not None and mobile.Hits > 0 and mobile.HitsMax is not None and mobile.HitsMax > 0:
+        return mobToAttack.Hits / mobToAttack.HitsMax
+    else:
+        return 0
+        
+# Returns the decimal representation of mobile hp, e.g. 0.30 is 30% health
+#def get_player_percent_mana():
+#    if Player.Mana is not None and Player.Mana > 0 and Player.ManaMax is not None and Player.ManaMax > 0:
+#        return Player.Mana / Player.ManaMax
+#    else:
+#        return 0

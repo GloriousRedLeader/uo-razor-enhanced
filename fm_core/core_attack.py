@@ -7,9 +7,11 @@
 from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
 from Scripts.fm_core.core_mobiles import get_friends_by_names
 from Scripts.fm_core.core_mobiles import get_blues_in_range
+from Scripts.fm_core.core_mobiles import get_mobile_percent_hp
 from Scripts.fm_core.core_player import find_instrument
 from Scripts.fm_core.core_player import use_bag_of_sending
 from Scripts.fm_core.core_spells import cast_until_works
+from Scripts.fm_core.core_spells import cast_spell
 import sys
 
 # These are loops that will run on your character that find nearest enemies,
@@ -835,7 +837,7 @@ def run_buff_loop_only (
 # Will cast AOE at player location and single target spells on closest mobs. Can also focus
 # a specific mob if you want to focus on a boss.
 # Set preferred delays in between each spell. Your main nukes should have no delay really.
-def run_mage_loop(
+def run_mage_loop2(
 
     # Give it a fun name in case you have different versions, e.g.
     # Mage AOE Loop or Mage Single Target Loop
@@ -1118,104 +1120,13 @@ def run_mage_loop(
                 Timer.Create( 'poisonStrikeTimer', poisonStrikeDelayMs )
                 Misc.Pause(actionDelayMs)
 
-            # Continue loop before doing harmul actions, focus on healing/curing.
-            #heal_player_and_friends(friendSelectMethod, friendNames, range, actionDelayMs, healThreshold, useCure, useGreaterHeal)
-            
 
-                 
-  
 # An internal function but it can be used as a main heal loop if desired.  
 # casts cure on player and pet, also heals with greater heal
 # if life is below threshold. Returns true if a heal / cure was attempted.
 # This is so the calling function can decide whether to call this again before
 # doing other stuff like continuing to attack.
 def heal_player_and_friends2(
-
-    # 0 = Heal only names in friendNames, 1 = heal any blue in range
-    friendSelectMethod = 0,
-    
-    # Pets, friends, etc. These are names (string).
-    friendNames = [],
-    
-    # If friends and pets are farther than this, dont bother with this.
-    range = 8,
-
-    # Buffer in MS between heal actions, otherwise we get "You have not yet recovered"
-    actionDelayMs = 1000,
-
-    # Only heal when pet/player life is below this threshold
-    healThreshold = 0.7, 
-    
-    # Whether to cure yourself or your pet
-    useCure = 0,
-    
-    # Whether to heal yourself or your pet
-    useGreaterHeal = 0
-   
-   # Provide name of player or pet to use gift of renewal.
-   # This is a tricky one. Will attempt to 
-   #giftOfRenwalTarget = None 
-):
-    didSomeHealing = False
-    
-    if useCure == 0 and useGreaterHeal == 0:
-        return False
-
-    if useCure == 1 and Player.Poisoned:
-        Spells.CastMagery("Arch Cure")
-        Target.WaitForTarget(10000, False)
-        Target.Self()
-        Misc.Pause(actionDelayMs)
-        didSomeHealing = True
-        
-    if useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
-        Spells.CastMagery("Greater Heal")
-        Target.WaitForTarget(10000, False)
-        Target.Self()
-        Misc.Pause(actionDelayMs)
-        didSomeHealing = True
-       
-    if friendSelectMethod == 0: 
-        friendMobiles = get_friends_by_names(friendNames, range)
-        for friendMobile in friendMobiles:
-            if useCure == 1 and friendMobile.Poisoned:
-                Spells.CastMagery("Arch Cure")
-                Target.WaitForTarget(10000, False)
-                Target.TargetExecute(friendMobile)
-                Misc.Pause(actionDelayMs)        
-                didSomeHealing = True
-                
-            if useGreaterHeal == 1 and not friendMobile.Poisoned and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits and friendMobile.Hits > 0:
-                Spells.CastMagery("Greater Heal")
-                Target.WaitForTarget(10000, False)
-                Target.TargetExecute(friendMobile)
-                Misc.Pause(actionDelayMs)        
-                didSomeHealing = True
-    elif friendSelectMethod == 1:
-        friendMobiles = get_blues_in_range(range)
-        for friendMobile in friendMobiles:
-            if useCure == 1 and friendMobile.Poisoned:
-                Spells.CastMagery("Arch Cure")
-                Target.WaitForTarget(10000, False)
-                Target.TargetExecute(friendMobile)
-                Misc.Pause(actionDelayMs)        
-                didSomeHealing = True
-                
-            if useGreaterHeal == 1 and not friendMobile.Poisoned and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits and friendMobile.Hits > 0:
-                Spells.CastMagery("Greater Heal")
-                Target.WaitForTarget(10000, False)
-                Target.TargetExecute(friendMobile)
-                Misc.Pause(actionDelayMs)        
-                didSomeHealing = True
-
-    return didSomeHealing
-    
-# An internal function but it can be used as a main heal loop if desired.  
-# casts cure on player and pet, also heals with greater heal
-# if life is below threshold. Returns true if a heal / cure was attempted.
-# This is so the calling function can decide whether to call this again before
-# doing other stuff like continuing to attack.
-def heal_player_and_friends(
 
     # 0 = Heal only names in friendNames, 1 = heal any blue in range
     friendSelectMethod = 0,
@@ -1335,5 +1246,358 @@ def heal_player_and_friends(
                 Misc.Pause(actionDelayMs) 
         else:
             break
+
+    return False
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################    
+    
+    
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+
+
+# Will cast AOE at player location and single target spells on closest mobs. Can also focus
+# a specific mob if you want to focus on a boss.
+# Set preferred delays in between each spell. Your main nukes should have no delay really.
+def run_mage_loop(
+
+    # Give it a fun name in case you have different versions, e.g.
+    # Mage AOE Loop or Mage Single Target Loop
+    loopName = "Mage Loop",
+    
+    # 0 = Heal only names in friendNames, 1 = heal any blue in range
+    friendSelectMethod = 0,
+    
+    # Names of pets or blue characters you want to heal, cure if they are in range.
+    # Note that you still need to enable useCure / useGreaterHeal etc.
+    friendNames = [],
+    
+    # Buffer in MS between attacks, otherwise we get "You have not yet recovered"
+    # DEPRECATED: NO LONGER DOES ANYTHING
+    actionDelayMs = 1000,
+    
+    # Only look for mobs and pets/friends inside of this range. IF they are farther, then
+    # dont heal them / dont attack them.
+    range = 8,
+    
+    # Use Arcane Empowerment (spell weaving) 0 = disabled, 1 = enabled
+    useArcaneEmpowerment = 0,
+    
+    # Time in millesconds between casts of arcane empowerment.
+    arcaneEmpowermentDelayMs = 35000,
+
+    # Whether to use this spell 0 = disabled, 1 = enabled
+    usePoisonStrike = 0,
+    
+    # Lower number like 10 means to spam repeatadly, number of MS in between usages
+    poisonStrikeDelayMs = 10,
+    
+    # Whether to use this spell 0 = disabled, 1 = enabled
+    useStrangle = 0,
+    
+    # Change to an appropriate value for strangle spell, number of MS in between usages
+    strangleDelayMs = 60000,
+    
+    # Whether to use this spell 0 = disabled, 1 = enabled
+    useCorpseSkin = 0,
+    
+    # Change to an appropriate value, number of MS in between usages
+    corpseSkinDelayMs = 60000,
+    
+    # Whether to use this spell before applying each dot and curse 0 = disabled, 1 = enabled
+    useEvilOmenBeforeDotsAndCurses = 0,
+    
+    # Whether to use the magery curse spell, 0 = disabled, 1 = enabled
+    useCurse = 0,
+    
+    # How often to cast this spell in millesconds
+    curseDelayMs = 60000,
+    
+    # Whether to use the magery spell poison, will only cast if poison is not on target 0 = disabled, 1 = enabled
+    usePoison = 0,
+    
+    # How often we can cast poison in milliseconds
+    poisonDelayMs = 30000,
+    
+    # Magery poison field spell 0 = disabled, 1 = enabled
+    usePoisonField = 0,
+    
+    # How often to cast this spell in milliseconds
+    poisonFieldDelayMs = 10000,
+    
+    # Toggles death ray. Requires magery mastery. There is no timer because this remains
+    # active until you move or you are interrupted or the creature dies. It will attempt to
+    # reapply immediately. 0 = disabled, 1 = enabled
+    useDeathRay = 0,
+    
+    # Will use shadow word death on eligible targets until they die. This is more of a toggle.
+    # 0 = disabled, 1 = enabled
+    useWordOfDeath = 0,
+    
+    # Whether to use this spell 0 = disabled, 1 = enabled
+    useWildfire = 0,
+    
+    # Lower number like 10 means to spam repeatadly, number of MS in between usages
+    wildfireDelayMs = 9000,
+    
+    # Whether to use the thunderstorm spellweaving spell. There is no delay here. Just spam.
+    useThunderstorm = 0,
+    
+    # Whether to use this spell 0 = disabled, 1 = enabled. There is no delay here. Just spam.
+    useWither = 0,
+    
+    # Whether to cure yourself or your pet
+    useCure = 0,
+    
+    # Whether to heal yourself or your pet
+    useGreaterHeal = 0,
+    
+    # Necro heal
+    useSpiritSpeak = 0,
+    
+    # Necro mastery for aoe damage, looks for buff. If no buff, casts it.
+    useConduit = 0,
+    
+    # When standing still, no mobes in range, not bleeding, strangled, or poisoned, will start meditating.
+    useMeditation = 0,
+    
+    # Only heal things that are below this percent HP
+    healThreshold = 0.70    
+):
+    
+    Timer.Create( 'magePingTimer', 1 )
+    Timer.Create( 'arcaneEmpowermentTimer', 1 )
+    Timer.Create( 'poisonStrikeTimer', 1000 )
+    Timer.Create( 'strangleTimer', 1 )
+    Timer.Create( 'corpseSkinTimer', 1 )
+    Timer.Create( 'wildfireTimer', 1 )
+    Timer.Create( 'curseTimer', 1 )
+    Timer.Create( 'poisonTimer', 1 )
+    Timer.Create( 'poisonFieldTimer', 1 )
+    Timer.Create( 'meditationTimer', 1 )
+
+    Player.ChatSay("All Guard Me")
+    
+    while not Player.IsGhost:
+        
+        if Timer.Check( 'magePingTimer' ) == False:
+            Player.HeadMessage( 128, "{} Running...".format(loopName) )
+            Timer.Create( 'magePingTimer', 3000 )
+
+        if not Player.Visible:
+            Misc.Pause(500)
+            continue  
+
+        # This is up top so we can buff up before heals.
+        if useArcaneEmpowerment == 1 and Timer.Check( 'arcaneEmpowermentTimer' ) == False and not Player.BuffsExist("Arcane Empowerment") and Player.Mana > 90:
+            cast_spell("Arcane Empowerment")
+            Timer.Create( 'arcaneEmpowermentTimer', arcaneEmpowermentDelayMs )            
+            
+        # Continue loop before doing harmul actions, focus on healing/curing.
+        if heal_player_and_friends(friendSelectMethod = friendSelectMethod, friendNames = friendNames, range = range, actionDelayMs = actionDelayMs, healThreshold = healThreshold, useCure = useCure, useGreaterHeal = useGreaterHeal, useSpiritSpeak = useSpiritSpeak) == True:
+            continue
+        
+        mobToAttack = None
+        eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])
+        if len(eligible) > 0:   
+            mobToAttack = Mobiles.Select(eligible, 'Nearest')
+        
+        if mobToAttack != None:
+            if useConduit == 1 and not Player.BuffsExist("Condit") and len(eligible) > 3 and Player.DistanceTo(mobToAttack) > 4:
+                cast_spell("Conduit", mobToAttack)
+            elif useDeathRay == 1 and not Player.BuffsExist("Death Ray") and Player.BuffsExist("Arcane Empowerment") and Player.Mana > 100:
+                cast_spell("Death Ray", mobToAttack)                                
+            elif useWordOfDeath == 1 and get_mobile_percent_hp(mobToAttack) < 0.3:
+                cast_spell("Word of Death", mobToAttack)                
+            elif useCorpseSkin == 1 and Timer.Check( 'corpseSkinTimer' ) == False and get_mobile_percent_hp(mobToAttack) > 0.5:
+                if useEvilOmenBeforeDotsAndCurses == 1:
+                    cast_spell("Evil Omen", mobToAttack)
+                cast_spell("Corpse Skin", mobToAttack)
+                Timer.Create( 'corpseSkinTimer', corpseSkinDelayMs )
+            elif useStrangle == 1 and Timer.Check( 'strangleTimer' ) == False and get_mobile_percent_hp(mobToAttack) > 0.5:
+                if useEvilOmenBeforeDotsAndCurses == 1:
+                    cast_spell("Evil Omen", mobToAttack)
+                cast_spell("Strangle", mobToAttack)
+                Timer.Create( 'strangleTimer', strangleDelayMs ) 
+            elif usePoison == 1 and Timer.Check( 'poisonTimer' ) == False and not mobToAttack.Poisoned and get_mobile_percent_hp(mobToAttack) > 0.5:
+                if useEvilOmenBeforeDotsAndCurses == 1:
+                    cast_spell("Evil Omen", mobToAttack)
+                cast_spell("Poison", mobToAttack)
+                Timer.Create( 'poisonTimer', poisonDelayMs) 
+            elif useCurse == 1 and Timer.Check( 'curseTimer' ) == False and get_mobile_percent_hp(mobToAttack) > 0.75:
+                if useEvilOmenBeforeDotsAndCurses == 1:
+                    cast_spell("Evil Omen", mobToAttack)
+                cast_spell("Curse", mobToAttack)
+                Timer.Create( 'curseTimer', curseDelayMs) 
+            elif useWildfire == 1 and Timer.Check( 'wildfireTimer' ) == False:
+                cast_spell("Wildfire", mobToAttack)
+                Timer.Create( 'wildfireTimer', wildfireDelayMs )
+            elif usePoisonField == 1 and Timer.Check( 'poisonFieldTimer' ) == False and len(eligible) > 3:
+                cast_spell("Poison Field", mobToAttack)
+                Timer.Create( 'poisonFieldTimer', poisonFieldDelayMs)                 
+            elif usePoisonStrike == 1  and Timer.Check( 'poisonStrikeTimer' ) == False:
+                cast_spell("Poison Strike", mobToAttack)
+                Timer.Create( 'poisonStrikeTimer', poisonStrikeDelayMs )                
+            elif useThunderstorm == 1:
+                cast_spell("Thunderstorm")
+            elif useWither == 1:
+                cast_spell("Wither")
+        elif Player.Mana / Player.ManaMax < 0.83 and not Player.Poisoned and not Player.BuffsExist("Bleeding") and not Player.BuffsExist("Strangle") and Timer.Check( 'meditationTimer' ) == False:
+            cast_spell("Meditation")
+            Timer.Create( 'meditationTimer', 10000)                
+                
+        Misc.Pause(100)
+
+
+# An internal function but it can be used as a main heal loop if desired.  
+# casts cure on player and pet, also heals with greater heal
+# if life is below threshold. Returns true if a heal / cure was attempted.
+# This is so the calling function can decide whether to call this again before
+# doing other stuff like continuing to attack.
+# Returns True if something was healed so we can call it again. 
+def heal_player_and_friends(
+
+    # 0 = Heal only names in friendNames, 1 = heal any blue in range
+    friendSelectMethod = 0,
+    
+    # Pets, friends, etc. These are names (string).
+    friendNames = [],
+    
+    # If friends and pets are farther than this, dont bother with this.
+    range = 8,
+
+    # Buffer in MS between heal actions, otherwise we get "You have not yet recovered"
+    actionDelayMs = 1000,
+
+    # Only heal when pet/player life is below this threshold
+    healThreshold = 0.7, 
+    
+    # Whether to cure yourself or your pet
+    useCure = 0,
+    
+    # Whether to heal yourself or your pet (heals are mutually exclusive, only one will work, so just pick one)
+    useGreaterHeal = 0,
+    
+    # Paladin spell for healing, only works on self. (heals are mutually exclusive, only one will work, so just pick one)
+    useCloseWounds = 0,
+    
+    # Paladin spell for curing poisons, only works on self.
+    useCleanseByFire = 0,
+    
+    # Chivalry spell
+    useRemoveCurse = 0,
+    
+    # Necro heal (heals are mutually exclusive, only one will work, so just pick one)
+    useSpiritSpeak = 0,
+):
+    
+    if useCure == 0 and useGreaterHeal == 0 and useCloseWounds == 0 and useCleanseByFire == 0 and useRemoveCurse == 0 and useSpiritSpeak == 0:
+        return False
+
+    if useCure == 1 and Player.Poisoned:
+        cast_spell("Arch Cure", Player.Body)
+        return True
+    elif useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
+        cast_spell("Greater Heal", Player.Body)
+        return True
+    elif useCloseWounds == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
+        cast_spell("Close Wounds", Player.Body)
+        return True
+    elif useSpiritSpeak == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
+        cast_spell("Spirit Speak")
+        return True
+    
+    # Player again, but outside of main loop because not critical, just try once and proceed. Attacking is important for paladins.
+    if useCleanseByFire == 1 and Player.Poisoned:
+        cast_spell("Cleanse by Fire")
+        return True
+    elif useRemoveCurse == 1 and Player.BuffsExist("Curse"):
+        cast_spell("Remove Curse", Player.Body)
+        return True
+        
+    # Now lets heal our friends
+    if friendSelectMethod == 0: 
+        friendMobiles = get_friends_by_names(friendNames, range)
+    elif friendSelectMethod == 1:
+        friendMobiles = get_blues_in_range(range)
+        
+    def sort_friends(x, y):
+        if x is None or y is None:
+            return False
+        if x.HitsMax is None or x.HitsMax == 0 or y.HitsMax is None or y.HitsMax == 0:
+            return False
+        return x.Hits / x.HitsMax > y.Hits / y.HitsMax 
+        
+    if len(friendMobiles) > 0:
+        friendMobiles.Sort(sort_friends)
+        friendMobile = friendMobiles[0]
+        
+        if not (useCure == 1 and friendMobile.Poisoned) and not (useGreaterHeal == 1 and not friendMobile.Poisoned and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits and friendMobile.Hits > 0):
+            return False
+        
+        if useCure == 1 and friendMobile.Poisoned:
+            cast_spell("Arch Cure", friendMobile)
+            return True
+        elif useGreaterHeal == 1 and not friendMobile.Poisoned and friendMobile.HitsMax is not None and friendMobile.HitsMax > 0 and friendMobile.Hits / friendMobile.HitsMax < healThreshold and not friendMobile.YellowHits and friendMobile.Hits > 0:
+            cast_spell("Greater Heal", friendMobile)
+            return True
 
     return False
