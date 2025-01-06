@@ -1564,14 +1564,12 @@ def heal_player_and_friends(
     elif useSpiritSpeak == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
         cast_spell("Spirit Speak")
         return True
-    
-    # Player again, but outside of main loop because not critical, just try once and proceed. Attacking is important for paladins.
-    if useCleanseByFire == 1 and Player.Poisoned:
+    elif useCleanseByFire == 1 and Player.Poisoned:
         cast_spell("Cleanse by Fire")
-        return True
+        return False # Doing this on purpose, this isnt superimportant for melee.
     elif useRemoveCurse == 1 and Player.BuffsExist("Curse"):
         cast_spell("Remove Curse", Player.Body)
-        return True
+        return False # Doing this on purpose, this isnt super important for melee.
         
     # Now lets heal our friends
     if friendSelectMethod == 0: 

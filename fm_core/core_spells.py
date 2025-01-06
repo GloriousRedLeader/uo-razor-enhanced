@@ -58,8 +58,6 @@ def cast_spell(
     # Optional mobile target, otherwise spell specific logic
     target = None
 ):
-    recoveryTimeMs = 750
-    
     # Player is moving.
     if user32.GetAsyncKeyState(0x02) & 0x8000:
         return
@@ -141,7 +139,7 @@ def cast_spell(
     if target is not None:
         Target.TargetExecute(target)
     
-    Misc.Pause(recoveryTimeMs)
+    Misc.Pause(get_fcr_delay())
     
 # Considers FC jewelry and protection spell. Add a buffer for lag.
 def get_fc_delay(
@@ -152,6 +150,13 @@ def get_fc_delay(
     baseDelayMs):
         
     return baseDelayMs + 250
+    
+# Completely stolen from Omniwraith and his lazy mage
+def get_fcr_delay():
+    fcr = int(((6 - Player.FasterCastRecovery) / 4) * 1000)
+    if fcr < 1:
+        fcr = 1
+    return fcr    
     
 
 # Make sure a spell gets cast
