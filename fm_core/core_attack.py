@@ -8,6 +8,7 @@ from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
 from Scripts.fm_core.core_mobiles import get_friends_by_names
 from Scripts.fm_core.core_mobiles import get_blues_in_range
 from Scripts.fm_core.core_mobiles import get_mobile_percent_hp
+from Scripts.fm_core.core_mobiles import get_pets
 from Scripts.fm_core.core_player import find_instrument
 from Scripts.fm_core.core_player import use_bag_of_sending
 from Scripts.fm_core.core_spells import cast_until_works
@@ -1323,16 +1324,12 @@ def run_mage_loop(
     # Mage AOE Loop or Mage Single Target Loop
     loopName = "Mage Loop",
     
-    # 0 = Heal only names in friendNames, 1 = heal any blue in range
+    # 0 = Heal only names in friendNames, 1 = heal any blue in range, 2 = my pets only
     friendSelectMethod = 0,
     
     # Names of pets or blue characters you want to heal, cure if they are in range.
     # Note that you still need to enable useCure / useGreaterHeal etc.
     friendNames = [],
-    
-    # Buffer in MS between attacks, otherwise we get "You have not yet recovered"
-    # DEPRECATED: NO LONGER DOES ANYTHING
-    actionDelayMs = 1000,
     
     # Only look for mobs and pets/friends inside of this range. IF they are farther, then
     # dont heal them / dont attack them.
@@ -1340,15 +1337,12 @@ def run_mage_loop(
     
     # Use Arcane Empowerment (spell weaving) 0 = disabled, 1 = enabled
     useArcaneEmpowerment = 0,
-    
-    # Time in millesconds between casts of arcane empowerment.
-    arcaneEmpowermentDelayMs = 35000,
 
     # Whether to use this spell 0 = disabled, 1 = enabled
     usePoisonStrike = 0,
     
     # Lower number like 10 means to spam repeatadly, number of MS in between usages
-    poisonStrikeDelayMs = 10,
+    poisonStrikeDelayMs = 8000,
     
     # Whether to use this spell 0 = disabled, 1 = enabled
     useStrangle = 0,
@@ -1424,7 +1418,6 @@ def run_mage_loop(
 ):
     
     Timer.Create( 'magePingTimer', 1 )
-    Timer.Create( 'arcaneEmpowermentTimer', 1 )
     Timer.Create( 'poisonStrikeTimer', 1000 )
     Timer.Create( 'strangleTimer', 1 )
     Timer.Create( 'corpseSkinTimer', 1 )
@@ -1447,12 +1440,11 @@ def run_mage_loop(
             continue  
 
         # This is up top so we can buff up before heals.
-        if useArcaneEmpowerment == 1 and Timer.Check( 'arcaneEmpowermentTimer' ) == False and not Player.BuffsExist("Arcane Empowerment") and Player.Mana > 90:
+        if useArcaneEmpowerment == 1 and not Player.BuffsExist("Arcane Empowerment") and Player.Mana > 90:
             cast_spell("Arcane Empowerment")
-            Timer.Create( 'arcaneEmpowermentTimer', arcaneEmpowermentDelayMs )            
             
         # Continue loop before doing harmul actions, focus on healing/curing.
-        if heal_player_and_friends(friendSelectMethod = friendSelectMethod, friendNames = friendNames, range = range, actionDelayMs = actionDelayMs, healThreshold = healThreshold, useCure = useCure, useGreaterHeal = useGreaterHeal, useSpiritSpeak = useSpiritSpeak) == True:
+        if heal_player_and_friends(friendSelectMethod = friendSelectMethod, friendNames = friendNames, range = range, healThreshold = healThreshold, useCure = useCure, useGreaterHeal = useGreaterHeal, useSpiritSpeak = useSpiritSpeak) == True:
             continue
         
         mobToAttack = None
@@ -1515,7 +1507,7 @@ def run_mage_loop(
 # Returns True if something was healed so we can call it again. 
 def heal_player_and_friends(
 
-    # 0 = Heal only names in friendNames, 1 = heal any blue in range
+    # 0 = Heal only names in friendNames, 1 = heal any blue in range, 2 = my pets only
     friendSelectMethod = 0,
     
     # Pets, friends, etc. These are names (string).
@@ -1523,9 +1515,6 @@ def heal_player_and_friends(
     
     # If friends and pets are farther than this, dont bother with this.
     range = 8,
-
-    # Buffer in MS between heal actions, otherwise we get "You have not yet recovered"
-    actionDelayMs = 1000,
 
     # Only heal when pet/player life is below this threshold
     healThreshold = 0.7, 
@@ -1576,6 +1565,8 @@ def heal_player_and_friends(
         friendMobiles = get_friends_by_names(friendNames, range)
     elif friendSelectMethod == 1:
         friendMobiles = get_blues_in_range(range)
+    elif friendSelectMethod == 2:
+        friendMobiles = get_pets()
         
     def sort_friends(x, y):
         if x is None or y is None:

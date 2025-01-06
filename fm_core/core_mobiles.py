@@ -124,6 +124,14 @@ def get_yellows_in_range(range = 8):
     mobs = Mobiles.ApplyFilter(fil)
 
     return mobs
+
+# Gets your pets as mobiles    
+def get_pets():
+    pets = []
+    blues = get_blues_in_range(range = 10)
+    for blue in blues:
+        if blue.CanRename:
+            pets.append(blue)
     
 # Returns the decimal representation of mobile hp, e.g. 0.30 is 30% health
 def get_mobile_percent_hp(mobile):
