@@ -419,7 +419,7 @@ def run_fishing_loop(
     fishRange = 4, 
     
     # If on a boat, tells the tiller to move forward this many times.
-    moveTiles = 2, 
+    moveTiles = 0, 
     
     # How long to pause between casts
     fishDelayMs = 10000,
