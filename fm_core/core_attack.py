@@ -4,11 +4,12 @@
 #   2024-03-26
 # Use at your own risk. 
 
-from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
+#from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
 from Scripts.fm_core.core_mobiles import get_friends_by_names
 from Scripts.fm_core.core_mobiles import get_blues_in_range
 from Scripts.fm_core.core_mobiles import get_mobile_percent_hp
 from Scripts.fm_core.core_mobiles import get_pets
+from Scripts.fm_core.core_mobiles import get_enemies
 from Scripts.fm_core.core_player import find_instrument
 from Scripts.fm_core.core_player import use_bag_of_sending
 from Scripts.fm_core.core_spells import cast_until_works
@@ -211,7 +212,8 @@ def run_dex_loop(
 
         heal_player_and_friends(useCleanseByFire = useCleanseByFire, useRemoveCurse = useRemoveCurse)
             
-        eligible = get_mobs_exclude_serials(attackRange, namesToExclude = ["a horde minion"])
+        #eligible = get_mobs_exclude_serials(attackRange, namesToExclude = ["a horde minion"])
+        eligible = get_enemies(attackRange)
         if len(eligible) > 0:   
             nearest = Mobiles.Select(eligible, 'Nearest')
             if Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=10:            
@@ -471,7 +473,8 @@ def run_ss_loop (
             Misc.Pause(actionDelayMs)
             
         # Excluding player from targeting his mirror images (they disrupt this script)
-        eligible = get_mobs_exclude_serials(6, namesToExclude = [Player.Name, "a reaper"])
+        #eligible = get_mobs_exclude_serials(6, namesToExclude = [Player.Name, "a reaper"])
+        eligible = get_enemies(6)
         if len(eligible) > 0:   
             nearest = Mobiles.Select(eligible, 'Nearest')
             if Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=6:            
@@ -629,7 +632,8 @@ def run_archery_loop (
             Misc.Pause(actionDelayMs)
      
         # Excluding player from targeting his mirror images (they disrupt this script)
-        eligible = get_mobs_exclude_serials(10, namesToExclude = [Player.Name, "a reaper"])
+        #eligible = get_mobs_exclude_serials(10, namesToExclude = [Player.Name, "a reaper"])
+        eligible = get_enemies(10)
         if len(eligible) > 0:   
             nearest = Mobiles.Select(eligible, 'Nearest')
             if Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<= 10:            
@@ -815,7 +819,8 @@ def run_buff_loop_only (
             Timer.Create( 'dexSpecialAbilityDelayTimer', specialAbilityDelayMs )   
             
         #eligible = get_mobs_exclude_serials(6)
-        eligible = get_mobs_exclude_serials(6, namesToExclude = [Player.Name, "a reaper"])
+        #eligible = get_mobs_exclude_serials(6, namesToExclude = [Player.Name, "a reaper"])
+        eligible = get_enemies(6)
         if len(eligible) > 0:   
             nearest = Mobiles.Select(eligible, 'Nearest')
             if Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=12:            
@@ -1007,7 +1012,8 @@ def run_mage_loop2(
         if mobSelectMethod == 1:
             mobToAttack = mob
         else:
-            eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])
+            #eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])
+            eligible = get_enemies(range)
             numEligibleMobs = len(eligible)
             if len(eligible) > 0:   
                 nearest = Mobiles.Select(eligible, 'Nearest')
@@ -1452,7 +1458,8 @@ def run_mage_loop(
         if heal_player_and_friends(friendSelectMethod = friendSelectMethod, friendNames = friendNames, range = range, healThreshold = healThreshold, useCure = useCure, useGreaterHeal = useGreaterHeal, useSpiritSpeak = useSpiritSpeak) == True:
             continue
         
-        eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])
+        #eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])
+        eligible = get_enemies(range)
         if len(eligible) > 0:  
             nearestMob = Mobiles.Select(eligible, 'Nearest')
             nonPoisonedMob = next((mob for mob in eligible if not mob.Poisoned and get_mobile_percent_hp(mob) > 0.5), None)
