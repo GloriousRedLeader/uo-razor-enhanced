@@ -130,8 +130,6 @@ def cast_spell(
         Spells.CastChivalry(spellName)
         Misc.Pause(get_fc_delay(spellName, ENEMY_OF_ONE_DELAY))            
     elif spellName == "Meditation":
-        Player.HeadMessage(58, "Stand still - meditating!")
-        Player.HeadMessage(38, "Stand still - meditating!")
         Player.UseSkill(spellName)
     else:
         Player.HeadMessage(28, "That spell is not supported! Pausing.")

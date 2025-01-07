@@ -1494,10 +1494,13 @@ def run_mage_loop(
                 Timer.Create( 'poisonStrikeTimer', poisonStrikeDelayMs )                
             elif useThunderstorm == 1 and Player.DistanceTo(nearestMob) < 7 and Player.Mana > 30:
                 cast_spell("Thunderstorm")
-            elif useWither == 1 and Player.DistanceTo(nearestMob) < 4 and Player.Mana > 20:
+            elif useWither == 1 and Player.DistanceTo(nearestMob) < 5 and Player.Mana > 20:
                 cast_spell("Wither")
         elif useMeditation == 1 and Player.Mana / Player.ManaMax < 0.83 and not Player.Poisoned and not Player.BuffsExist("Bleeding") and not Player.BuffsExist("Strangle") and Timer.Check( 'meditationTimer' ) == False:
+            Player.HeadMessage(58, "Stand still - going to meditate!")
+            Misc.Pause(1500)
             cast_spell("Meditation")
+            Player.HeadMessage(58, "Meditating!")
             Timer.Create( 'meditationTimer', 10000)                
                 
         Misc.Pause(100)
