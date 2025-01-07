@@ -136,7 +136,7 @@ def get_pets():
 # Returns the decimal representation of mobile hp, e.g. 0.30 is 30% health
 def get_mobile_percent_hp(mobile):
     if mobile is not None and mobile.Hits is not None and mobile.Hits > 0 and mobile.HitsMax is not None and mobile.HitsMax > 0:
-        return mobToAttack.Hits / mobToAttack.HitsMax
+        return mobile.Hits / mobile.HitsMax
     else:
         return 0
         

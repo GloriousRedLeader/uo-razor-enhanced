@@ -4,45 +4,44 @@
 #   2024-03-26
 # Use at your own risk. 
 
-# This stuff is used to detect keypresses like mouse for movement
-user32 = ctypes.WinDLL('user32', use_last_error=True)
-user32.GetAsyncKeyState.restype = wintypes.SHORT
-user32.GetAsyncKeyState.argtypes = [wintypes.INT]
+FC_CAP_MAGERY = 2
+FC_CAP_NECROMANCY = 3 if (Player.GetSkillValue("Necromancy") == 120 and Player.GetSkillValue("Necromancy") == 120 and not any(Player.GetSkillValue(skill) > 30 for skill in ["Magery", "Spellweaving", "Parrying", "Mysticism", "Chivalry", "Animal Taming", "Animal Lore", "Ninjitsu", "Bushido", "Focus", "Imbuing", "Evaluating Intelligence"])) else 2
+FC_CAP_CHIVALRY = 4
+FC_CAP_SPELLWEAVING = 4
 
 # Got the delay values from ServUO Github
 
 # Necro
-WITHER_DELAY = 2250
-POISON_STRIKE_DELAY = 2000
-STRANGLE_DELAY = 2250
+CURSE_WEAPON_DELAY = 1000
 EVIL_OMEN_DELAY = 1000
 CORPSE_SKIN_DELAY = 1750
+POISON_STRIKE_DELAY = 2000
+STRANGLE_DELAY = 2250
+WITHER_DELAY = 2250
 CONDUIT_DELAY = 2250
-CURSE_WEAPON_DELAY = 1000
 SPIRIT_SPEAK_DELAY = 999
 
 # Spellweaving
-WILDFIRE_DELAY = 2500
 THUNDERSTORM_DELAY = 1500
+WILDFIRE_DELAY = 2500
 ARCANE_EMPOWERMENT_DELAY = 3000
 GIFT_OF_RENEWAL_DELAY = 3000
 WORD_OF_DEATH_DELAY = 3500
 
 # Magery
-GREATER_HEAL_DELAY = 1250
-ARCH_CURE_DELAY = 1250
-POISON_FIELD_DELAY = 1500
-POISON_DELAY = 1000
+POISON_DELAY = 1500
+CURSE_DELAY = 1750
+GREATER_HEAL_DELAY = 1750
+ARCH_CURE_DELAY = 1750
+POISON_FIELD_DELAY = 2000
 DEATH_RAY_DELAY = 2250
-CURSE_DELAY = 1250
-
 
 # Chivalry
 CONSECRATE_WEAPON_DELAY = 500
-DIVINE_FURY_DELAY = 1000
-CLOSE_WOUNDS_DELAY = 1500
 ENEMY_OF_ONE_DELAY = 500
+DIVINE_FURY_DELAY = 1000
 CLEANSE_BY_FIRE_DELAY = 1000
+CLOSE_WOUNDS_DELAY = 1500
 REMOVE_CURSE_DELAY = 1500
 
 # Casts a spell. Blocks until spell is complete, or a small buffer has elapsed.
@@ -58,12 +57,7 @@ def cast_spell(
     # Optional mobile target, otherwise spell specific logic
     target = None
 ):
-    # Player is moving.
-    if user32.GetAsyncKeyState(0x02) & 0x8000:
-        return
-        
-    if Player.BuffsExist("Meditation"):
-        return
+    Target.Cancel()
     
     if spellName == "Wildfire":
         Spells.CastSpellweaving(spellName)
@@ -139,6 +133,9 @@ def cast_spell(
         Player.HeadMessage(58, "Stand still - meditating!")
         Player.HeadMessage(38, "Stand still - meditating!")
         Player.UseSkill(spellName)
+    else:
+        Player.HeadMessage(28, "That spell is not supported! Pausing.")
+        Misc.Pause(1000)
 
     if target is not None:
         Target.TargetExecute(target)
@@ -153,7 +150,23 @@ def get_fc_delay(
     # Constants defined above for each spell
     baseDelayMs):
         
-    return baseDelayMs + 250
+    latency = 350
+
+    if spellName in ["Wildfire", "Thunderstorm", "Arcane Empowerment", "Word of Death", "Gift of Renewal"]:
+        fcOffset = 250 * (min(abs(Player.FasterCasting - 2), FC_CAP_SPELLWEAVING - 2) if Player.BuffsExist("Protection") else min(Player.FasterCasting, FC_CAP_SPELLWEAVING))    
+    elif spellName in ["Arch Cure", "Greater Heal", "Poison", "Poison Field"]:
+        fcOffset = 250 * (min(abs(Player.FasterCasting - 2), FC_CAP_MAGERY - 2) if Player.BuffsExist("Protection") else min(Player.FasterCasting, FC_CAP_MAGERY))
+    elif spellName in ["Evil Omen", "Strangle", "Wither", "Poison Strike", "Corpse Skin"]:
+        fcOffset = 250 * (min(abs(Player.FasterCasting - 2), FC_CAP_NECROMANCY - 2) if Player.BuffsExist("Protection") else min(Player.FasterCasting, FC_CAP_NECROMANCY))
+    elif spellName in ["Consecrate Weapon", "Close Wounds", "Cleanse by Fire", "Enemy of One", "Divine Fury"]:
+        fcOffset = 250 * (min(abs(Player.FasterCasting - 2), FC_CAP_CHIVALRY - 2) if Player.BuffsExist("Protection") else min(Player.FasterCasting, FC_CAP_CHIVALRY))
+        
+    
+    if fcOffset is not None:
+        print("spellName=", spellName, "fcOffset", fcOffset, "fc", (fcOffset / 250), "final fc delay", baseDelayMs + latency - fcOffset)
+        return baseDelayMs + latency - fcOffset
+        
+    return baseDelayMs + latency
     
 # Completely stolen from Omniwraith and his lazy mage
 def get_fcr_delay():

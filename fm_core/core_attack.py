@@ -13,6 +13,7 @@ from Scripts.fm_core.core_player import find_instrument
 from Scripts.fm_core.core_player import use_bag_of_sending
 from Scripts.fm_core.core_spells import cast_until_works
 from Scripts.fm_core.core_spells import cast_spell
+from Scripts.fm_core.core_rails import is_player_moving
 import sys
 
 # These are loops that will run on your character that find nearest enemies,
@@ -1438,6 +1439,10 @@ def run_mage_loop(
         if not Player.Visible:
             Misc.Pause(500)
             continue  
+            
+        if is_player_moving() or Player.BuffsExist("Meditation"):
+            Misc.Pause(250)
+            continue
 
         # This is up top so we can buff up before heals.
         if useArcaneEmpowerment == 1 and not Player.BuffsExist("Arcane Empowerment") and Player.Mana > 90:
@@ -1447,52 +1452,51 @@ def run_mage_loop(
         if heal_player_and_friends(friendSelectMethod = friendSelectMethod, friendNames = friendNames, range = range, healThreshold = healThreshold, useCure = useCure, useGreaterHeal = useGreaterHeal, useSpiritSpeak = useSpiritSpeak) == True:
             continue
         
-        mobToAttack = None
         eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])
-        if len(eligible) > 0:   
-            mobToAttack = Mobiles.Select(eligible, 'Nearest')
-        
-        if mobToAttack != None:
-            if useConduit == 1 and not Player.BuffsExist("Condit") and len(eligible) > 3 and Player.DistanceTo(mobToAttack) > 4:
-                cast_spell("Conduit", mobToAttack)
+        if len(eligible) > 0:  
+            nearestMob = Mobiles.Select(eligible, 'Nearest')
+            nonPoisonedMob = next((mob for mob in eligible if not mob.Poisoned and get_mobile_percent_hp(mob) > 0.5), None)
+            
+            if useConduit == 1 and not Player.BuffsExist("Condit") and len(eligible) > 3 and Player.DistanceTo(nearestMob) > 4:
+                cast_spell("Conduit", nearestMob)
             elif useDeathRay == 1 and not Player.BuffsExist("Death Ray") and Player.BuffsExist("Arcane Empowerment") and Player.Mana > 100:
-                cast_spell("Death Ray", mobToAttack)                                
-            elif useWordOfDeath == 1 and get_mobile_percent_hp(mobToAttack) < 0.3:
-                cast_spell("Word of Death", mobToAttack)                
-            elif useCorpseSkin == 1 and Timer.Check( 'corpseSkinTimer' ) == False and get_mobile_percent_hp(mobToAttack) > 0.5:
+                cast_spell("Death Ray", nearestMob)                                
+            elif useWordOfDeath == 1 and get_mobile_percent_hp(nearestMob) < 0.3:
+                cast_spell("Word of Death", nearestMob)                
+            elif useCorpseSkin == 1 and Timer.Check( 'corpseSkinTimer' ) == False and get_mobile_percent_hp(nearestMob) > 0.5:
                 if useEvilOmenBeforeDotsAndCurses == 1:
-                    cast_spell("Evil Omen", mobToAttack)
-                cast_spell("Corpse Skin", mobToAttack)
+                    cast_spell("Evil Omen", nearestMob)
+                cast_spell("Corpse Skin", nearestMob)
                 Timer.Create( 'corpseSkinTimer', corpseSkinDelayMs )
-            elif useStrangle == 1 and Timer.Check( 'strangleTimer' ) == False and get_mobile_percent_hp(mobToAttack) > 0.5:
+            elif useStrangle == 1 and Timer.Check( 'strangleTimer' ) == False and get_mobile_percent_hp(nearestMob) > 0.5:
                 if useEvilOmenBeforeDotsAndCurses == 1:
-                    cast_spell("Evil Omen", mobToAttack)
-                cast_spell("Strangle", mobToAttack)
+                    cast_spell("Evil Omen", nearestMob)
+                cast_spell("Strangle", nearestMob)
                 Timer.Create( 'strangleTimer', strangleDelayMs ) 
-            elif usePoison == 1 and Timer.Check( 'poisonTimer' ) == False and not mobToAttack.Poisoned and get_mobile_percent_hp(mobToAttack) > 0.5:
+            elif usePoison == 1 and Timer.Check( 'poisonTimer' ) == False and nonPoisonedMob is not None:
                 if useEvilOmenBeforeDotsAndCurses == 1:
-                    cast_spell("Evil Omen", mobToAttack)
-                cast_spell("Poison", mobToAttack)
+                    cast_spell("Evil Omen", nonPoisonedMob)
+                cast_spell("Poison", nonPoisonedMob)
                 Timer.Create( 'poisonTimer', poisonDelayMs) 
-            elif useCurse == 1 and Timer.Check( 'curseTimer' ) == False and get_mobile_percent_hp(mobToAttack) > 0.75:
+            elif useCurse == 1 and Timer.Check( 'curseTimer' ) == False and get_mobile_percent_hp(nearestMob) > 0.75:
                 if useEvilOmenBeforeDotsAndCurses == 1:
-                    cast_spell("Evil Omen", mobToAttack)
-                cast_spell("Curse", mobToAttack)
+                    cast_spell("Evil Omen", nearestMob)
+                cast_spell("Curse", nearestMob)
                 Timer.Create( 'curseTimer', curseDelayMs) 
             elif useWildfire == 1 and Timer.Check( 'wildfireTimer' ) == False:
-                cast_spell("Wildfire", mobToAttack)
+                cast_spell("Wildfire", nearestMob)
                 Timer.Create( 'wildfireTimer', wildfireDelayMs )
-            elif usePoisonField == 1 and Timer.Check( 'poisonFieldTimer' ) == False and len(eligible) > 3:
-                cast_spell("Poison Field", mobToAttack)
+            elif usePoisonField == 1 and Timer.Check( 'poisonFieldTimer' ) == False and nonPoisonedMob is not None:
+                cast_spell("Poison Field", nonPoisonedMob)
                 Timer.Create( 'poisonFieldTimer', poisonFieldDelayMs)                 
             elif usePoisonStrike == 1  and Timer.Check( 'poisonStrikeTimer' ) == False:
-                cast_spell("Poison Strike", mobToAttack)
+                cast_spell("Poison Strike", nearestMob)
                 Timer.Create( 'poisonStrikeTimer', poisonStrikeDelayMs )                
-            elif useThunderstorm == 1:
+            elif useThunderstorm == 1 and Player.DistanceTo(nearestMob) < 7 and Player.Mana > 30:
                 cast_spell("Thunderstorm")
-            elif useWither == 1:
+            elif useWither == 1 and Player.DistanceTo(nearestMob) < 4 and Player.Mana > 20:
                 cast_spell("Wither")
-        elif Player.Mana / Player.ManaMax < 0.83 and not Player.Poisoned and not Player.BuffsExist("Bleeding") and not Player.BuffsExist("Strangle") and Timer.Check( 'meditationTimer' ) == False:
+        elif useMeditation == 1 and Player.Mana / Player.ManaMax < 0.83 and not Player.Poisoned and not Player.BuffsExist("Bleeding") and not Player.BuffsExist("Strangle") and Timer.Check( 'meditationTimer' ) == False:
             cast_spell("Meditation")
             Timer.Create( 'meditationTimer', 10000)                
                 
@@ -1542,13 +1546,13 @@ def heal_player_and_friends(
         return False
 
     if useCure == 1 and Player.Poisoned:
-        cast_spell("Arch Cure", Player.Body)
+        cast_spell("Arch Cure", Player.Serial)
         return True
     elif useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
-        cast_spell("Greater Heal", Player.Body)
+        cast_spell("Greater Heal", Player.Serial)
         return True
     elif useCloseWounds == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
-        cast_spell("Close Wounds", Player.Body)
+        cast_spell("Close Wounds", Player.Serial)
         return True
     elif useSpiritSpeak == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits:
         cast_spell("Spirit Speak")
@@ -1557,7 +1561,7 @@ def heal_player_and_friends(
         cast_spell("Cleanse by Fire")
         return False # Doing this on purpose, this isnt superimportant for melee.
     elif useRemoveCurse == 1 and Player.BuffsExist("Curse"):
-        cast_spell("Remove Curse", Player.Body)
+        cast_spell("Remove Curse", Player.Serial)
         return False # Doing this on purpose, this isnt super important for melee.
         
     # Now lets heal our friends

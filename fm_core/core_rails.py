@@ -13,7 +13,18 @@ from System import Byte, Int32
 import sys
 import time
 
+# This stuff is used to detect keypresses like mouse for movement
+import ctypes
+from ctypes import wintypes
+user32 = ctypes.WinDLL('user32', use_last_error=True)
+user32.GetAsyncKeyState.restype = wintypes.SHORT
+user32.GetAsyncKeyState.argtypes = [wintypes.INT]
+
 CORE_LOOP_DELAY_MS = 650
+
+# Is right mouse button down (player moving)?
+def is_player_moving():
+    return user32.GetAsyncKeyState(0x02) & 0x8000
 
 # Lifted this from the mining script. Returns the same thing as relative
 # to player +1 based on direction. The relative function doesnt always
