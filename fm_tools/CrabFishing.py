@@ -44,8 +44,8 @@ for trapItem in trapItems:
         traps.append(trapItem)
 #traps = Items.FindByName("empty lobster trap", -1, Player.Backpack.Serial, 1)
 
-waitMs = 125000
-maxTraps = 12
+waitMs = 65000
+maxTraps = 19
 actualTraps = len(traps)
 
 Player.HeadMessage(38, "Stand in middle of cargo hold")
