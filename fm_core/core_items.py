@@ -84,7 +84,15 @@ FISH_STATIC_IDS = [
     0x44C4, # Yellowfin tuna, pike
     0x44C5, # Captain snook
     0x44C6, # Mahi-mahi
+    
+    0x44D1, # Snow crab, Apple crab
+    0x44D2, # Blue crab, Dungeness crab
+    0x44D3, # Crusty Lobster
+    0x44D4, # Hummer lobster
 ]
+
+LOBSTER_TRAP_STATIC_IDS = [0x44CF]
+DEPLOYED_LOBSTER_TRAP_STATIC_ID = 0x44CB
 
 # Corpses are technically items.    
 def get_corpses(range = 2):

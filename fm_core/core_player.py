@@ -25,6 +25,13 @@ def find_all_in_container_by_ids(itemIDs, containerSerial = Player.Backpack.Seri
 def find_first_in_container_by_name(itemName, containerSerial = Player.Backpack.Serial):
     return Items.FindByName(itemName, -1, containerSerial, 1)
 
+# Gets all items by name    
+#def find_all_in_container_by_name(itemName, containerSerial = Player.Backpack.Serial):
+#    items = []
+#    items = items + Items.FindByName(itemName, -1, containerSerial, 1)
+#    Items.Find
+#    return 
+
 # Takes a list of itemIDs and returns the first one it finds.
 def find_first_in_container_by_ids(itemIDs, containerSerial = Player.Backpack.Serial):
     for itemID in itemIDs:

@@ -365,7 +365,7 @@ def run_mining_loop(
         filter = Items.Filter()
         # 0x053B is Cave floor
         # 0x0018 is Sand
-        filter.Graphics = List[Int32]((0x053B))
+        filter.Graphics = List[Int32]((0x053B)) 
         filter.OnGround = True
         filter.RangeMax = 1
         items = Items.ApplyFilter(filter)

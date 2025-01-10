@@ -8,41 +8,60 @@ FC_CAP_MAGERY = 2
 FC_CAP_NECROMANCY = 3 if (Player.GetSkillValue("Necromancy") == 120 and Player.GetSkillValue("Necromancy") == 120 and not any(Player.GetSkillValue(skill) > 30 for skill in ["Magery", "Spellweaving", "Parrying", "Mysticism", "Chivalry", "Animal Taming", "Animal Lore", "Ninjitsu", "Bushido", "Focus", "Imbuing", "Evaluating Intelligence"])) else 2
 FC_CAP_CHIVALRY = 4
 FC_CAP_SPELLWEAVING = 4
+FC_CAP_SHIELD_BASH = 4
 
-# Got the delay values from ServUO Github
-
-# Necro
+# Necro (taken from ServUO files)
 CURSE_WEAPON_DELAY = 1000
 EVIL_OMEN_DELAY = 1000
 CORPSE_SKIN_DELAY = 1750
 POISON_STRIKE_DELAY = 2000
 STRANGLE_DELAY = 2250
 WITHER_DELAY = 2250
-CONDUIT_DELAY = 2250
-SPIRIT_SPEAK_DELAY = 999
 
-# Spellweaving
+# Spellweaving (taken from ServUO files)
 THUNDERSTORM_DELAY = 1500
 WILDFIRE_DELAY = 2500
 ARCANE_EMPOWERMENT_DELAY = 3000
 GIFT_OF_RENEWAL_DELAY = 3000
 WORD_OF_DEATH_DELAY = 3500
 
-# Magery
+# Magery (these are all +500ms that are listed on the uo wiki)
 POISON_DELAY = 1500
 CURSE_DELAY = 1750
 GREATER_HEAL_DELAY = 1750
 ARCH_CURE_DELAY = 1750
 POISON_FIELD_DELAY = 2000
-DEATH_RAY_DELAY = 2250
 
-# Chivalry
+# Chivalry (taken from ServUO files)
 CONSECRATE_WEAPON_DELAY = 500
 ENEMY_OF_ONE_DELAY = 500
 DIVINE_FURY_DELAY = 1000
 CLEANSE_BY_FIRE_DELAY = 1000
 CLOSE_WOUNDS_DELAY = 1500
 REMOVE_CURSE_DELAY = 1500
+
+# Mastery (taken from ServUO files)
+CONDUIT_DELAY = 2250
+DEATH_RAY_DELAY = 2250
+SHIELD_BASH_DELAY = 1000
+
+# Skills
+SPIRIT_SPEAK_DELAY = 999
+MEDITATION_DELAY = 250
+
+# Adds delay to skill usage so we can loop it
+def use_skill(
+    # Meditation, Spirit Speak, etc.
+    skillName
+):
+    Player.UseSkill(skillName)
+    
+    if skillName == "Meditation":
+        Misc.Pause(MEDITATION_DELAY)
+    elif skillName == "Spirit Speak":
+        Misc.Pause(SPIRIT_SPEAK_DELAY)
+    else:
+        Misc.Pause(1000)
 
 # Casts a spell. Blocks until spell is complete, or a small buffer has elapsed.
 # It is possible the spell fizzled or there was some latency. 
@@ -55,82 +74,88 @@ def cast_spell(
     spellName, 
     
     # Optional mobile target, otherwise spell specific logic
-    target = None
+    target = None,
+    
+    # Milliseonds of extra delay when computing cast time to account for internet fuzz. Fine tune this as needed.
+    latencyMs = 100
 ):
     Target.Cancel()
     
     if spellName == "Wildfire":
         Spells.CastSpellweaving(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, WILDFIRE_DELAY))
+        Target.WaitForTarget(get_fc_delay(WILDFIRE_DELAY, FC_CAP_SPELLWEAVING, latencyMs))
     elif spellName == "Thunderstorm":
         Spells.CastSpellweaving(spellName)
-        Misc.Pause(get_fc_delay(spellName, THUNDERSTORM_DELAY)) 
+        Misc.Pause(get_fc_delay(THUNDERSTORM_DELAY, FC_CAP_SPELLWEAVING, latencyMs)) 
     elif spellName == "Word of Death":
         Spells.CastSpellweaving(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, WORD_OF_DEATH_DELAY))
+        Target.WaitForTarget(get_fc_delay(WORD_OF_DEATH_DELAY, FC_CAP_SPELLWEAVING, latencyMs))
     elif spellName == "Arcane Empowerment":
         Spells.CastSpellweaving(spellName)    
-        Target.WaitForTarget(get_fc_delay(spellName, ARCANE_EMPOWERMENT_DELAY))
+        Target.WaitForTarget(get_fc_delay(ARCANE_EMPOWERMENT_DELAY, FC_CAP_SPELLWEAVING, latencyMs))
     elif spellName == "Wither":
         Spells.CastNecro(spellName)
-        Misc.Pause(get_fc_delay(spellName, WITHER_DELAY)) 
+        Misc.Pause(get_fc_delay(WITHER_DELAY, FC_CAP_NECROMANCY, latencyMs)) 
     elif spellName == "Conduit":
         Spells.CastMastery(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, CONDUIT_DELAY))
+        Target.WaitForTarget(get_fc_delay(CONDUIT_DELAY, FC_CAP_NECROMANCY, latencyMs))
     elif spellName == "Corpse Skin":
         Spells.CastNecro(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, CORPSE_SKIN_DELAY))
+        Target.WaitForTarget(get_fc_delay(CORPSE_SKIN_DELAY, FC_CAP_NECROMANCY, latencyMs))
     elif spellName == "Evil Omen":
         Spells.CastNecro(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, EVIL_OMEN_DELAY))
+        Target.WaitForTarget(get_fc_delay(EVIL_OMEN_DELAY, FC_CAP_NECROMANCY, latencyMs))
     elif spellName == "Strangle":
         Spells.CastNecro(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, STRANGLE_DELAY))
+        Target.WaitForTarget(get_fc_delay(STRANGLE_DELAY, FC_CAP_NECROMANCY, latencyMs))
     elif spellName == "Poison Strike":
         Spells.CastNecro(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, POISON_STRIKE_DELAY))
+        Target.WaitForTarget(get_fc_delay(POISON_STRIKE_DELAY, FC_CAP_NECROMANCY, latencyMs))
     elif spellName == "Curse Weapon":
         Spells.CastNecro(spellName)
-        Misc.Pause(get_fc_delay(spellName, CURSE_WEAPON_DELAY))        
-    elif spellName == "Spirit Speak":
-        Player.UseSkill("Spirit Speak")
-        Misc.Pause(get_fc_delay(spellName, SPIRIT_SPEAK_DELAY))
+        Misc.Pause(get_fc_delay(CURSE_WEAPON_DELAY, FC_CAP_NECROMANCY, latencyMs))        
+    #elif spellName == "Spirit Speak":
+        #Player.UseSkill("Spirit Speak")
+        #Misc.Pause(get_fc_delay(SPIRIT_SPEAK_DELAY))
     elif spellName == "Poison Field":
         Spells.CastMagery(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, POISON_FIELD_DELAY))
+        Target.WaitForTarget(get_fc_delay(POISON_FIELD_DELAY, FC_CAP_MAGERY, latencyMs))
     elif spellName == "Poison":
         Spells.CastMagery(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, POISON_DELAY))
+        Target.WaitForTarget(get_fc_delay(POISON_DELAY, FC_CAP_MAGERY, latencyMs))
     elif spellName == "Death Ray":
         Spells.CastMastery(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, DEATH_RAY_DELAY))
+        Target.WaitForTarget(get_fc_delay(DEATH_RAY_DELAY, FC_CAP_MAGERY, latencyMs))
     elif spellName == "Curse":
         Spells.CastMagery(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, CURSE_DELAY))
+        Target.WaitForTarget(get_fc_delay(CURSE_DELAY, FC_CAP_MAGERY, latencyMs))
         Target.TargetExecute(target)
     elif spellName == "Arch Cure":
         Spells.CastMagery(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, ARCH_CURE_DELAY))
+        Target.WaitForTarget(get_fc_delay(ARCH_CURE_DELAY, FC_CAP_MAGERY, latencyMs))
     elif spellName == "Greater Heal":
         Spells.CastMagery(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, GREATER_HEAL_DELAY))
+        Target.WaitForTarget(get_fc_delay(GREATER_HEAL_DELAY, FC_CAP_MAGERY, latencyMs))
     elif spellName == "Remove Curse":
         Spells.CastChivalry(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, REMOVE_CURSE_DELAY))
+        Target.WaitForTarget(get_fc_delay(REMOVE_CURSE_DELAY, FC_CAP_CHIVALRY, latencyMs))
     elif spellName == "Close Wounds":
         Spells.CastChivalry(spellName)
-        Target.WaitForTarget(get_fc_delay(spellName, CLOSE_WOUNDS_DELAY))        
+        Target.WaitForTarget(get_fc_delay(CLOSE_WOUNDS_DELAY, FC_CAP_CHIVALRY, latencyMs))        
     elif spellName == "Divine Fury":
         Spells.CastChivalry(spellName)
-        Misc.Pause(get_fc_delay(spellName, DIVINE_FURY_DELAY))            
+        Misc.Pause(get_fc_delay(DIVINE_FURY_DELAY, FC_CAP_CHIVALRY, latencyMs))            
     elif spellName == "Consecrate Weapon":
         Spells.CastChivalry(spellName)
-        Misc.Pause(get_fc_delay(spellName, CONSECRATE_WEAPON_DELAY))            
+        Misc.Pause(get_fc_delay(CONSECRATE_WEAPON_DELAY, FC_CAP_CHIVALRY, latencyMs))            
     elif spellName == "Enemy of One":
         Spells.CastChivalry(spellName)
-        Misc.Pause(get_fc_delay(spellName, ENEMY_OF_ONE_DELAY))            
-    elif spellName == "Meditation":
-        Player.UseSkill(spellName)
+        Misc.Pause(get_fc_delay(ENEMY_OF_ONE_DELAY, FC_CAP_CHIVALRY, latencyMs))            
+    #elif spellName == "Meditation":
+    #    Player.UseSkill(spellName)
+    elif spellName == "Shield Bash":
+        Spells.CastMastery(spellName)
+        Misc.Pause(get_fc_delay(SHIELD_BASH_DELAY, FC_CAP_SHIELD_BASH, latencyMs))            
     else:
         Player.HeadMessage(28, "That spell is not supported! Pausing.")
         Misc.Pause(1000)
@@ -138,39 +163,43 @@ def cast_spell(
     if target is not None:
         Target.TargetExecute(target)
     
-    Misc.Pause(get_fcr_delay())
-    
-# Considers FC jewelry and protection spell. Add a buffer for lag.
-def get_fc_delay(
-    # Spell from Magery, Spellweaving, Necromancy, Chivalry
-    spellName,
-    
-    # Constants defined above for each spell
-    baseDelayMs):
-        
-    latency = 350
+    Misc.Pause(get_fcr_delay(spellName))
 
-    if spellName in ["Wildfire", "Thunderstorm", "Arcane Empowerment", "Word of Death", "Gift of Renewal"]:
-        fcOffset = 250 * (min(abs(Player.FasterCasting - 2), FC_CAP_SPELLWEAVING - 2) if Player.BuffsExist("Protection") else min(Player.FasterCasting, FC_CAP_SPELLWEAVING))    
-    elif spellName in ["Arch Cure", "Greater Heal", "Poison", "Poison Field"]:
-        fcOffset = 250 * (min(abs(Player.FasterCasting - 2), FC_CAP_MAGERY - 2) if Player.BuffsExist("Protection") else min(Player.FasterCasting, FC_CAP_MAGERY))
-    elif spellName in ["Evil Omen", "Strangle", "Wither", "Poison Strike", "Corpse Skin"]:
-        fcOffset = 250 * (min(abs(Player.FasterCasting - 2), FC_CAP_NECROMANCY - 2) if Player.BuffsExist("Protection") else min(Player.FasterCasting, FC_CAP_NECROMANCY))
-    elif spellName in ["Consecrate Weapon", "Close Wounds", "Cleanse by Fire", "Enemy of One", "Divine Fury"]:
-        fcOffset = 250 * (min(abs(Player.FasterCasting - 2), FC_CAP_CHIVALRY - 2) if Player.BuffsExist("Protection") else min(Player.FasterCasting, FC_CAP_CHIVALRY))
-        
+
+# Considers FC jewelry and protection spell. Add a buffer for lag.
+def get_fc_delay (
+
+    # Constants defined above for each spell
+    baseDelayMs,
     
-    if fcOffset is not None:
-        print("spellName=", spellName, "fcOffset", fcOffset, "fc", (fcOffset / 250), "final fc delay", baseDelayMs + latency - fcOffset)
-        return baseDelayMs + latency - fcOffset
+    # Each spell can have a different FC cap. Use constants above.
+    fcCap,
+    
+    # Milliseonds of extra delay when computing cast time to account for internet fuzz. Fine tune this as needed.
+    latencyMs = 100
+):
+
+    latency = 100
+    fcOffset = 250 * (min(max(Player.FasterCasting - 2, 0), fcCap - 2) if Player.BuffsExist("Protection") else min(Player.FasterCasting, fcCap))
+    delay = baseDelayMs - fcOffset
+    if delay < 250:
+        delay = 250
         
-    return baseDelayMs + latency
+    delay = delay + latencyMs
+    print("fc", Player.FasterCasting, "fcCap", fcCap, "protection", Player.BuffsExist("Protection"), "baseDelayMs", baseDelayMs, "fcOffset", fcOffset, "delay", delay)        
+    return delay
     
 # Completely stolen from Omniwraith and his lazy mage
-def get_fcr_delay():
-    fcr = int(((6 - Player.FasterCastRecovery) / 4) * 1000)
+def get_fcr_delay(spellName):
+    
+    if spellName in ["Shield Bash"]:
+        fcr = 0
+    else:
+        fcr = int(((6 - Player.FasterCastRecovery) / 4) * 1000)
+        
     if fcr < 1:
         fcr = 1
+    print("FCR", "fcr", fcr)        
     return fcr    
     
 
@@ -194,3 +223,71 @@ def cast_until_works(castFunc, delayBetweenAttemptsMs = 1000, maxAttempts = -1):
             maxAttempts = maxAttempts - 1
         else:
             break
+
+
+############################
+# Shield Bash Test
+############################
+
+# 0 FC w/ Protection
+# 0.97
+# 1.00
+# 0.99
+
+# 1 FC w/ Protection
+# 0.98
+# 1.01
+# 0.99
+
+# 2 FC w/ Protection
+# 1.03
+# 1.01
+# 0.99
+
+# 3 FC w/ Protection
+# 0.75
+# 0.75
+# 0.73
+
+# 4 FC w/ Protection
+# 0.52
+# 0.50
+
+
+# 0 FC
+# 1.03
+# 0.97
+# 1.04
+# 1.01
+ 
+# 1 FC
+# 0.83
+# 0.83
+# 0.77
+# 0.82
+# 0.76
+# 0.77
+# 0.75
+# 0.77
+
+# 2 FC
+# 0.53
+# 0.53
+# 0.53
+# 0.50
+
+# 3 FC
+# 0.26
+# 0.31
+# 0.25
+# 0.27
+# 0.28
+
+# 4 FC
+# 0.23
+# 0.28
+# 0.24
+# 0.26
+# 0.24
+# 0.26
+# 0.27

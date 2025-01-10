@@ -151,7 +151,7 @@ def get_yellows_in_range(range = 8):
     
 # Gets attackable things.
 # Noterieties:  blue = 1, green = 2, gray = 3, gray crim = 4, orange = 5, red = 6, yellow = 7
-def get_enemies(range = 10):
+def get_enemies(range = 10, serialsToExclude = []):
     fil = Mobiles.Filter()
     fil.Enabled = True
     fil.RangeMax = range
@@ -164,10 +164,18 @@ def get_enemies(range = 10):
     # need to remove Animate dead summons. There are a handfull of MobileIDs that match
     # the regular mobs, however these are red from animate dead when they are normally gray.
     if len(mobs) > 0:
-        mobsList = List[type(mobs[0])]([mob for mob in mobs if mob.Name not in ANIMATE_DEAD_MOBILE_NAMES and mob.Notoriety != 6])
+        mobsList = List[type(mobs[0])]([mob for mob in mobs if mob.Name not in ANIMATE_DEAD_MOBILE_NAMES and mob.Notoriety != 6 and mob.Serial not in serialsToExclude])
         return mobsList
 
     return mobs
+    
+    
+    
+#    listValid = [m.Serial for m in mobs if m.Serial not in serialsToExclude and m.Name not in namesToExclude]
+    #listValid = [m.Serial for m in mobs if m.Serial not in serialsToExclude]    
+    
+    
+    
 
 # Gets your pets as mobiles    
 def get_pets():

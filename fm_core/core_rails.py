@@ -6,7 +6,8 @@
 
 from Scripts.fm_core.core_player import open_bank_and_deposit_items
 from Scripts.fm_core.core_player import move_all_items_from_container
-from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
+from Scripts.fm_core.core_mobiles import get_enemies
+#from Scripts.fm_core.core_mobiles import get_mobs_exclude_serials
 from Scripts.fm_core.core_spells import cast_until_works
 from System.Collections.Generic import List 
 from System import Byte, Int32
@@ -150,7 +151,8 @@ def do_route(path, range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 
             Player.HeadMessage(48, "Weve arrived at sector {}".format(sectorId))
             Misc.Pause(1000)
             
-            eligible = get_mobs_exclude_serials(range, True, serialsToExclude) 
+            #eligible = get_mobs_exclude_serials(range, True, serialsToExclude) 
+            eligible = get_enemies(range, serialsToExclude) 
 
             if len(eligible) > 0:  
                 Player.HeadMessage(48, "Found {} things to attack ({}) filtered".format(len(eligible), len(serialsToExclude)))    
@@ -214,7 +216,8 @@ def defend(range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 3.0):
         
         Misc.Pause(2000)
         
-        eligible = get_mobs_exclude_serials(range, True) 
+        #eligible = get_mobs_exclude_serials(range, True) 
+        eligible = get_enemies(range) 
 
         if len(eligible) > 0:  
             Player.HeadMessage(48, "Found {} things to attack".format(len(eligible)))    
