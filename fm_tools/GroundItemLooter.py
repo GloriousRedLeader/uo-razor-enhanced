@@ -31,34 +31,17 @@ from Scripts.fm_core.core_items import STONE_STATIC_IDS
 from Scripts.fm_core.core_items import SAND_STATIC_IDS
 
 # Loots items near player into pack animal
+# TODO Change to get_pets from core_player
 PACK_ANIMAL_NAMES = ["one", "two", "three", "four"]
 
 Timer.Create( 'pingTimer', 1 )
 
-
-
-#item = Items.FindBySerial(0x4003E0B4)
-#item = Items.FindBySerial(0x40E2C44B)
-
-#print(item)
-#print(item.IsContainer)
-#print(item.Weight)
-#print(item.Contains)
-#print(item.Contains.Count)
-#sys.exit()
-
-#List[Item]()
-
 while True:
-    
     if Timer.Check( 'pingTimer' ) == False:
         Player.HeadMessage( 118, "Ground Looter Running...")
         Timer.Create( 'pingTimer', 3000)
         
     filter = Items.Filter()
-    # 0x053B is Cave floor
-    # 0x0018 is Sand
-    #filter.Graphics = List[Int32]((0x053B))
     filter.Movable = 1
     filter.OnGround = True
     filter.RangeMax = 2

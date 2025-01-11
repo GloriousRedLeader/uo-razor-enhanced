@@ -4,8 +4,8 @@
 #   2024-11-05
 # Use at your own risk. 
 
-# Drop everything from a container to the ground.AcceptMe
-
 from Scripts.fm_core.core_player import drop_all_items_from_pack_animal_to_floor
 
+# Provide pack animal names as an array
+# Drops the contents of their backpack to the floor
 drop_all_items_from_pack_animal_to_floor(packAnimalNames = ["two"])

@@ -1,4 +1,3 @@
-
 // Razor Enhanced Scripts for Ultima Online by
 //   GRL  
 //   https://github.com/GloriousRedLeader/uo-razor-enhanced

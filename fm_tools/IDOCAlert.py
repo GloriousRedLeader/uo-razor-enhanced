@@ -6,9 +6,10 @@
 
 from System.Collections.Generic import List
 from System import Byte, Int32
-
 from System.Collections.Generic import List
 from System import Int32
+
+# This is written by someone else! Storing for safe keeping. It is excellent.
 
 class IDOCScanner(object):
     global signs

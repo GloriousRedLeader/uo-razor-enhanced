@@ -4,11 +4,9 @@
 #   2024-03-26
 # Use at your own risk. 
 
-# Moves all number of items from container 1 to container 2
-
 from Scripts.fm_core.core_player import move_all_items_from_container
 
-
+# Moves all number of items from container 1 to container 2
 sourceSerial = Target.PromptTarget("Pick source container")
 destinationSerial = Target.PromptTarget("Pick target container")
 

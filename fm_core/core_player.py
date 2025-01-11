@@ -202,6 +202,7 @@ def move_all_items_by_ids_to_container(itemIDs):
     for itemID in itemIDs:
         move_item_to_container_by_id(itemID, sourceSerial, destinationSerial)
 
+# Move x number of items from container 1 to container 2
 # Enter number of items to move via chat
 # Prompt for source container
 # Prompt for destination container
@@ -247,7 +248,7 @@ def move_number_of_items_from_container():
 #        Misc.Pause(650)
 
 # Provide pack animal names as an array
-# Drops their backpack to the floor
+# Drops the contents of their backpack to the floor
 def drop_all_items_from_pack_animal_to_floor(packAnimalNames = []):
     currentNum = 0        
     packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)

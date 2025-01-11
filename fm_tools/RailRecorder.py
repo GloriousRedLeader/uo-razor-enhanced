@@ -1,3 +1,9 @@
+# Razor Enhanced Scripts for Ultima Online by
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2025-01-11
+# Use at your own risk. 
+
 # GRL DID NOT WRITE THIS.
 # This beautiful script was written by someone else. Just storing it here for safekeeping.
 # This is a good, very useful script.

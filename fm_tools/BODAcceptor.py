@@ -1,13 +1,14 @@
 # Razor Enhanced Scripts for Ultima Online by
 #   GRL  
 #   https://github.com/GloriousRedLeader/uo-razor-enhanced
-#   2024-11-22
+#   2025-01-11
 # Use at your own risk. 
 
 from System.Collections.Generic import List
 from System import Byte, Int32
 from Scripts.fm_core.core_mobiles import get_yellows_in_range
 
+# Looks up nearby npcs and attempts to accept BODs
 while True:
     npcs = get_yellows_in_range(3)
     for npc in npcs:

@@ -11,9 +11,6 @@
 from Scripts.fm_core.core_mobiles import find_vendor_by_name
 
 # Just replace this with your vendors name and walk around mashing this script. 
-# 790k
-VENDOR_NAME = "Florence"
-# 700k
 VENDOR_NAME = "Luthien"
 
 # Search within this many tiles

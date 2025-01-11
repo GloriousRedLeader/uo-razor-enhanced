@@ -1,3 +1,8 @@
+# Razor Enhanced Scripts for Ultima Online by
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2024-03-26
+# Use at your own risk. 
 
 from Scripts.fm_core.core_mobiles import get_enemies
 from Scripts.fm_core.core_player import open_bank_and_resupply
@@ -11,9 +16,10 @@ import sys
 from System import Byte, Int32
 import time
 
+# PIcks up nearby items. Will prompt you for a container to put them in
+
 Player.HeadMessage(455, "Pick up nearby items and put in container")
 
-destinationSerial = 0x408CC21E
 destinationSerial = Target.PromptTarget("Pick destination container", 38)
 
 filter = Items.Filter()

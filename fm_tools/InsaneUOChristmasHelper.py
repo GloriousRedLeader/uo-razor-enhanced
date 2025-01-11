@@ -8,6 +8,8 @@ from System.Collections.Generic import List
 from System import Byte, Int32
 
 # InsaneUO Christmas Helper
+# 1. Loots stockings
+# 2. Picks up snowballs and throws them at bad guys.
 
 STOCKING_ID = 0x2BDC
 SNOWMAN_SERIAL = 0x401706EE
@@ -32,7 +34,6 @@ while True:
     
     # Snowballs
     snowballs = Items.FindAllByID(SNOWBALL_ID, -1, Player.Backpack.Serial, 1)
-    
     if Timer.Check( 'journalAlertPingTimer' ) == False:
         Player.HeadMessage(58, "{} / 10 snowballs".format(len(snowballs)))
         Timer.Create( 'journalAlertPingTimer', HOW_OFTEN_TO_PING_MS )

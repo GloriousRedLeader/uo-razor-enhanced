@@ -1,3 +1,8 @@
+# Razor Enhanced Scripts for Ultima Online by
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2025-01-11
+# Use at your own risk. 
 
 from Scripts.fm_core.core_mobiles import get_enemies
 from Scripts.fm_core.core_player import open_bank_and_resupply
@@ -12,6 +17,7 @@ import sys
 from System import Byte, Int32
 import time
 
+# This is just me testing faster casting. Nothing to see here.
 
 Player.HeadMessage(455, "start")
 

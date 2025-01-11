@@ -182,7 +182,7 @@ def run_lumberjacking_loop(
     
     # If you have a beetle
     packAnimalNames = []
-    ):
+):
         
     global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
 
@@ -298,12 +298,16 @@ def get_kindling_in_area(tileRange = 10, weightLimit = 350):
 
     Misc.SendMessage("All done", 123) 
     
+# Mines an area then steps forward to mine again in a straight line.
+# Attempts to smelt ores if you have a fire beetle (provide parameter)
+# Attempts to move smelted ore to pack animal (provide parameter)
 def run_mining_loop(
     # Required. Your fire beetles name.
     forgeAnimalName = None,
     
     # Required. One or more blue beetle names.
-    packAnimalNames = []):
+    packAnimalNames = []
+):
     
     def getMinerTool():
         for minerToolStaticID in MINER_TOOLS_STATIC_IDS:
