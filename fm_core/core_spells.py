@@ -191,14 +191,12 @@ def get_fc_delay (
     
 # Completely stolen from Omniwraith and his lazy mage
 def get_fcr_delay(spellName):
-    
-    if spellName in ["Shield Bash"]:
-        fcr = 0
-    else:
-        fcr = int(((6 - Player.FasterCastRecovery) / 4) * 1000)
+
+    fcr = int(((6 - Player.FasterCastRecovery) / 4) * 1000)
         
     if fcr < 1:
         fcr = 1
+
     print("FCR", "fcr", fcr)        
     return fcr    
     
@@ -224,70 +222,3 @@ def cast_until_works(castFunc, delayBetweenAttemptsMs = 1000, maxAttempts = -1):
         else:
             break
 
-
-############################
-# Shield Bash Test
-############################
-
-# 0 FC w/ Protection
-# 0.97
-# 1.00
-# 0.99
-
-# 1 FC w/ Protection
-# 0.98
-# 1.01
-# 0.99
-
-# 2 FC w/ Protection
-# 1.03
-# 1.01
-# 0.99
-
-# 3 FC w/ Protection
-# 0.75
-# 0.75
-# 0.73
-
-# 4 FC w/ Protection
-# 0.52
-# 0.50
-
-
-# 0 FC
-# 1.03
-# 0.97
-# 1.04
-# 1.01
- 
-# 1 FC
-# 0.83
-# 0.83
-# 0.77
-# 0.82
-# 0.76
-# 0.77
-# 0.75
-# 0.77
-
-# 2 FC
-# 0.53
-# 0.53
-# 0.53
-# 0.50
-
-# 3 FC
-# 0.26
-# 0.31
-# 0.25
-# 0.27
-# 0.28
-
-# 4 FC
-# 0.23
-# 0.28
-# 0.24
-# 0.26
-# 0.24
-# 0.26
-# 0.27

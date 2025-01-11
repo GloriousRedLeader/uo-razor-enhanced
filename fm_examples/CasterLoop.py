@@ -1,20 +1,28 @@
+# Razor Enhanced Scripts for Ultima Online by
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2025-01-11
+# Use at your own risk. 
+
 from Scripts.fm_core.core_attack import run_mage_loop
 
-Player.HeadMessage( 118, 'STARTING AOE MAGE LOOP' )
-
+# Very basic caster loop. Configurable to meet needs of purse casters, and tamers. 
+# Can cast spellweaving, magery, necro spells. Can heal player, friends, pets, etc.
+# Set the values you need and go. 
+# Ideally make separate scripts for each specific task, e.g. AOE loop, single target 
+# loop, or maybe just a heal only loop.
 run_mage_loop(
 
-    # How to pick your target for single target spells.
-    # 0 = Nearest enemy. Default.
-    # 1 = Prompt for target once at start of script. Useful for bosses.
-    mobSelectMethod = 0,
+    # Give it a fun name in case you have different versions, e.g.
+    # Mage AOE Loop or Mage Single Target Loop
+    loopName = "Caster Loop",
+
+    # 0 = Heal only names in friendNames, 1 = heal any blue in range, 2 = my pets only
+    friendSelectMethod = 0,
     
     # Names of pets or blue characters you want to heal, cure if they are in range.
     # Note that you still need to enable useCure / useGreaterHeal etc.
-    friendNames = ["omg arthur", "omg dog"],
-    
-    # Buffer in MS between attacks, otherwise we get "You have not yet recovered"
-    actionDelayMs = 1000,
+    friendNames = [],
     
     # Only look for mobs and pets/friends inside of this range. IF they are farther, then
     # dont heal them / dont attack them.
@@ -22,12 +30,9 @@ run_mage_loop(
     
     # Use Arcane Empowerment (spell weaving) 0 = disabled, 1 = enabled
     useArcaneEmpowerment = 0,
-    
-    # Time in millesconds between casts of arcane empowerment.
-    arcaneEmpowermentDelayMs = 35000,    
 
     # Whether to use this spell 0 = disabled, 1 = enabled
-    usePoisonStrike = 1,
+    usePoisonStrike = 0,
     
     # Lower number like 10 means to spam repeatadly, number of MS in between usages
     poisonStrikeDelayMs = 5000,
@@ -47,12 +52,33 @@ run_mage_loop(
     # Whether to use this spell before applying each dot and curse 0 = disabled, 1 = enabled
     useEvilOmenBeforeDotsAndCurses = 0,
     
+    # Whether to use the magery curse spell, 0 = disabled, 1 = enabled
+    useCurse = 0,
+    
+    # How often to cast this spell in millesconds
+    curseDelayMs = 60000,
+    
+    # Whether to use the magery spell poison, will only cast if poison is not on target 0 = disabled, 1 = enabled
+    usePoison = 0,
+    
+    # How often we can cast poison in milliseconds
+    poisonDelayMs = 10000,
+    
+    # Magery poison field spell 0 = disabled, 1 = enabled
+    usePoisonField = 0,
+    
+    # How often to cast this spell in milliseconds
+    poisonFieldDelayMs = 10000,    
+    
     # Whether to use this spell 0 = disabled, 1 = enabled
-    useWildfire = 1,
+    useWildfire = 0,
     
     # Lower number like 10 means to spam repeatadly, number of MS in between usages
-    wildfireDelayMs = 15000,
+    wildfireDelayMs = 9000,
     
+    # Whether to use the thunderstorm spellweaving spell.
+    useThunderstorm = 0,
+        
     # Toggles death ray. Requires magery mastery. There is no timer because this remains
     # active until you move or you are interrupted or the creature dies. It will attempt to
     # reapply immediately. 0 = disabled, 1 = enabled
@@ -61,15 +87,15 @@ run_mage_loop(
     # Whether to use this spell 0 = disabled, 1 = enabled
     useWither = 0,
     
-    # Change to an appropriate value for strangle spell, number of MS in between usages
-    witherDelayMs = 5000,
-    
     # Whether to cure yourself or your pet
-    useCure = 1,
+    useCure = 0,
     
     # Whether to heal yourself or your pet
-    useGreaterHeal = 1,
+    useGreaterHeal = 0,
     
     # Only heal things that are below this percent HP
-    healThreshold = 0.70
+    healThreshold = 0.80,
+	
+	# Milliseonds of extra delay when computing cast time to account for internet fuzz. Fine tune this as needed.
+    latencyMs = 100
 )

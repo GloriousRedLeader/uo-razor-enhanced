@@ -71,6 +71,7 @@ POISON_POTION_STATIC_ID = 0x0F0A
 WRAITH_FORM_SCROLL_ID = 0x226F
 
 FISH_STATIC_IDS = [
+    0x4302, # Demon Trout
     0x4303, # Bonito
     0x4306, # Cape cod
     0x4307, # Red grouper, Shad, gray snapper, red drum, sunfish, redbelly beam, pumpkinseed sunfish

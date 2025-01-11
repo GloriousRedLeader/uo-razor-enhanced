@@ -36,11 +36,13 @@ import sys
 # 253 - yellow  GPH
 # 455 - white   PLAYER / ITEMS
 
+# Basic dexer loop that attacks nearby monsters using the abilities listed below.
+# Configure as needed.
 def run_dex_loop(
 
     # Give it a fun name in case you have different versions, e.g.
     # DexLoop Single Targert, DexLoop AOE, etc.
-    loopName = "DexLoop",
+    loopName = "Dex Loop",
 
     # This is my special convention. It represents abilities that are toggled and
     # activated by next auto attack. These are what the possible values are:
@@ -657,10 +659,11 @@ def run_ss_loop (
 ####################################################################################################
 ####################################################################################################
 
-
-# Will cast AOE at player location and single target spells on closest mobs. Can also focus
-# a specific mob if you want to focus on a boss.
-# Set preferred delays in between each spell. Your main nukes should have no delay really.
+# Very basic caster loop. Configurable to meet needs of purse casters, and tamers. 
+# Can cast spellweaving, magery, necro spells. Can heal player, friends, pets, etc.
+# Set the values you need and go. 
+# Ideally make separate scripts for each specific task, e.g. AOE loop, single target 
+# loop, or maybe just a heal only loop.
 def run_mage_loop(
 
     # Give it a fun name in case you have different versions, e.g.

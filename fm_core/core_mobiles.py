@@ -164,7 +164,13 @@ def get_enemies(range = 10, serialsToExclude = []):
     # need to remove Animate dead summons. There are a handfull of MobileIDs that match
     # the regular mobs, however these are red from animate dead when they are normally gray.
     if len(mobs) > 0:
-        mobsList = List[type(mobs[0])]([mob for mob in mobs if mob.Name not in ANIMATE_DEAD_MOBILE_NAMES and mob.Notoriety != 6 and mob.Serial not in serialsToExclude])
+        #for mob in mobs:
+            #print(mob.Name, mob.Name not in ANIMATE_DEAD_MOBILE_NAMES and mob.Notoriety != 6 and mob.Serial not in serialsToExclude)
+            #print("is in animate dead", mob.Name not in ANIMATE_DEAD_MOBILE_NAMES)
+            
+        mobsList = List[type(mobs[0])]([mob for mob in mobs if not (mob.Name in ANIMATE_DEAD_MOBILE_NAMES and mob.Notoriety == 6) and mob.Serial not in serialsToExclude])
+        if len(mobsList) == 0:
+            print("No mobs found")
         return mobsList
 
     return mobs
