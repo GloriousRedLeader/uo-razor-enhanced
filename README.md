@@ -31,6 +31,8 @@ A couple of resource gathering scripts. **Use with caution**. Don't break any ru
 
 **Character Stats** is a standalone tool that will have some details on character stats from item properties. Just bind it to a key and run it when you want to see all your properties like resists, HCI, SDI, etc. Note that it does get a little wonkie sometimes and you'll have to close and re-open your paperdoll. This script will tell you when it needs to be done (has something to do with item caching in the client / razor). You can find this at *fm_tools/CharacterStats.py*. 
 
+**Shadowguard** script from Dorana. Just keeping a copy. This thing is amazing. Dear god.
+
 **Lootmaster** script from Dorana. Just keeping a copy for posterity.
 
 ### Credits
