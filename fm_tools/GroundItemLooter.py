@@ -16,6 +16,7 @@ from Scripts.fm_core.core_player import find_first_in_container_by_name
 from Scripts.fm_core.core_player import find_all_in_container_by_id
 from Scripts.fm_core.core_player import move_item_to_container
 from Scripts.fm_core.core_mobiles import get_friends_by_names
+from Scripts.fm_core.core_mobiles import get_pets
 from Scripts.fm_core.core_rails import move
 from Scripts.fm_core.core_rails import go_to_tile
 from Scripts.fm_core.core_rails import get_tile_in_front
@@ -32,7 +33,7 @@ from Scripts.fm_core.core_items import SAND_STATIC_IDS
 
 # Loots items near player into pack animal
 # TODO Change to get_pets from core_player
-PACK_ANIMAL_NAMES = ["one", "two", "three", "four"]
+#PACK_ANIMAL_NAMES = ["one", "two", "three", "four"]
 
 Timer.Create( 'pingTimer', 1 )
 
@@ -47,14 +48,17 @@ while True:
     filter.RangeMax = 2
     items = Items.ApplyFilter(filter)
 
-    packAnimals = get_friends_by_names(friendNames = PACK_ANIMAL_NAMES, range = 2)
+    packAnimals = get_pets()
     for packAnimal in packAnimals:
         Items.UseItem(packAnimal.Backpack.Serial)
         Misc.Pause(650)
         
     for item in items:
       
-        if len(packAnimals) > 0:
+        if Player.Weight + item.Weight < Player.MaxWeight and ((not item.IsContainer and Player.Backpack.Contains.Count < 125) or (item.IsContainer and Player.Backpack.Contains.Count + item.Contains.Count < 125)):
+            print("Moving item {}".format(item.Name))
+            move_item_to_container(item, Player.Backpack.Serial)
+        elif len(packAnimals) > 0:
             for packAnimal in packAnimals:
                 Items.UseItem(packAnimal.Backpack.Serial)
                 Misc.Pause(650)

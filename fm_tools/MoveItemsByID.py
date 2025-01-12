@@ -7,6 +7,20 @@
 # Prompts for an item type and destination container. Transfers 
 # all items matching that item id.
 
-from Scripts.fm_core.core_player import move_all_items_of_type_to_container
+from Scripts.fm_core.core_player import move_item_to_container_by_id
 
-move_all_items_of_type_to_container()
+# Prompts for an item type
+# Source is that items container
+# Destination is prompt
+# Moves all items with that ItemID
+
+itemSerial = Target.PromptTarget("Which item type? Click one.")
+destinationSerial = Target.PromptTarget("Pick target container")
+
+Items.UseItem(destinationSerial)
+Misc.Pause(650)
+
+item = Items.FindBySerial(itemSerial)
+if item is not None:
+    sourceSerial = Items.FindBySerial(item.Container).Serial
+    move_item_to_container_by_id(item.ItemID, sourceSerial, destinationSerial)

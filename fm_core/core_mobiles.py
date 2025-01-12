@@ -174,14 +174,6 @@ def get_enemies(range = 10, serialsToExclude = []):
         return mobsList
 
     return mobs
-    
-    
-    
-#    listValid = [m.Serial for m in mobs if m.Serial not in serialsToExclude and m.Name not in namesToExclude]
-    #listValid = [m.Serial for m in mobs if m.Serial not in serialsToExclude]    
-    
-    
-    
 
 # Gets your pets as mobiles    
 def get_pets():
@@ -190,6 +182,7 @@ def get_pets():
     for blue in blues:
         if blue.CanRename:
             pets.append(blue)
+    return pets
     
 # Returns the decimal representation of mobile hp, e.g. 0.30 is 30% health
 def get_mobile_percent_hp(mobile):

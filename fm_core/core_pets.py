@@ -28,6 +28,9 @@
 # But if youre playing different characters on different servers with different 
 # script names, that becomes hard to track. So instead we can use this shared variable.
 import time
+from Scripts.fm_core.core_items import PET_LEASH_STATIC_IDS
+from Scripts.fm_core.core_player import find_first_in_container_by_ids
+from Scripts.fm_core.core_mobiles import get_pets
 
 Timer.Create("vetLoopPetWarning", 1)
 
@@ -127,51 +130,20 @@ def getHealthPercent(mobForHP):
         healthPercent = 100 * mobForHP.Hits / mobForHP.HitsMax
         return healthPercent
         
-# Will look through your bags, find a leash, and leash all the pets 
-# around you.
-def leash_pets (
-    # An array of serials for your pets. You must provide this.
-    # To get the serials you can use razor and press "Inspect Entities",
-    # but really all of these programs have this feature and most clients
-    # to too.
-    petSerials = [],
-    
-    # Container where your bandages live. Defautls to player backpack.
-    containerSerial = Player.Backpack.Serial):
-
-    leash = Items.FindByID(0x1374, 0, containerSerial)
+# Uses a pet leash on all deployed pets. Pet leash must be in backpack.
+def leash_pets ():
+    leash = find_first_in_container_by_ids(PET_LEASH_STATIC_IDS)
     if leash == None:
         Player.HeadMessage(38, "You do not have a leash in backpack.")
         return False
     
-    atLeastOnePetFound = False
-    atLeastOnePetMissing = False
-    
-    pets = []
-    for petSerial in petSerials:
-        pet = Mobiles.FindBySerial(petSerial)
-        if pet == None:
-            atLeastOnePetMissing = True
-            continue
-        atLeastOnePetFound = True
-        pets.append(pet)
-    
-    for pet in pets:
-        if Misc.ReadSharedValue("core_loops_enabled") != 1:
-            Player.HeadMessage( 88, "Skipping pet {} because framework is paused".format(pet.Name))
-            break
-            
+    for pet in get_pets():
         if Player.DistanceTo(pet) <= 5:
             Items.UseItem(leash)
             Target.WaitForTarget(3000)
             Player.HeadMessage( 88, "Leashing fluffy {}".format(pet.Name))
             Target.TargetExecute(pet)
             Misc.Pause(1000)
-            
-    if not atLeastOnePetFound:
-        Player.HeadMessage(38, "Could not find any pets.")
-    elif atLeastOnePetMissing:
-        Player.HeadMessage(38, "At least one pet missing.")
 
 # This is the public API you should use when running a pet heal bot
 # in the background. You will need to get your pet serials first. To do that

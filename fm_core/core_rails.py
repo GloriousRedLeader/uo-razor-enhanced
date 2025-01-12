@@ -4,7 +4,6 @@
 #   2024-03-26
 # Use at your own risk. 
 
-from Scripts.fm_core.core_player import open_bank_and_deposit_items
 from Scripts.fm_core.core_player import move_all_items_from_container
 from Scripts.fm_core.core_mobiles import get_enemies
 from Scripts.fm_core.core_spells import cast_until_works
@@ -204,17 +203,17 @@ def do_route(path, range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 
     
 # Goes to monsters in range. 
 def defend(
-	# range is the number of tiles to search for monsters in each "sector"
-	range = 6, 
-	
-	# autoLootBufferMs is the time in MS to stand around like an idiot before moving
-	autoLootBufferMs = 0, 
-	
-	# pathFindingTimeoutSeconds is a float that represents number of seconds before quitting
-	# on a path. It is a value passed to the pathfinding method. The Pathfinding algorithm 
-	# could go on for days. Instead of derping, just give up after this many seconds and 
-	# move on with your life.
-	pathFindingTimeoutSeconds = 3.0
+    # range is the number of tiles to search for monsters in each "sector"
+    range = 6, 
+    
+    # autoLootBufferMs is the time in MS to stand around like an idiot before moving
+    autoLootBufferMs = 0, 
+    
+    # pathFindingTimeoutSeconds is a float that represents number of seconds before quitting
+    # on a path. It is a value passed to the pathfinding method. The Pathfinding algorithm 
+    # could go on for days. Instead of derping, just give up after this many seconds and 
+    # move on with your life.
+    pathFindingTimeoutSeconds = 3.0
 ):
     rails_stats("start")   
     
@@ -248,10 +247,10 @@ def defend(
 
 # Crappy way of reporting gold per hour
 def rails_stats(
-	# clear | start | reset = setse initial values and times to 0
-	# report_head = flashes data above player head
-	# report = Prints message in journal
-	option
+    # clear | start | reset = setse initial values and times to 0
+    # report_head = flashes data above player head
+    # report = Prints message in journal
+    option
 ):
     global railsStartingGold
     global railsStartingTime
@@ -302,9 +301,9 @@ def run_rail_loop_single(
     rails_stats("start")        
 
     while True:
-		if Player.Weight < Player.MaxWeight - 40:
-			do_route(path, range = attackRange, autoLootBufferMs = autoLootBufferMs, pathFindingTimeoutSeconds = pathFindingTimeoutSeconds)
-			rails_stats("report")
-		else:
-			Player.HeadMessage(48, "Stopping because max weight reached")
-			break
+        if Player.Weight < Player.MaxWeight - 40:
+            do_route(path, range = attackRange, autoLootBufferMs = autoLootBufferMs, pathFindingTimeoutSeconds = pathFindingTimeoutSeconds)
+            rails_stats("report")
+        else:
+            Player.HeadMessage(48, "Stopping because max weight reached")
+            break

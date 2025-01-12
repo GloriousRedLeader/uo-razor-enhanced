@@ -95,6 +95,8 @@ FISH_STATIC_IDS = [
 LOBSTER_TRAP_STATIC_IDS = [0x44CF]
 DEPLOYED_LOBSTER_TRAP_STATIC_ID = 0x44CB
 
+PET_LEASH_STATIC_IDS = [0x1374]
+
 # Corpses are technically items.    
 def get_corpses(range = 2):
     filter = Items.Filter()
