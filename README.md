@@ -13,8 +13,8 @@ You can safely clone this repo or just manually copy the files into your razord 
 
 RazorInstallDirectory/Scripts
 
-* fm_core -> This is framework stuff I've written (for the most part). These don't do anything on their own. You'll need to make a script that calls these functions (see fm_examples).
-* fm_tools -> This is the stuff you'll use. It doesn't really matter where you put your scripts, but you can reference these as examples. Most of this stuff uses my framework (the files in *fm_core*).
+* fm_core -> This is framework stuff I've written (for the most part). These don't do anything on their own. You'll need to make a script that calls these functions (see fm_tools).
+* fm_tools -> This is the stuff you'll use. It doesn't really matter where you put these scripts. Most of this stuff uses my framework (the files in *fm_core*). Some of these are very powerful and heavily configurable.
 * fm_train -> Standalone scripts used for training skills.
 
 So basically look through *fm_tools* and modify those scripts. You can store your scripts in whatever folder you like.
