@@ -56,7 +56,7 @@ def find_in_container_by_id(itemID, containerSerial = Player.Backpack.Serial, co
 
 # checks list of itemids and returns first one that matches
 # one in either hand.
-def find_first_in_hands_by_id(itemIDs):
+def find_first_in_hands_by_ids(itemIDs):
     for itemID in itemIDs:
         item = find_in_hands_by_id(itemID)
         if item != None:
@@ -80,7 +80,7 @@ def find_in_hands_by_id(itemID):
 # Note: Right now it just undresses left hand. If you
 # have a 2 hander or something in yoru right hand, you may 
 # be effed.
-def swap_weapon(newItem):
+def equip_weapon(newItem):
     leftHand = Player.GetItemOnLayer("LeftHand")
     if leftHand != None:
         Player.UnEquipItemByLayer("LeftHand", True)    

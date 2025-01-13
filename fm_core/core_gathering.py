@@ -9,7 +9,7 @@ from System.Collections.Generic import List
 import sys
 from System import Byte, Int32
 from Scripts.fm_core.core_player import find_first_in_container_by_ids
-from Scripts.fm_core.core_player import find_first_in_hands_by_id
+from Scripts.fm_core.core_player import find_first_in_hands_by_ids
 from Scripts.fm_core.core_player import move_all_items_from_container
 from Scripts.fm_core.core_player import move_item_to_container_by_id
 from Scripts.fm_core.core_player import move_item_to_container
@@ -17,6 +17,7 @@ from Scripts.fm_core.core_player import find_in_container_by_id
 from Scripts.fm_core.core_player import find_first_in_container_by_name
 from Scripts.fm_core.core_player import find_all_in_container_by_id
 from Scripts.fm_core.core_player import find_all_in_container_by_ids
+from Scripts.fm_core.core_player import equip_weapon
 from Scripts.fm_core.core_mobiles import get_friends_by_names
 from Scripts.fm_core.core_rails import move
 from Scripts.fm_core.core_rails import go_to_tile
@@ -34,6 +35,7 @@ from Scripts.fm_core.core_items import SAND_STATIC_IDS
 from Scripts.fm_core.core_items import FISH_STATIC_IDS
 from Scripts.fm_core.core_items import LOBSTER_TRAP_STATIC_IDS
 from Scripts.fm_core.core_items import DEPLOYED_LOBSTER_TRAP_STATIC_ID
+from Scripts.fm_core.core_items import FISHING_POLE_STATIC_IDS
 
 # Lumberjacking original author: https://github.com/hampgoodwin/razorenhancedscripts/blob/master/LumberjackingScanTile.py
 # Mining original author: https://github.com/getoldgaming/razor-enhanced-/blob/master/autoMiner.py
@@ -190,7 +192,7 @@ def run_lumberjacking_loop(
     Misc.SendMessage("Eqipping Axe", 123)
     
 #    originalItemsInHands = [None, None]
-    axe = find_first_in_hands_by_id(AXE_STATIC_IDS)
+    axe = find_first_in_hands_by_ids(AXE_STATIC_IDS)
     #axe = find_in_container_by_id(AXE_STATIC_IDS, Player.Backpack)
 #    if axe == None:
 #        axe = find_first_item_by_id(AXE_STATIC_IDS, Player.Backpack)
@@ -438,11 +440,14 @@ def run_fishing_loop(
     # Will not do any fishHandling operations on this fish. Leaves it in backpack. Useful for fishing quests.
     fishToKeep = None
 ):
-    
-    rightHand = Player.GetItemOnLayer("RightHand")
-    if rightHand == None:
-        print("Need a fishing pole")
-        return False
+    fishingPole = find_first_in_hands_by_ids(FISHING_POLE_STATIC_IDS)
+    if fishingPole == None:
+        fishingPole = find_first_in_container_by_ids(FISHING_POLE_STATIC_IDS)
+        if fishingPole == None:
+            print("Need a fishing pole")
+            return False
+        else:
+            equip_weapon(fishingPole)
         
     while Player.Weight < Player.MaxWeight - 40:
         
@@ -477,7 +482,7 @@ def run_fishing_loop(
                     move_item_to_container(fish, hatches[0].Serial)
                     
         Target.Cancel()
-        Items.UseItem(rightHand)
+        Items.UseItem(fishingPole)
         Target.WaitForTarget(2000, False)
         x, y, z = get_tile_in_front(fishRange)
         

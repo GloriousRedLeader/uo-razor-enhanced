@@ -717,7 +717,7 @@ def run_mage_loop(
     # How often we can cast poison in milliseconds
     poisonDelayMs = 30000,
     
-    # Magery poison field spell 0 = disabled, 1 = enabled
+    # Magery poison field spell 0 = disabled, 1 = enabled. Will only cast if there is a nonpoisoned mob.
     usePoisonField = 0,
     
     # How often to cast this spell in milliseconds
