@@ -25,7 +25,7 @@ STRINGS_TO_LOOK_FOR = [
     "a venom steed",
     "an inferno steed",
     "a blazing steed",
-    "Ardon"
+    "John"
 ]
 
 Timer.Create( 'journalAlertPingTimer', 1 )
