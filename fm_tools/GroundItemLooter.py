@@ -8,7 +8,6 @@ from System.Collections.Generic import List
 import sys
 from System import Byte, Int32
 from Scripts.fm_core.core_player import find_first_in_container_by_ids
-from Scripts.fm_core.core_player import find_first_in_hands_by_id
 from Scripts.fm_core.core_player import move_all_items_from_container
 from Scripts.fm_core.core_player import move_item_to_container_by_id
 from Scripts.fm_core.core_player import find_in_container_by_id
