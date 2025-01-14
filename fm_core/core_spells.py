@@ -186,7 +186,7 @@ def get_fc_delay (
         delay = 250
         
     delay = delay + latencyMs
-    print("fc", Player.FasterCasting, "fcCap", fcCap, "protection", Player.BuffsExist("Protection"), "baseDelayMs", baseDelayMs, "fcOffset", fcOffset, "delay", delay)        
+    #print("fc", Player.FasterCasting, "fcCap", fcCap, "protection", Player.BuffsExist("Protection"), "baseDelayMs", baseDelayMs, "fcOffset", fcOffset, "delay", delay)        
     return delay
     
 # Completely stolen from Omniwraith and his lazy mage
@@ -197,7 +197,7 @@ def get_fcr_delay(spellName):
     if fcr < 1:
         fcr = 1
 
-    print("FCR", "fcr", fcr)        
+    #print("FCR", "fcr", fcr)        
     return fcr    
     
 

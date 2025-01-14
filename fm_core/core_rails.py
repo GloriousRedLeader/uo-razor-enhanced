@@ -193,7 +193,7 @@ def do_route(path, range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 
                 # got away or not. It is more likely that there is loot and the monster is dead if attempts 
                 # is greater than zero.
                 if autoLootBufferMs > 0 and goToNearestAttempts > 0:
-                    Player.HeadMessage(48, "Pausing a little extra for more loot")
+                    #Player.HeadMessage(48, "Pausing a little extra for more loot")
                     Misc.Pause(autoLootBufferMs)
             else:
                 Player.HeadMessage(48, "Nothing left in sector")
