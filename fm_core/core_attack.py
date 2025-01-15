@@ -762,6 +762,9 @@ def run_mage_loop(
     # Only heal things that are below this percent HP
     healThreshold = 0.70,
     
+    # If greater than 0 will attempt to use bag of sending when this much gold is present. Default is 0, no bag of sending usage.
+    minGold = 0,
+    
     # Milliseonds of extra delay when computing cast time to account for internet fuzz. Fine tune this as needed.
     latencyMs = 100
 ):
@@ -787,6 +790,9 @@ def run_mage_loop(
         if not Player.Visible:
             Misc.Pause(500)
             continue  
+            
+        if minGold > 0 and Player.Gold >= minGold:
+            use_bag_of_sending(minGold)            
             
         if is_player_moving() or Player.BuffsExist("Meditation"):
             Misc.Pause(250)
