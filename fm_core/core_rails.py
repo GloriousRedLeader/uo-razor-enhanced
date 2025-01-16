@@ -21,8 +21,10 @@ user32.GetAsyncKeyState.argtypes = [wintypes.INT]
 
 # Globals. Put in a class one day.
 CORE_LOOP_DELAY_MS = 650
-railsStartingGold = 0
+#railsStartingGold = 0
 railsStartingTime = 0
+railsEarnedGold = 0
+railsLastGold = 0
 
 # Is right mouse button down (player moving)? Does NOT detect if player is moving
 # via rails.
@@ -252,28 +254,43 @@ def rails_stats(
     # report = Prints message in journal
     option
 ):
-    global railsStartingGold
+    #global railsStartingGold
     global railsStartingTime
+    global railsEarnedGold
+    global railsLastGold
     if option == "clear" or option == "start" or option == "reset":
-        railsStartingGold = Player.Gold
+        #railsStartingGold = Player.Gold
         railsStartingTime = time.time()       
-    elif option == "report":
+        railsEarnedGold = 0
+        railsLastGold = Player.Gold
+    #elif option == "report":
+        #hours = (time.time() - railsStartingTime) / 60 / 60
+        #hoursFormatted = "{:.2f}".format(hours)
+        #earnedGold = Player.Gold - railsStartingGold
+        #earnedGoldFormatted = "{:,}".format(earnedGold)
+        #if hours == 0:
+        #    goldPerHour = 0
+        #else:
+        #    goldPerHour = "{:,.2f}".format(earnedGold / hours)
+        #Misc.SendMessage("Total hours: {} Earned Gold: {} Gold Per Hour: {}".format(hoursFormatted, earnedGoldFormatted, goldPerHour)) 
+    elif option == "report_head" or option == "report":
         hours = (time.time() - railsStartingTime) / 60 / 60
-        hoursFormatted = "{:.2f}".format(hours)
-        earnedGold = Player.Gold - railsStartingGold
-        earnedGoldFormatted = "{:,}".format(earnedGold)
+        
+        if railsLastGold < Player.Gold and railsLastGold != Player.Gold:
+            railsLastGold = Player.Gold
+            railsEarnedGold = railsEarnedGold + railsLastGold
+            
+        #earnedGold = Player.Gold - railsStartingGold
+        #if Player.Gold - railsStartingGold < 0:
+        #    railsEarnedGold = railsEarnedGold + Player.Gold
+        #    railsStartingGold = 0
+        #else:
+        #    railsEarnedGold = railsEarnedGold + Player.Gold - railsStartingGold
+        
         if hours == 0:
             goldPerHour = 0
         else:
-            goldPerHour = "{:,.2f}".format(earnedGold / hours)
-        Misc.SendMessage("Total hours: {} Earned Gold: {} Gold Per Hour: {}".format(hoursFormatted, earnedGoldFormatted, goldPerHour)) 
-    elif option == "report_head":
-        hours = (time.time() - railsStartingTime) / 60 / 60
-        earnedGold = Player.Gold - railsStartingGold
-        if hours == 0:
-            goldPerHour = 0
-        else:
-            goldPerHour = "{:,.0f}".format(earnedGold / hours)
+            goldPerHour = "{:,.0f}".format(railsEarnedGold / hours)
         Player.HeadMessage(253, "[GPH: {}]".format(goldPerHour))    
 
 # Run a single route. The only required argument is a set of coordinates. 
