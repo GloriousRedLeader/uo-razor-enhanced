@@ -37,7 +37,7 @@ def find_first_in_container_by_ids(itemIDs, containerSerial = Player.Backpack.Se
 # This one is pretty much called by all the other functions.
 # Finds one instance of itemID in containerSerial
 # Note that itemID can be a single itemID or a list of itemID
-def find_in_container_by_id(itemID, containerSerial = Player.Backpack.Serial, color = -1, ignoreContainer = []):
+def find_in_container_by_id(itemID, containerSerial = Player.Backpack.Serial, color = -1, ignoreContainer = [], recursive = False):
     ignoreColor = False
     if color == -1:
         ignoreColor = True
@@ -52,7 +52,13 @@ def find_in_container_by_id(itemID, containerSerial = Player.Backpack.Serial, co
         raise ValueError( 'Unknown argument type for itemID passed to FindItem().', itemID, container )
 
     if foundItem != None:
-        return foundItem
+        return foundItem        
+    elif recursive == True:
+        for item in container.Contains:
+            if item.IsContainer:
+                foundItem = find_in_container_by_id(itemID, containerSerial = item.Serial, color = color, ignoreContainer = ignoreContainer, recursive = recursive)
+                if foundItem != None:
+                    return foundItem
 
 # checks list of itemids and returns first one that matches
 # one in either hand.

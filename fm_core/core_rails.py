@@ -276,9 +276,14 @@ def rails_stats(
     elif option == "report_head" or option == "report":
         hours = (time.time() - railsStartingTime) / 60 / 60
         
-        if railsLastGold < Player.Gold and railsLastGold != Player.Gold:
+        if  Player.Gold < railsLastGold:
+            railsEarnedGold = railsEarnedGold + Player.Gold
             railsLastGold = Player.Gold
-            railsEarnedGold = railsEarnedGold + railsLastGold
+            print("< Earned Gold: {}".format(railsEarnedGold))
+        elif railsLastGold != Player.Gold:
+            railsEarnedGold = railsEarnedGold + Player.Gold - railsLastGold
+            railsLastGold = Player.Gold
+            print("!= Earned Gold: {}".format(railsEarnedGold))
             
         #earnedGold = Player.Gold - railsStartingGold
         #if Player.Gold - railsStartingGold < 0:

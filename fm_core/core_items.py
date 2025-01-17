@@ -100,6 +100,10 @@ FISHING_POLE_STATIC_IDS = [0x0DC0]
 
 PET_LEASH_STATIC_IDS = [0x1374]
 
+BOD_STATIC_ID = 0x2258
+
+BOD_BOOK_STATIC_ID = 0x2259
+
 # Corpses are technically items.    
 def get_corpses(range = 2):
     filter = Items.Filter()
