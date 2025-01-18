@@ -17,6 +17,7 @@ CORPSE_SKIN_DELAY = 1750
 POISON_STRIKE_DELAY = 2000
 STRANGLE_DELAY = 2250
 WITHER_DELAY = 2250
+ANIMATE_DEAD_DELAY = 1750
 
 # Spellweaving (taken from ServUO files)
 THUNDERSTORM_DELAY = 1500
@@ -114,6 +115,9 @@ def cast_spell(
     elif spellName == "Curse Weapon":
         Spells.CastNecro(spellName)
         Misc.Pause(get_fc_delay(CURSE_WEAPON_DELAY, FC_CAP_NECROMANCY, latencyMs))        
+    elif spellName == "Animate Dead":
+        Spells.CastNecro(spellName)
+        Misc.Pause(get_fc_delay(ANIMATE_DEAD_DELAY, FC_CAP_NECROMANCY, latencyMs))        
     #elif spellName == "Spirit Speak":
         #Player.UseSkill("Spirit Speak")
         #Misc.Pause(get_fc_delay(SPIRIT_SPEAK_DELAY))

@@ -24,13 +24,22 @@ TRASH_NAMES = [
     "Fey Leggings",
     "Soul Seeker",
     "Blade Dance",
-    "Quiver Of The Elements",
+    "Quiver of the Elements",
     "Quiver of Rage",
     "Flesh Ripper",
     "Aegis of Grace",
     "Pads of the Cu Sidhe",
     "Totem of the Void",
-    "Bonesmasher"
+    "Bonesmasher",
+    "Robe of the Equinox",
+    "Robe of the Eclipse",
+    "Righteous Anger",
+    "Boomstick",
+    "Bloodwood Spirit",
+    "Windsong",
+    "Wildfire Bow",
+    "Raed's Glory",
+    "Brightsight Lenses",
 ]
 
 Timer.Create( 'pingTimer', 1 )

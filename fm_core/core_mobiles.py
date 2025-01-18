@@ -9,6 +9,7 @@ from System import Byte, Int32
 #from builtins import Mobile
 
 ANIMATE_DEAD_MOBILE_NAMES = [
+    "a gore fiend",
     "a lich",
     "a flesh golem",
     "a mummy",
@@ -169,8 +170,8 @@ def get_enemies(range = 10, serialsToExclude = []):
             #print("is in animate dead", mob.Name not in ANIMATE_DEAD_MOBILE_NAMES)
             
         mobsList = List[type(mobs[0])]([mob for mob in mobs if not (mob.Name in ANIMATE_DEAD_MOBILE_NAMES and mob.Notoriety == 6) and mob.Serial not in serialsToExclude])
-        if len(mobsList) == 0:
-            print("No mobs found")
+#        if len(mobsList) == 0:
+#            print("No mobs found")
         return mobsList
 
     return mobs

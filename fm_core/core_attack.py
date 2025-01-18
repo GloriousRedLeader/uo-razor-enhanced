@@ -744,6 +744,13 @@ def run_mage_loop(
     # Whether to use this spell 0 = disabled, 1 = enabled. There is no delay here. Just spam.
     useWither = 0,
     
+    # This is Insane UO Specific. That means there is no target reticle. Wont work
+    # on other servers.
+    useAnimateDead = 0,
+    
+    # Cast it this often
+    animateDeadDelayMs = 60000,
+    
     # Whether to cure yourself or your pet
     useCure = 0,
     
@@ -778,6 +785,7 @@ def run_mage_loop(
     Timer.Create( 'poisonTimer', 1 )
     Timer.Create( 'poisonFieldTimer', 1 )
     Timer.Create( 'meditationTimer', 1 )
+    Timer.Create( 'animateDeadTimer', animateDeadDelayMs )
 
     Player.ChatSay("All Guard Me")
     
@@ -838,6 +846,9 @@ def run_mage_loop(
                     cast_spell("Evil Omen", nearestMob, latencyMs)
                 cast_spell("Curse", nearestMob, latencyMs)
                 Timer.Create( 'curseTimer', curseDelayMs) 
+            elif useAnimateDead == 1 and Timer.Check( 'animateDeadTimer' ) == False and Player.Hits / Player.HitsMax > 0.90:
+                cast_spell("Animate Dead", None, latencyMs)
+                Timer.Create( 'animateDeadTimer', animateDeadDelayMs)
             elif useWildfire == 1 and Timer.Check( 'wildfireTimer' ) == False:
                 cast_spell("Wildfire", nearestMob, latencyMs)
                 Timer.Create( 'wildfireTimer', wildfireDelayMs )
