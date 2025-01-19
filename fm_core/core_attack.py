@@ -36,6 +36,9 @@ import sys
 # 253 - yellow  GPH
 # 455 - white   PLAYER / ITEMS
 
+# Global Timers
+Timer.Create("cloakOfGraveMistsTimer", 10000)
+
 # Basic dexer loop that attacks nearby monsters using the abilities listed below.
 # Configure as needed.
 def run_dex_loop(
@@ -769,6 +772,10 @@ def run_mage_loop(
     # Only heal things that are below this percent HP
     healThreshold = 0.70,
     
+    # InsaneUO specific. There is a cloak that grants immunity. Looks like 30 second cooldown.
+    # Looks for item on Cloak layer and uses it. Timer for this is created in the main core_attack script.
+    useCloakOfGraveMists = 0,
+    
     # If greater than 0 will attempt to use bag of sending when this much gold is present. Default is 0, no bag of sending usage.
     minGold = 0,
     
@@ -807,7 +814,7 @@ def run_mage_loop(
             continue
 
         # Continue loop before doing harmul actions, focus on healing/curing.
-        if heal_player_and_friends(friendSelectMethod = friendSelectMethod, friendNames = friendNames, range = range, healThreshold = healThreshold, useCure = useCure, useGreaterHeal = useGreaterHeal, useSpiritSpeak = useSpiritSpeak) == True:
+        if heal_player_and_friends(friendSelectMethod = friendSelectMethod, friendNames = friendNames, range = range, healThreshold = healThreshold, useCure = useCure, useGreaterHeal = useGreaterHeal, useSpiritSpeak = useSpiritSpeak, useCloakOfGraveMists = useCloakOfGraveMists) == True:
             if useArcaneEmpowerment == 1 and not Player.BuffsExist("Arcane Empowerment") and Player.Mana > 90 and Player.Hits > 50:
                 cast_spell("Arcane Empowerment", None, latencyMs)
             continue
@@ -872,6 +879,8 @@ def run_mage_loop(
         Misc.Pause(100)
 
 
+
+
 # An internal function but it can be used as a main heal loop if desired.  
 # casts cure on player and pet, also heals with greater heal
 # if life is below threshold. Returns true if a heal / cure was attempted.
@@ -910,14 +919,26 @@ def heal_player_and_friends(
     # Necro heal (heals are mutually exclusive, only one will work, so just pick one)
     useSpiritSpeak = 0,
     
+    # InsaneUO specific. There is a cloak that grants immunity. Looks like 30 second cooldown.
+    # Looks for item on Cloak layer and uses it. Timer for this is created in the main core_attack script.
+    useCloakOfGraveMists = 0,
+    
     # Milliseonds of extra delay when computing cast time to account for internet fuzz. Fine tune this as needed.
     latencyMs = 100
 ):
     
-    if useCure == 0 and useGreaterHeal == 0 and useCloseWounds == 0 and useCleanseByFire == 0 and useRemoveCurse == 0 and useSpiritSpeak == 0:
+    if useCure == 0 and useGreaterHeal == 0 and useCloseWounds == 0 and useCleanseByFire == 0 and useRemoveCurse == 0 and useSpiritSpeak == 0 and useCloakOfGraveMists == 0:
         return False
 
-    if useCure == 1 and Player.Poisoned:
+    if useCloakOfGraveMists == 1 and Timer.Check("cloakOfGraveMistsTimer") == False and Player.Hits / Player.HitsMax < 0.50:
+        cloak = Player.GetItemOnLayer("Cloak")    
+        Items.UseItem(cloak)
+        Target.WaitForTarget(1000)
+        Target.Cancel()
+        Timer.Create( 'cloakOfGraveMistsTimer', 32000 )
+        Misc.Pause(100)
+        return True
+    elif useCure == 1 and Player.Poisoned:
         cast_spell("Arch Cure", Player.Serial)
         return True
     elif useGreaterHeal == 1 and not Player.Poisoned and Player.Hits / Player.HitsMax < healThreshold and not Player.YellowHits and Player.Mana > 15:
