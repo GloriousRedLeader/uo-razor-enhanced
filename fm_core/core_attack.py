@@ -14,6 +14,7 @@ from Scripts.fm_core.core_player import find_instrument
 from Scripts.fm_core.core_player import use_bag_of_sending
 from Scripts.fm_core.core_spells import cast_until_works
 from Scripts.fm_core.core_spells import cast_spell
+from Scripts.fm_core.core_spells import check_summon_familiar
 from Scripts.fm_core.core_spells import use_skill
 from Scripts.fm_core.core_rails import is_player_moving
 import sys
@@ -123,9 +124,8 @@ def run_dex_loop(
                     cast_spell("Curse Weapon", None, latencyMs)
            
                 if useShieldBash == 1 and not Player.BuffsExist("Shield Bash") and Player.Mana > 35:
-                    Player.HeadMessage(38, "Shield Bash")
                     cast_spell("Shield Bash", None, latencyMs)
-                    
+                    Player.HeadMessage(38, "Shield Bash")
                 if (useShieldBash == 0 or (useShieldBash == 1 and Player.BuffsExist("Shield Bash"))) and Player.Mana > 20:
                     if specialAbilityType == 1:
                         if not Player.HasPrimarySpecial:
@@ -754,6 +754,12 @@ def run_mage_loop(
     # Cast it this often
     animateDeadDelayMs = 60000,
     
+    # InsaneUO specific. Keeps all 4 pets summoned when safe to cast.
+    useSummonFamiliar = 0,
+    
+    # Make sure we are in wraith form when it is safe to cast.
+    useWraithForm = 0,
+    
     # Whether to cure yourself or your pet
     useCure = 0,
     
@@ -818,6 +824,11 @@ def run_mage_loop(
             if useArcaneEmpowerment == 1 and not Player.BuffsExist("Arcane Empowerment") and Player.Mana > 90 and Player.Hits > 50:
                 cast_spell("Arcane Empowerment", None, latencyMs)
             continue
+            
+        if useWraithForm == 1 and Player.Mana > 30 and Player.Hits / Player.HitsMax > 0.90 and not Player.BuffsExist("Wraith Form"):
+            cast_spell("Wraith Form", None, latencyMs)            
+        elif useSummonFamiliar == 1 and Player.Mana > 40 and Player.Hits / Player.HitsMax > 0.90:
+            check_summon_familiar()
         
         #eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])
         eligible = get_enemies(range)

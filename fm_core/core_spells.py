@@ -4,6 +4,9 @@
 #   2024-03-26
 # Use at your own risk. 
 
+from Scripts.fm_core.core_mobiles import get_pets
+import re
+
 FC_CAP_MAGERY = 2
 FC_CAP_NECROMANCY = 3 if (Player.GetSkillValue("Necromancy") == 120 and Player.GetSkillValue("Necromancy") == 120 and not any(Player.GetSkillValue(skill) > 30 for skill in ["Magery", "Spellweaving", "Parrying", "Mysticism", "Chivalry", "Animal Taming", "Animal Lore", "Ninjitsu", "Bushido", "Focus", "Imbuing", "Evaluating Intelligence"])) else 2
 FC_CAP_CHIVALRY = 4
@@ -14,10 +17,12 @@ FC_CAP_SHIELD_BASH = 4
 CURSE_WEAPON_DELAY = 1000
 EVIL_OMEN_DELAY = 1000
 CORPSE_SKIN_DELAY = 1750
+ANIMATE_DEAD_DELAY = 1750
 POISON_STRIKE_DELAY = 2000
 STRANGLE_DELAY = 2250
 WITHER_DELAY = 2250
-ANIMATE_DEAD_DELAY = 1750
+SUMMON_FAMILIAR_DELAY = 2250
+WRAITH_FORM_DELAY = 2250
 
 # Spellweaving (taken from ServUO files)
 THUNDERSTORM_DELAY = 1500
@@ -118,6 +123,9 @@ def cast_spell(
     elif spellName == "Animate Dead":
         Spells.CastNecro(spellName)
         Misc.Pause(get_fc_delay(ANIMATE_DEAD_DELAY, FC_CAP_NECROMANCY, latencyMs))        
+    elif spellName == "Wraith Form":
+        Spells.CastNecro(spellName)
+        Misc.Pause(get_fc_delay(WRAITH_FORM_DELAY, FC_CAP_NECROMANCY, latencyMs))        
     #elif spellName == "Spirit Speak":
         #Player.UseSkill("Spirit Speak")
         #Misc.Pause(get_fc_delay(SPIRIT_SPEAK_DELAY))
@@ -204,6 +212,54 @@ def get_fcr_delay(spellName):
     #print("FCR", "fcr", fcr)        
     return fcr    
     
+# InsaneUO specific. Summons a single familiar. Will require multiple calls
+# to summon all 4. 
+Timer.Create("checkSummonFamiliarTimer", 5000)
+def check_summon_familiar():
+    SUMMON_FAMILIAR_GUMP_ID = 0x2082496e
+    
+    if Timer.Check("checkSummonFamiliarTimer") == False:
+        if not Gumps.HasGump(SUMMON_FAMILIAR_GUMP_ID):
+            Spells.CastNecro("Summon Familiar")
+            Gumps.WaitForGump(SUMMON_FAMILIAR_GUMP_ID, 1000)
+
+        if Gumps.HasGump(SUMMON_FAMILIAR_GUMP_ID):
+            petButtonMap = {}
+            data = Gumps.GetGumpData(SUMMON_FAMILIAR_GUMP_ID)
+            for piece in data.layoutPieces:
+                match = re.match(r"button (?:\d+\s)*(\d+)", piece)
+                if match is not None:
+                    buttonId = int(match.group(1))
+                    #print("buttonId! ", buttonId, type(buttonId))
+                    if buttonId in [2, 102]:
+                        petButtonMap["Shadow Wisp"] = buttonId
+                    elif buttonId in [3, 103]:
+                        petButtonMap["Dark Wolf"] = buttonId
+                    elif buttonId in [4, 104]:
+                        petButtonMap["Death Adder"] = buttonId
+                    elif buttonId in [5, 105]:
+                        petButtonMap["Vampire Bat"] = buttonId
+
+            pets = get_pets()
+            petNames = [pet.Name.replace(Player.Name + " ", "") for pet in pets]    
+            goodPetCount = 0
+            for petName in petButtonMap:
+                #print("{} -> {}".format(petName, petButtonMap[petName]))
+                if petButtonMap[petName] < 6:
+                    Gumps.SendAction(SUMMON_FAMILIAR_GUMP_ID, petButtonMap[petName])
+                    Misc.Pause(get_fc_delay (baseDelayMs = SUMMON_FAMILIAR_DELAY, fcCap = FC_CAP_NECROMANCY, latencyMs = 100))
+                    break
+                elif petName not in petNames:
+                    Gumps.SendAction(SUMMON_FAMILIAR_GUMP_ID, petButtonMap[petName])
+                    Misc.Pause(250)    
+                else:
+                    goodPetCount = goodPetCount + 1
+                    
+                if goodPetCount == 4:
+                    # We have all 4 pets and they are nearby. Dont call again
+                    # for this many seconds
+                    print("We have all pets, taking a break for 10 seconds")
+                    Timer.Create("checkSummonFamiliarTimer", 10000)
 
 # Make sure a spell gets cast
 # DEPRECATED: Maybe dont use this. Ive got it baked into the recall
