@@ -827,8 +827,6 @@ def run_mage_loop(
             
         if useWraithForm == 1 and Player.Mana > 30 and Player.Hits / Player.HitsMax > 0.90 and not Player.BuffsExist("Wraith Form") and Timer.Remaining("cloakOfGraveMistsTimer") < 20000:
             cast_spell("Wraith Form", None, latencyMs)            
-        elif useSummonFamiliar == 1 and Player.Mana > 40 and Player.Hits / Player.HitsMax > 0.90:
-            check_summon_familiar()
         
         #eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])
         eligible = get_enemies(range)
@@ -880,6 +878,8 @@ def run_mage_loop(
                 cast_spell("Thunderstorm", None, latencyMs)
             elif useWither == 1 and Player.DistanceTo(nearestMob) < 5 and Player.Mana > 20:
                 cast_spell("Wither", None, latencyMs)
+        elif useSummonFamiliar == 1 and Player.Mana > 40 and Player.Hits / Player.HitsMax > 0.90:
+            check_summon_familiar()
         elif useMeditation == 1 and Player.Mana / Player.ManaMax < 0.83 and not Player.Poisoned and not Player.BuffsExist("Bleeding") and not Player.BuffsExist("Strangle") and Timer.Check( 'meditationTimer' ) == False:
             Player.HeadMessage(58, "Stand still - going to meditate!")
             Misc.Pause(1500)

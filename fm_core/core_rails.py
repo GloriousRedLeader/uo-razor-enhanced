@@ -364,12 +364,13 @@ def rails_stats(
         if  Player.Gold < railsLastGold:
             railsEarnedGold = railsEarnedGold + Player.Gold
             railsLastGold = Player.Gold
-            print("< Earned Gold: {}".format(railsEarnedGold))
+            #print("< Earned Gold: {}".format(railsEarnedGold))
         elif railsLastGold != Player.Gold:
             railsEarnedGold = railsEarnedGold + Player.Gold - railsLastGold
             railsLastGold = Player.Gold
-            print("!= Earned Gold: {}".format(railsEarnedGold))
-            
+            #print("!= Earned Gold: {}".format(railsEarnedGold))
+        timeMinutes =round((time.time() - railsStartingTime) / 60)
+        print("Gold Earned: {} Minutes: {}".format( "{:,.0f}".format(railsEarnedGold), timeMinutes))
         #earnedGold = Player.Gold - railsStartingGold
         #if Player.Gold - railsStartingGold < 0:
         #    railsEarnedGold = railsEarnedGold + Player.Gold
