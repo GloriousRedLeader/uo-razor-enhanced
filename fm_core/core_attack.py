@@ -38,7 +38,7 @@ import sys
 # 455 - white   PLAYER / ITEMS
 
 # Global Timers
-Timer.Create("cloakOfGraveMistsTimer", 10000)
+Timer.Create("cloakOfGraveMistsTimer", 1)
 
 # Basic dexer loop that attacks nearby monsters using the abilities listed below.
 # Configure as needed.
@@ -825,7 +825,7 @@ def run_mage_loop(
                 cast_spell("Arcane Empowerment", None, latencyMs)
             continue
             
-        if useWraithForm == 1 and Player.Mana > 30 and Player.Hits / Player.HitsMax > 0.90 and not Player.BuffsExist("Wraith Form"):
+        if useWraithForm == 1 and Player.Mana > 30 and Player.Hits / Player.HitsMax > 0.90 and not Player.BuffsExist("Wraith Form") and Timer.Remaining("cloakOfGraveMistsTimer") < 20000:
             cast_spell("Wraith Form", None, latencyMs)            
         elif useSummonFamiliar == 1 and Player.Mana > 40 and Player.Hits / Player.HitsMax > 0.90:
             check_summon_familiar()
@@ -941,7 +941,7 @@ def heal_player_and_friends(
     if useCure == 0 and useGreaterHeal == 0 and useCloseWounds == 0 and useCleanseByFire == 0 and useRemoveCurse == 0 and useSpiritSpeak == 0 and useCloakOfGraveMists == 0:
         return False
 
-    if useCloakOfGraveMists == 1 and Timer.Check("cloakOfGraveMistsTimer") == False and Player.Hits / Player.HitsMax < 0.50:
+    if useCloakOfGraveMists == 1 and Timer.Check("cloakOfGraveMistsTimer") == False and Player.Hits / Player.HitsMax < 0.40:
         cloak = Player.GetItemOnLayer("Cloak")    
         Items.UseItem(cloak)
         Target.WaitForTarget(1000)

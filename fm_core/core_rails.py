@@ -85,7 +85,68 @@ def move(x):
 # Can potentially swap implementation to use this pathfinder:
 # https://github.com/YulesRules/Ultima-Online-Razor-Enhanced-Pathfinding/blob/main/README.md
 # The timeout value is in seconds. It is a float. 
-def go_to_tile(x, y, timeoutSeconds = -1):
+# tileOffset of 0 means land right on x, y. Positive value means stop short of the 
+# provided x, y. This is useful for casters or anyone who doesnt wish to be directly
+# on top of a mobile.
+def go_to_tile(
+    # Desired X coordinate to travel to. Typically a mobile X.
+    x, 
+    
+    # Desired Y coordinate to travel to. Typically a mobile Y.
+    y, 
+    
+    # Number of seconds to attempt travel. Blocks until we arrive or this many seconds elapses.
+    timeoutSeconds = -1, 
+    
+    # Value of 0 means land right on x, y. This is the default behavior. Positive value means stop 
+    # short of the provided x, y by that many tiles. This is useful for casters or anyone who 
+    # doesnt wish to be directly on top of a mobile.
+    tileOffset = 0
+):
+    if Player.Position.X == x and Player.Position.Y == y:
+        return True
+        
+    start_time = time.time()
+    
+    if tileOffset > 0:
+        tiles = PathFinding.GetPath(x, y, True)
+        #print("Total Tiles: {}".format(len(tiles)))
+        
+        numTiles = len(tiles) if tiles is not None else 0
+        
+        if numTiles - tileOffset > 1:
+            # There is a duplicate of last tile entry. Its in there twice.
+            tileIndex = numTiles - tileOffset - 2
+            #print("tileIndex used {}".format(tileIndex))
+            #print("Original {}, {}".format(x, y))
+            
+            #i = 0
+            #for tile in tiles:
+            #    print("tiles[{}]".format(i), tile.X, tile.Y)
+            #    i = i + 1
+            
+            x = tiles[tileIndex].X
+            y = tiles[tileIndex].Y
+            #print("New {}, {}".format(x, y))
+            
+        else:
+            return True
+        
+        
+    route = PathFinding.Route() 
+    route.X = x
+    route.Y = y
+    route.MaxRetry = 3
+    route.IgnoreMobile = True
+    route.Timeout = timeoutSeconds
+    res = PathFinding.Go(route)
+    
+    total = "{:.2f}".format(time.time() - start_time)
+    Misc.SendMessage("It took {} seconds to generate route ({})".format(total, res), 48)
+    return res  
+
+# Deprecated. Works. Doesnt have tileOffset
+def go_to_tile2(x, y, timeoutSeconds = -1):
     if Player.Position.X == x and Player.Position.Y == y:
         return True
         
@@ -139,7 +200,26 @@ def go_to_adjacent_tile(x, y, timeoutSeconds = -1):
 # on a path. It is a value passed to the pathfinding method. The Pathfinding algorithm 
 # could go on for days. Instead of derping, just give up after this many seconds and 
 # move on with your life.
-def do_route(path, range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 3.0):
+def do_route(
+    # List of x,y coordinates. Will cycle through sequentially.
+    path, 
+    
+    # If an enemy is found within this many tiles, go to that enemy. Stay there
+    # until it is dead. If we cant reach it after x number of tries, quit and go back
+    # to normal route.
+    range = 6, 
+    
+    # Pause for this many MS after a mobile we are after dies.
+    autoLootBufferMs = 0, 
+    
+    # Number of seconds to attempt travel. Blocks until we arrive or this many seconds elapses. 
+    pathFindingTimeoutSeconds = 3.0,
+    
+    # Value of 0 means land right on x, y. This is the default behavior. Positive value means stop 
+    # short of the provided x, y by that many tiles. This is useful for casters or anyone who 
+    # doesnt wish to be directly on top of a mobile.
+    tileOffset = 0
+):
     sectorId = 0
     for coord in path:
         sectorId = sectorId + 1
@@ -166,7 +246,7 @@ def do_route(path, range = 6, autoLootBufferMs = 0, pathFindingTimeoutSeconds = 
                 while Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=range:            
                     Mobiles.Message(nearest,68,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
                     
-                    res = go_to_tile(nearest.Position.X, nearest.Position.Y, pathFindingTimeoutSeconds)
+                    res = go_to_tile(nearest.Position.X, nearest.Position.Y, pathFindingTimeoutSeconds, tileOffset)
                     #res = go_to_adjacent_tile(nearest.Position.X, nearest.Position.Y, pathFindingTimeoutSeconds)
                     
                     Misc.Pause(50)
@@ -215,7 +295,12 @@ def defend(
     # on a path. It is a value passed to the pathfinding method. The Pathfinding algorithm 
     # could go on for days. Instead of derping, just give up after this many seconds and 
     # move on with your life.
-    pathFindingTimeoutSeconds = 3.0
+    pathFindingTimeoutSeconds = 3.0,
+    
+    # Value of 0 means land right on x, y. This is the default behavior. Positive value means stop 
+    # short of the provided x, y by that many tiles. This is useful for casters or anyone who 
+    # doesnt wish to be directly on top of a mobile.
+    tileOffset = 0    
 ):
     rails_stats("start")   
     
@@ -231,7 +316,7 @@ def defend(
             while Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=range:            
                 Mobiles.Message(nearest,68,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
                 
-                res = go_to_tile(nearest.Position.X, nearest.Position.Y, pathFindingTimeoutSeconds)
+                res = go_to_tile(nearest.Position.X, nearest.Position.Y, pathFindingTimeoutSeconds, tileOffset)
                 
                 Misc.Pause(250)
             
@@ -318,13 +403,18 @@ def run_rail_loop_single(
     
     # Give a little extra time to loot when a monster dies. This is useful. A nice value
     # is about 2000ms.
-    autoLootBufferMs = 2000
+    autoLootBufferMs = 2000,
+    
+    # Value of 0 means land right on x, y. This is the default behavior. Positive value means stop 
+    # short of the provided x, y by that many tiles. This is useful for casters or anyone who 
+    # doesnt wish to be directly on top of a mobile.
+    tileOffset = 0 
 ):
     rails_stats("start")        
 
     while True:
         if Player.Weight < Player.MaxWeight - 40:
-            do_route(path, range = attackRange, autoLootBufferMs = autoLootBufferMs, pathFindingTimeoutSeconds = pathFindingTimeoutSeconds)
+            do_route(path, range = attackRange, autoLootBufferMs = autoLootBufferMs, pathFindingTimeoutSeconds = pathFindingTimeoutSeconds, tileOffset= tileOffset)
             rails_stats("report")
         else:
             Player.HeadMessage(48, "Stopping because max weight reached")
