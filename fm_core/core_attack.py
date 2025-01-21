@@ -941,7 +941,7 @@ def heal_player_and_friends(
     if useCure == 0 and useGreaterHeal == 0 and useCloseWounds == 0 and useCleanseByFire == 0 and useRemoveCurse == 0 and useSpiritSpeak == 0 and useCloakOfGraveMists == 0:
         return False
 
-    if useCloakOfGraveMists == 1 and Timer.Check("cloakOfGraveMistsTimer") == False and Player.Hits / Player.HitsMax < 0.40:
+    if useCloakOfGraveMists == 1 and Timer.Check("cloakOfGraveMistsTimer") == False and Player.Hits / Player.HitsMax <= 0.50:
         cloak = Player.GetItemOnLayer("Cloak")    
         Items.UseItem(cloak)
         Target.WaitForTarget(1000)

@@ -258,7 +258,7 @@ def check_summon_familiar():
                 if goodPetCount == 4:
                     # We have all 4 pets and they are nearby. Dont call again
                     # for this many seconds
-                    print("We have all pets, taking a break for 10 seconds")
+                    #print("We have all pets, taking a break for 10 seconds")
                     Timer.Create("checkSummonFamiliarTimer", 10000)
 
 # Make sure a spell gets cast
