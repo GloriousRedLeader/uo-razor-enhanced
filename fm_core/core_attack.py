@@ -800,7 +800,9 @@ def run_mage_loop(
     Timer.Create( 'meditationTimer', 1 )
     Timer.Create( 'animateDeadTimer', animateDeadDelayMs )
 
-    Player.ChatSay("All Guard Me")
+    if Player.Visible:
+        Player.ChatSay("All Guard Me")
+        Misc.Pause(250)
     
     while not Player.IsGhost:
         

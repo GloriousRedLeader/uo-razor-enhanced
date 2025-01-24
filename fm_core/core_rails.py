@@ -225,7 +225,7 @@ def do_route(
         sectorId = sectorId + 1
         serialsToExclude = []
 
-        while True:
+        while not Player.IsGhost:
             rails_stats("report_head")
             
             if not go_to_tile(coord[0],coord[1], pathFindingTimeoutSeconds):
@@ -304,7 +304,7 @@ def defend(
 ):
     rails_stats("start")   
     
-    while True:
+    while not Player.IsGhost:
         rails_stats("report_head")
         Misc.Pause(2000)
         
@@ -420,10 +420,15 @@ def run_rail_loop_single(
 ):
     rails_stats("start")        
 
-    while True:
+    while not Player.IsGhost:
         if Player.Weight < Player.MaxWeight - 40:
             do_route(path, range = attackRange, autoLootBufferMs = autoLootBufferMs, pathFindingTimeoutSeconds = pathFindingTimeoutSeconds, tileOffset= tileOffset)
             rails_stats("report")
         else:
             Player.HeadMessage(48, "Stopping because max weight reached")
             break
+            
+# Looks for corpses in the ocean, sails to them, pauses for your autolooter
+# then returns to the original spot.
+def run_ocean_looter():
+    return True
