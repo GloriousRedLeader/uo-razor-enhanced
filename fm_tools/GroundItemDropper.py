@@ -40,6 +40,15 @@ TRASH_NAMES = [
     "Wildfire Bow",
     "Raed's Glory",
     "Brightsight Lenses",
+    "Burglar's Bandana",
+    "Orcish Visage",
+    "Gloves of the Pugilist",
+    "Blaze of Death",
+    "Arctic Death Dealer",
+    "Staff of Power",
+    "Violet Courage",
+    "Gold Bricks",
+    
 ]
 
 Timer.Create( 'pingTimer', 1 )

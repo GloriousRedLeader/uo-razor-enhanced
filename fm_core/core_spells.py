@@ -214,7 +214,7 @@ def get_fcr_delay(spellName):
     
 # InsaneUO specific. Summons a single familiar. Will require multiple calls
 # to summon all 4. 
-Timer.Create("checkSummonFamiliarTimer", 5000)
+Timer.Create("checkSummonFamiliarTimer", 1000)
 def check_summon_familiar():
     SUMMON_FAMILIAR_GUMP_ID = 0x2082496e
     
@@ -259,7 +259,7 @@ def check_summon_familiar():
                     # We have all 4 pets and they are nearby. Dont call again
                     # for this many seconds
                     #print("We have all pets, taking a break for 10 seconds")
-                    Timer.Create("checkSummonFamiliarTimer", 10000)
+                    Timer.Create("checkSummonFamiliarTimer", 2000)
 
 # Make sure a spell gets cast
 # DEPRECATED: Maybe dont use this. Ive got it baked into the recall

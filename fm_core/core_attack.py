@@ -826,7 +826,8 @@ def run_mage_loop(
             continue
             
         if useWraithForm == 1 and Player.Mana > 30 and Player.Hits / Player.HitsMax > 0.90 and not Player.BuffsExist("Wraith Form") and Timer.Remaining("cloakOfGraveMistsTimer") < 20000:
-            cast_spell("Wraith Form", None, latencyMs)            
+            cast_spell("Wraith Form", None, latencyMs)
+            continue
         
         #eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])
         eligible = get_enemies(range)
@@ -880,6 +881,10 @@ def run_mage_loop(
                 cast_spell("Wither", None, latencyMs)
         elif useSummonFamiliar == 1 and Player.Mana > 40 and Player.Hits / Player.HitsMax > 0.90:
             check_summon_familiar()
+        elif Player.Hits / Player.HitsMax < 0.95 and Player.Mana > 20 and (useGreaterHeal == 1 or useSpiritSpeak == 1 or useCure == 1):
+            # Top player off if no one is around and its safe.
+            heal_player_and_friends(friendSelectMethod = 0, friendNames = [], range = range, healThreshold = 0.95, useCure = useCure, useGreaterHeal = useGreaterHeal, useSpiritSpeak = useSpiritSpeak, useCloakOfGraveMists = 0)
+            
         elif useMeditation == 1 and Player.Mana / Player.ManaMax < 0.83 and not Player.Poisoned and not Player.BuffsExist("Bleeding") and not Player.BuffsExist("Strangle") and Timer.Check( 'meditationTimer' ) == False:
             Player.HeadMessage(58, "Stand still - going to meditate!")
             Misc.Pause(1500)
@@ -946,7 +951,7 @@ def heal_player_and_friends(
         Items.UseItem(cloak)
         Target.WaitForTarget(1000)
         Target.Cancel()
-        Timer.Create( 'cloakOfGraveMistsTimer', 32000 )
+        Timer.Create( 'cloakOfGraveMistsTimer', 30000 )
         Misc.Pause(100)
         return True
     elif useCure == 1 and Player.Poisoned:
