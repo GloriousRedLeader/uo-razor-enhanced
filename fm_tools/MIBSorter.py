@@ -10,7 +10,8 @@ import re
 # Organizes scrolls for mibs into containers based on x, y coordinates.
 # Set one container for east and another for west. 
 
-SOURCE_CONTAINER_ID = 0x40DB059B
+#SOURCE_CONTAINER_ID = 0x40DB059B # Blue bag
+SOURCE_CONTAINER_ID = 0x408A916E # Brown bag
 WEST_CONTAINER_ID = 0x4010BA53
 CENTRAL_CONTAINER_ID = 0x401F082C
 EAST_CONTAINER_ID = 0x40801537
@@ -25,11 +26,6 @@ for mib in mibs:
 scrolls = Items.FindAllByID(SCROLL_ITEM_ID, -1, SOURCE_CONTAINER_ID, 1)
 for scroll in scrolls:
     for prop in scroll.Properties:
-        
-        print(prop)
-        
-        #match = re.match(r"   button (?:\d+\s)*(\d+)", piece)
-        #match = re.match(r"(?:.*)*\:\s\((\d+){1}, (\d+)*\){1}\)", prop.ToString())
         match = re.match(r"(.*){1}\:\s\((\d+){1}, (\d+){1}\)", prop.ToString())
         if match is not None:
             facet = match.group(1)
@@ -48,6 +44,4 @@ for scroll in scrolls:
                 else: 
                     print(facet, x, y, "Moving to east")
                     Items.Move(scroll, EAST_CONTAINER_ID, scroll.Amount)
-                Misc.Pause(650)
-            
-        
+                Misc.Pause(650)            

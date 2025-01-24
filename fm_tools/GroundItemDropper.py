@@ -56,7 +56,7 @@ Timer.Create( 'pingTimer', 1 )
 while True:
     if Timer.Check( 'pingTimer' ) == False:
         Player.HeadMessage( 128, "Ground Dropper Running...")
-        Timer.Create( 'pingTimer', 3000)   
+        Timer.Create( 'pingTimer', 25000)   
         
     for trashName in TRASH_NAMES:
         item = Items.FindByName(trashName, -1, Player.Backpack.Serial,range = 1)

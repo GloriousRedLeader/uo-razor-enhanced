@@ -806,7 +806,7 @@ def run_mage_loop(
         
         if Timer.Check( 'magePingTimer' ) == False:
             Player.HeadMessage( 128, "{} Running...".format(loopName) )
-            Timer.Create( 'magePingTimer', 3000 )
+            Timer.Create( 'magePingTimer', 10000 )
 
         if not Player.Visible:
             Misc.Pause(500)
@@ -843,6 +843,8 @@ def run_mage_loop(
                 cast_spell("Death Ray", nearestMob, latencyMs)                                
             elif useWordOfDeath == 1 and get_mobile_percent_hp(nearestMob) < 0.3:
                 cast_spell("Word of Death", nearestMob, latencyMs)                
+            #elif useSummonFamiliar == 1 and Player.Mana > 40 and Player.Hits / Player.HitsMax > 0.90:
+            #    check_summon_familiar()                
             elif useCorpseSkin == 1 and Timer.Check( 'corpseSkinTimer' ) == False and get_mobile_percent_hp(nearestMob) > 0.5:
                 if useEvilOmenBeforeDotsAndCurses == 1:
                     cast_spell("Evil Omen", nearestMob, latencyMs)

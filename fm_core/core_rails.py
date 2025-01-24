@@ -142,7 +142,7 @@ def go_to_tile(
     res = PathFinding.Go(route)
     
     total = "{:.2f}".format(time.time() - start_time)
-    Misc.SendMessage("It took {} seconds to generate route ({})".format(total, res), 48)
+    #Misc.SendMessage("It took {} seconds to generate route ({})".format(total, res), 48)
     return res  
 
 # Deprecated. Works. Doesnt have tileOffset
@@ -160,7 +160,7 @@ def go_to_tile2(x, y, timeoutSeconds = -1):
     res = PathFinding.Go(route)
     
     total = "{:.2f}".format(time.time() - start_time)
-    Misc.SendMessage("It took {} seconds to generate route ({})".format(total, res), 48)
+    #Misc.SendMessage("It took {} seconds to generate route ({})".format(total, res), 48)
     return res
 
 # This method moves our character next to the x, y provided (not on top of it)
@@ -189,7 +189,7 @@ def go_to_adjacent_tile(x, y, timeoutSeconds = -1):
     res = PathFinding.RunPath(path, timeoutSeconds, useResync = False)
     
     total = "{:.2f}".format(time.time() - start_time)
-    Misc.SendMessage("It took {} seconds to generate a route result of {}".format(total, res), 48)
+    #Misc.SendMessage("It took {} seconds to generate a route result of {}".format(total, res), 48)
     return res
 
 # range is the number of tiles to search for monsters in each "sector"
@@ -232,19 +232,19 @@ def do_route(
                 Misc.SendMessage("Cant make it to target, aborting this coord", 38)
                 break
             
-            Player.HeadMessage(48, "Weve arrived at sector {}".format(sectorId))
+            #Player.HeadMessage(48, "Weve arrived at sector {}".format(sectorId))
             Misc.Pause(1000)
             
             #eligible = get_mobs_exclude_serials(range, True, serialsToExclude) 
             eligible = get_enemies(range, serialsToExclude) 
 
             if len(eligible) > 0:  
-                Player.HeadMessage(48, "Found {} things to attack ({}) filtered".format(len(eligible), len(serialsToExclude)))    
+                #Player.HeadMessage(48, "Found {} things to attack ({}) filtered".format(len(eligible), len(serialsToExclude)))    
                 nearest = Mobiles.Select(eligible, 'Nearest')
                 
                 goToNearestAttempts = 3
                 while Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=range:            
-                    Mobiles.Message(nearest,68,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
+                    #Mobiles.Message(nearest,68,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
                     
                     res = go_to_tile(nearest.Position.X, nearest.Position.Y, pathFindingTimeoutSeconds, tileOffset)
                     #res = go_to_adjacent_tile(nearest.Position.X, nearest.Position.Y, pathFindingTimeoutSeconds)
@@ -253,13 +253,13 @@ def do_route(
                     
                     if res == False or (Player.DistanceTo(nearest) > 1 and goToNearestAttempts <= 0):
                         serialsToExclude.append(nearest.Serial)
-                        Mobiles.Message(nearest,38,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
-                        Player.HeadMessage(38, "Giving up on this monster")
+                        #Mobiles.Message(nearest,38,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
+                        #Player.HeadMessage(38, "Giving up on this monster")
                         break
                     elif Player.DistanceTo(nearest) > 1:
                         goToNearestAttempts = goToNearestAttempts - 1
-                        Mobiles.Message(nearest,28,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
-                        Player.HeadMessage(28, "Monster too far, attempt {}".format(goToNearestAttempts))
+                        #Mobiles.Message(nearest,28,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
+                        #Player.HeadMessage(28, "Monster too far, attempt {}".format(goToNearestAttempts))
                     else:
                         pass
                     
@@ -278,9 +278,9 @@ def do_route(
                     #Player.HeadMessage(48, "Pausing a little extra for more loot")
                     Misc.Pause(autoLootBufferMs)
             else:
-                Player.HeadMessage(48, "Nothing left in sector")
+                #Player.HeadMessage(48, "Nothing left in sector")
                 break
-    Player.HeadMessage(48, "Done in this zone!")
+    #Player.HeadMessage(48, "Done in this zone!")
     
     
 # Goes to monsters in range. 
@@ -332,6 +332,8 @@ def defend(
             Player.HeadMessage(48, "Nothing left in sector")
             Misc.Pause(1000)
 
+Timer.Create("railsStatsTimer", 1)
+
 # Crappy way of reporting gold per hour
 def rails_stats(
     # clear | start | reset = setse initial values and times to 0
@@ -370,7 +372,7 @@ def rails_stats(
             railsLastGold = Player.Gold
             #print("!= Earned Gold: {}".format(railsEarnedGold))
         timeMinutes =round((time.time() - railsStartingTime) / 60)
-        print("Gold Earned: {} Minutes: {}".format( "{:,.0f}".format(railsEarnedGold), timeMinutes))
+        #print("Gold Earned: {} Minutes: {}".format( "{:,.0f}".format(railsEarnedGold), timeMinutes))
         #earnedGold = Player.Gold - railsStartingGold
         #if Player.Gold - railsStartingGold < 0:
         #    railsEarnedGold = railsEarnedGold + Player.Gold
@@ -382,7 +384,12 @@ def rails_stats(
             goldPerHour = 0
         else:
             goldPerHour = "{:,.0f}".format(railsEarnedGold / hours)
-        Player.HeadMessage(253, "[GPH: {}]".format(goldPerHour))    
+        #Player.HeadMessage(253, "[GPH: {}]".format(goldPerHour))    
+        if Timer.Check("railsStatsTimer") == False:
+            message = "Gold Earned: {} Minutes: {} GPH: {}".format( "{:,.0f}".format(railsEarnedGold), timeMinutes, goldPerHour)
+            Misc.SendMessage(message, 253)    
+            Timer.Create("railsStatsTimer", 15000)
+        
 
 # Run a single route. The only required argument is a set of coordinates. 
 # You can find a list of coordinates predefined in fm_core/core_routes.py
