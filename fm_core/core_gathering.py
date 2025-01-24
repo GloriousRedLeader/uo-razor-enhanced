@@ -22,6 +22,7 @@ from Scripts.fm_core.core_mobiles import get_friends_by_names
 from Scripts.fm_core.core_rails import move
 from Scripts.fm_core.core_rails import go_to_tile
 from Scripts.fm_core.core_rails import get_tile_in_front
+from Scripts.fm_core.core_items import get_corpses
 from Scripts.fm_core.core_items import AXE_STATIC_IDS
 from Scripts.fm_core.core_items import LOG_STATIC_IDS
 from Scripts.fm_core.core_items import TREE_STATIC_IDS
@@ -438,7 +439,10 @@ def run_fishing_loop(
     fishHandling = 0,
     
     # Will not do any fishHandling operations on this fish. Leaves it in backpack. Useful for fishing quests.
-    fishToKeep = None
+    fishToKeep = None,
+    
+    # Optional function to call after each fishing attempt, e.g. auto looter
+    callback = None
 ):
     fishingPole = find_first_in_hands_by_ids(FISHING_POLE_STATIC_IDS)
     if fishingPole == None:
@@ -521,6 +525,9 @@ def run_fishing_loop(
                     fished = True
                 else:
                     print("This tile is not wet")
+
+        if callback is not None:
+            callback()
 
         for i in range(0, moveTiles):
             Player.ChatSay("forward one")
@@ -703,3 +710,104 @@ def run_crab_fishing_loop(
         for i in range(0, moveTiles):
             Player.ChatSay("forward one")
             Misc.Pause(750)    
+            
+            
+
+TRUE_NORTH_DIRECTION_MAP = ["Forward One", "Right One", "Back One", "Left One"]
+
+# Essentially returns an array offset for TRUE_NORTH_DIRECTION_MAP
+# Depending on boat direction, shift that array so that forward always
+# means forward. Otherwise youll end up in Peru.
+def get_boat_direction():
+    boatDirection = None
+    playerX = Player.Position.X
+    playerY = Player.Position.Y
+    Player.ChatSay("forward one")
+    Misc.Pause(1000)
+    if Player.Position.X < playerX:
+        boatDirection = "West"
+        boatDirection = 1
+    elif Player.Position.X > playerX:
+        boatDirection = "East"        
+        boatDirection = 3
+    elif Player.Position.Y < playerY:
+        boatDirection = "North"                
+        boatDirection = 0
+    elif Player.Position.Y > playerY:
+        boatDirection = "South"  
+        boatDirection = 2
+    Player.ChatSay("back one")
+    Misc.Pause(1000)        
+
+    return boatDirection
+
+# Go to this tile on the ocean. This is slow. Not meant for long trips.
+# Instead, use this for precision corpse looting.
+def sail_to_tile(
+
+    # Go to this X coord
+    x, 
+    
+    # Go to this Y coord
+    y, 
+
+    # Result of get_boat_direction. Dont call it in here because it is wasteful.
+    # We would have to do it after each corpse is looted.
+    boatDirection,
+    
+    # Optional Time to delay between issuing commands to move boat. This is slow.
+    moveCmdLatencyMs = 650
+):
+    directionMap = TRUE_NORTH_DIRECTION_MAP[boatDirection:] + TRUE_NORTH_DIRECTION_MAP[: boatDirection]
+    while True:
+        #print("Player ", Player.Position.X, Player.Position.Y)
+        if Player.Position.X == x and Player.Position.Y == y:
+            break
+        if Player.Position.X > x:
+            Player.ChatSay(directionMap[3])
+        elif Player.Position.X < x:
+            Player.ChatSay(directionMap[1])            
+        elif Player.Position.Y < y:
+            Player.ChatSay(directionMap[2])                        
+        elif Player.Position.Y > y:
+            Player.ChatSay(directionMap[0])
+        Misc.Pause(1000)
+
+# Global because the function should not forget
+cacheLooted = []
+
+# Looks for corpses in the ocean, sails to them, pauses for your autolooter
+# then returns to the original spot.
+def run_ocean_looter(
+
+    # Time to delay between issuing commands to move boat. This is slow.
+    moveCmdLatencyMs = 650,
+    
+    # Only sail to loot these. Useful for message in a bottle enemies.
+    corpseNames = ["a deep sea serpents corpse", "a sea serpents corpse"]
+):
+    # Store recent corpses so we dont waste time.
+    global cacheLooted
+
+    items = get_corpses(range = 10)
+    
+    if len(items) > 0:
+        playerX = Player.Position.X
+        playerY = Player.Position.Y
+
+        #for item in items:
+        #    print(item.Name)
+        corpses = List[type(items[0])]([item for item in items if item.Name in corpseNames and item.Serial not in cacheLooted])
+
+        if len(corpses) > 0:
+            boatDirection = get_boat_direction()
+            for corpse in corpses:
+                print(corpse.Name, corpse.Position.X, corpse.Position.Y)
+                sail_to_tile(corpse.Position.X, corpse.Position.Y, boatDirection, moveCmdLatencyMs)
+                Misc.Pause(2000)
+                print("cacheLooted size = {}".format(len(cacheLooted)))
+                if len(cacheLooted) >= 30:
+                    cacheLooted.pop(0)
+                    print("cacheLooted popping one off {}".format(len(cacheLooted)))
+                cacheLooted.append(corpse.Serial)
+            sail_to_tile(playerX, playerY, boatDirection, moveCmdLatencyMs)            
