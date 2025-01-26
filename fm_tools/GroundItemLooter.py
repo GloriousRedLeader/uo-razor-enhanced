@@ -29,7 +29,7 @@ from Scripts.fm_core.core_items import ORE_STATIC_IDS
 from Scripts.fm_core.core_items import INGOT_STATIC_IDS
 from Scripts.fm_core.core_items import STONE_STATIC_IDS
 from Scripts.fm_core.core_items import SAND_STATIC_IDS
-
+# Test
 # Loots items near player into pack animal
 # TODO Change to get_pets from core_player
 #PACK_ANIMAL_NAMES = ["one", "two", "three", "four"]
