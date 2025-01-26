@@ -83,7 +83,7 @@ def cast_spell(
     target = None,
     
     # Milliseonds of extra delay when computing cast time to account for internet fuzz. Fine tune this as needed.
-    latencyMs = 100
+    latencyMs = 200
 ):
     Target.Cancel()
     
@@ -188,7 +188,7 @@ def get_fc_delay (
     fcCap,
     
     # Milliseonds of extra delay when computing cast time to account for internet fuzz. Fine tune this as needed.
-    latencyMs = 100
+    latencyMs = 200
 ):
 
     latency = 100
