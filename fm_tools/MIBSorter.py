@@ -11,7 +11,10 @@ import re
 # Set one container for east and another for west. 
 
 #SOURCE_CONTAINER_ID = 0x40DB059B # Blue bag
-SOURCE_CONTAINER_ID = 0x408A916E # Brown bag
+#SOURCE_CONTAINER_ID = 0x408A916E # Brown bag
+
+SOURCE_CONTAINER_ID = Target.PromptTarget("Pick source container", 38)
+
 WEST_CONTAINER_ID = 0x4010BA53
 CENTRAL_CONTAINER_ID = 0x401F082C
 EAST_CONTAINER_ID = 0x40801537

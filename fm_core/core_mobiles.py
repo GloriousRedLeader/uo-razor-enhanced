@@ -145,7 +145,7 @@ def get_yellows_in_range(range = 8):
     fil.Notorieties = List[Byte](bytes([7]))
     fil.IsGhost = False
     fil.Friend = False
-    fil.CheckLineOfSight = True
+    fil.CheckLineOfSight = False
     mobs = Mobiles.ApplyFilter(fil)
 
     return mobs
