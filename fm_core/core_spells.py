@@ -248,7 +248,8 @@ def check_summon_familiar():
                 if petButtonMap[petName] < 6:
                     Gumps.SendAction(SUMMON_FAMILIAR_GUMP_ID, petButtonMap[petName])
                     Misc.Pause(get_fc_delay (baseDelayMs = SUMMON_FAMILIAR_DELAY, fcCap = FC_CAP_NECROMANCY, latencyMs = 100))
-                    break
+                    return True
+                    #break
                 elif petName not in petNames:
                     Gumps.SendAction(SUMMON_FAMILIAR_GUMP_ID, petButtonMap[petName])
                     Misc.Pause(250)    
@@ -260,6 +261,7 @@ def check_summon_familiar():
                     # for this many seconds
                     #print("We have all pets, taking a break for 10 seconds")
                     Timer.Create("checkSummonFamiliarTimer", 2000)
+    return False
 
 # Make sure a spell gets cast
 # DEPRECATED: Maybe dont use this. Ive got it baked into the recall

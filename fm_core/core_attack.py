@@ -830,6 +830,11 @@ def run_mage_loop(
         if useWraithForm == 1 and Player.Mana > 30 and Player.Hits / Player.HitsMax > 0.90 and not Player.BuffsExist("Wraith Form") and Timer.Remaining("cloakOfGraveMistsTimer") < 20000:
             cast_spell("Wraith Form", None, latencyMs)
             continue
+            
+        if useSummonFamiliar == 1 and Player.Mana > 40 and Player.Hits / Player.HitsMax > 0.90:
+            if check_summon_familiar():
+                Misc.Pause(250)
+                continue
         
         #eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])
         eligible = get_enemies(range)
@@ -883,8 +888,8 @@ def run_mage_loop(
                 cast_spell("Thunderstorm", None, latencyMs)
             elif useWither == 1 and Player.DistanceTo(nearestMob) < 5 and Player.Mana > 20:
                 cast_spell("Wither", None, latencyMs)
-        elif useSummonFamiliar == 1 and Player.Mana > 40 and Player.Hits / Player.HitsMax > 0.90:
-            check_summon_familiar()
+        #elif useSummonFamiliar == 1 and Player.Mana > 40 and Player.Hits / Player.HitsMax > 0.90:
+        #    check_summon_familiar()
         elif Player.Hits / Player.HitsMax < 0.95 and Player.Mana > 20 and (useGreaterHeal == 1 or useSpiritSpeak == 1 or useCure == 1):
             # Top player off if no one is around and its safe.
             heal_player_and_friends(friendSelectMethod = 0, friendNames = [], range = range, healThreshold = 0.95, useCure = useCure, useGreaterHeal = useGreaterHeal, useSpiritSpeak = useSpiritSpeak, useCloakOfGraveMists = 0)
