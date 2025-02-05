@@ -41,6 +41,8 @@ A couple of **resource gathering** scripts. Use with caution. Don't break any ru
 
 **Lootmaster** script from Dorana. Just keeping a copy for posterity.
 
+A script that **opens Messages in a bottle and sorts them** into 3 chests, one for each section of the map (west, central, east). This makes fishing MiBs much more efficient since you aren't hunting all over the map, just 1/3 of it with more condensed spots. I usually take about 100 of them with me.
+
 ### Credits
 
 I wrote some of this stuff. Others I am just storing for safekeeping. These were acquired via discord or github. All credit goes to original authors.

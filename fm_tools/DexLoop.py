@@ -6,8 +6,6 @@
 
 from Scripts.fm_core.core_attack import run_dex_loop
 
-# Basic dexer loop that attacks nearby monsters using the abilities listed below.
-# Configure as needed.
 run_dex_loop(
 
     # Give it a fun name in case you have different versions, e.g.
@@ -55,5 +53,5 @@ run_dex_loop(
     minGold = 0,
     
     # Milliseonds of extra delay when computing cast time to account for internet fuzz. Fine tune this as needed.
-    latencyMs = 100,    
+    latencyMs = 200,    
 )

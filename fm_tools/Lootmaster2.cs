@@ -1,3 +1,8 @@
+// From: https://github.com/dorana/RazorEnhancedScripts/blob/master/RazorScripts/Lootmaster.cs
+// Go there to see the original author. Give them all credit. I'm just storing in my repo
+// for safekeeping. I think they play on UOAlive perhaps, go say hi and give them your thanks!
+// I do not own or maintain this script. I'm just a user like  you.
+
 using System;
 using System.Collections.Generic;
 using System.Data;

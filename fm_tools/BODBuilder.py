@@ -104,7 +104,7 @@ run_bod_builder(
     # (Optional) By default only regular materials are allowed (Iron, Leather). If you want
     # to add others like copper, spined leather, etc. then you need to explicitly add them here.
     # This is just an array of color ids. I have constants for them (see imports)
-    allowedResourceHues = [RESOURCE_HUE_DEFAULT, RESOURCE_HUE_DULL_COPPER],
+    allowedResourceHues = [RESOURCE_HUE_DEFAULT, RESOURCE_HUE_COPPER, RESOURCE_HUE_SHADOW_IRON, RESOURCE_HUE_DULL_COPPER, RESOURCE_HUE_BRONZE, RESOURCE_HUE_GOLD, RESOURCE_HUE_AGAPITE, RESOURCE_HUE_VERITE, RESOURCE_HUE_VALORITE],
     
     # (Optional) God save the queen
     gumpDelayMs = 250
