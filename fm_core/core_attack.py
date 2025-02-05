@@ -832,8 +832,8 @@ def run_mage_loop(
             continue
             
         if useSummonFamiliar == 1 and Player.Mana > 40 and Player.Hits / Player.HitsMax > 0.90:
-            if check_summon_familiar():
-                Misc.Pause(250)
+            if check_summon_familiar(latencyMs):
+                #Misc.Pause(250)
                 continue
         
         #eligible = get_mobs_exclude_serials(range, checkLineOfSight = True, namesToExclude = [Player.Name])

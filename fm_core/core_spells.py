@@ -215,7 +215,11 @@ def get_fcr_delay(spellName):
 # InsaneUO specific. Summons a single familiar. Will require multiple calls
 # to summon all 4. 
 Timer.Create("checkSummonFamiliarTimer", 1000)
-def check_summon_familiar():
+def check_summon_familiar(
+
+    # Milliseonds of extra delay when computing cast time to account for internet fuzz. Fine tune this as needed.
+    latencyMs = 200
+):
     SUMMON_FAMILIAR_GUMP_ID = 0x2082496e
     
     if Timer.Check("checkSummonFamiliarTimer") == False:
@@ -240,14 +244,15 @@ def check_summon_familiar():
                     elif buttonId in [5, 105]:
                         petButtonMap["Vampire Bat"] = buttonId
 
-            pets = get_pets()
+            pets = get_pets(range = 15, checkLineOfSight = False)
             petNames = [pet.Name.replace(Player.Name + " ", "") for pet in pets]    
             goodPetCount = 0
             for petName in petButtonMap:
                 #print("{} -> {}".format(petName, petButtonMap[petName]))
                 if petButtonMap[petName] < 6:
                     Gumps.SendAction(SUMMON_FAMILIAR_GUMP_ID, petButtonMap[petName])
-                    Misc.Pause(get_fc_delay (baseDelayMs = SUMMON_FAMILIAR_DELAY, fcCap = FC_CAP_NECROMANCY, latencyMs = 100))
+                    Misc.Pause(get_fc_delay (baseDelayMs = SUMMON_FAMILIAR_DELAY, fcCap = FC_CAP_NECROMANCY, latencyMs = latencyMs))
+                    Misc.Pause(250) # Extra pause for create to appear in world or we get stuck in an infinite loop
                     return True
                     #break
                 elif petName not in petNames:
@@ -259,8 +264,7 @@ def check_summon_familiar():
                 if goodPetCount == 4:
                     # We have all 4 pets and they are nearby. Dont call again
                     # for this many seconds
-                    #print("We have all pets, taking a break for 10 seconds")
-                    Timer.Create("checkSummonFamiliarTimer", 2000)
+                    Timer.Create("checkSummonFamiliarTimer", 3000)
     return False
 
 # Make sure a spell gets cast

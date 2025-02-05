@@ -24,7 +24,8 @@ ANIMATE_DEAD_MOBILE_NAMES = [
     "a wailing banshee",
     "a wraith",
     "a hellsteed",
-    "a skeletal steed"
+    "a skeletal steed",
+    "an Undead Gargoyle",
 ]
 
 # This was taken from the lumberjack script written by Credzba
@@ -177,9 +178,16 @@ def get_enemies(range = 10, serialsToExclude = []):
     return mobs
 
 # Gets your pets as mobiles    
-def get_pets():
+def get_pets(range = 10, checkLineOfSight = True):
     pets = []
-    blues = get_blues_in_range(range = 10)
+    fil = Mobiles.Filter()
+    fil.Enabled = True
+    fil.RangeMax = range
+    fil.Notorieties = List[Byte](bytes([1, 2]))
+    fil.IsGhost = False
+    fil.Friend = False
+    fil.CheckLineOfSight = checkLineOfSight
+    blues = Mobiles.ApplyFilter(fil)    
     for blue in blues:
         if blue.CanRename:
             pets.append(blue)
