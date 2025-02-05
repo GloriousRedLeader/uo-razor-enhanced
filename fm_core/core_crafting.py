@@ -161,7 +161,7 @@ def run_restocker(
     # Green commodity deed box. Can be any container that can hold weight though.
     commodityBoxSerial,
     
-    # (Optional) An array of RestockItem, the resources you want to stock. This is how you configure it.
+    # An array of RestockItem, the resources you want to stock. This is how you configure it.
     # Include only those resources you wish to stock, the hue, the amount, the  gump button id, and page.
     # Page is the page on the gump menu.
     resources,

@@ -27,13 +27,15 @@ A highly configurable **Dexer Attack Loop** that supports some chiv, necro and s
 
 A rather inefficient **Caster Attack Loop**. Good for mage tamer and InsaneUO specific focused necro caster.
 
-A couple of **resource gathering** scripts. Use with caution. Don't break any rules. Includes fishing on a boat, lumberjacking, and mining.
+A couple of **resource gathering** scripts. Use with caution. Don't break any rules. Includes fishing on a boat (also crab fishing), lumberjacking, and mining.
 
 **BOD Builder** script to automate crafting and filling small bods. Highly configurable. Should support all crafting professions (currently just blacksmithy).
 
 **Move Items** scripts to put things in various containers. I bind about 3 of these to the M key (shift + M,alt + M) lots of use cases.
 
 **Automated character movement** script that uses the rails framework. Several default routes already established. You can easily add your own, it's just a list of x, y coordinates. Use this in conjunction with dexer / caster loops for maximum farming. For the love of all that is holy, use while you're at your machine supervising. You will get banned.
+
+A script that **scans journal entries and alerts** with obnoxious sounds and overhead text. Useful for holiday bosses so you don't miss the message. Also good for hunting down specific NPCs like when doing the honesty virtue.
 
 **Character Stats** is a standalone tool that will have some details on character stats from item properties. Just bind it to a key and run it when you want to see all your properties like resists, HCI, SDI, etc. Note that it does get a little wonkie sometimes and you'll have to close and re-open your paperdoll. This script will tell you when it needs to be done (has something to do with item caching in the client / razor). You can find this at *fm_tools/CharacterStats.py*. 
 
