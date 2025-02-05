@@ -11,11 +11,30 @@ They may or may not work on others. Requires razor enhanced 0.8.2.242
 
 You can safely clone this repo or just manually copy *ALL* of the files into your razord enhanced scripts directory. I have these organized as follows:
 
-RazorInstallDirectory/Scripts
+```bash
+└── RazorInstallDirectory
+    └── Scripts
+        ├── fm_core                # Core framework stuff, don't touch
+        |   ├── core_items.py
+        |   ├── core_mobiles.py
+        |   └── ...
+        ├── fm_tools               # Edit these, bind them to keys, go forth.
+        |   ├── CasterLoop.py
+        |   ├── DexLoop.py
+        |   ├── MiningLoop.py
+        |   ├── BODBuilder.py
+        |   └── ...
+        ├── fm_train               # Standalone scripts for training skills
+        |   ├── TrainMagery.py
+        |   ├── TrainHiding.py
+        |   └── ...
+        ├── your_other_scripts.py  # Your normal collection of razor scripts
+        └── ...
+```
 
-* fm_core -> This is framework stuff I've written (for the most part). These don't do anything on their own. You'll need to make a script that calls these functions (see fm_tools for examples).
-* fm_tools -> This is the stuff you'll use. Modify these. Configure them. Bind them to keys.
-* fm_train -> Standalone scripts used for training skills.
+* *fm_core* -> This is framework stuff I've written (for the most part). These don't do anything on their own. You'll need to make a script that calls these functions (see fm_tools for examples).
+* *fm_tools* -> This is the stuff you'll use. Modify these. Configure them. Bind them to keys.
+* *fm_train* -> Standalone scripts used for training skills.
 
 So basically look through *fm_tools* and modify those scripts. You can store your scripts in whatever folder you like.
 
