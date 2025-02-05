@@ -219,14 +219,15 @@ CAT_BLACKSMITHY_THROWING = 57
 
 # Internal data structure of storing ingredients for a recipe.
 class SmallBodResource:
-    def __init__(self, resourceId, amount = 100, canOverrideHue = True, hue = RESOURCE_HUE_DEFAULT):
+    def __init__(self, resourceId, amount = 100):
         self.resourceId = resourceId
         self.amount = amount
-        self.canOverrideHue = canOverrideHue
-        self.hue = hue
+        
+    def can_override_hue(self):
+        return self.resourceId in [INGOT_STATIC_ID, BOARD_STATIC_ID, LEATHER_STATIC_ID ]
         
     def __str__(self):
-        return f"SmallBodResource(resourceId='{self.resourceId}', amount={self.amount}, canOverrideHue='{self.canOverrideHue}', hue='{self.hue}')"        
+        return f"SmallBodResource(resourceId='{self.resourceId}', amount={self.amount}, canOverrideHue='{self.can_override_hue()}')"        
 
 # Recipe template. Pass an array of these to the run_bod_builder function.
 # itemName: Lower case as it appears in the small bod (very bottom last line), e.g. mace
@@ -247,16 +248,17 @@ class SmallBodRecipe:
         
 # Internal data structure used in our main method. Represents a bod and its recipe. 
 class SmallBod:
-    def __init__(self, itemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, recipe):
-        self.itemName = itemName
+    def __init__(self, craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, recipe):
+        self.craftedItemName = craftedItemName
         self.amountMade = amountMade
         self.isExceptional = isExceptional
         self.amountToMake = amountToMake
         self.specialMaterialButton = specialMaterialButton
         self.specialMaterialHue = specialMaterialHue
         self.recipe = recipe
+
     def __str__(self):
-        return f"SmallBod(itemName='{self.itemName}', amountMade='{self.amountMade}', isExceptional={self.isExceptional}, amountToMake='{self.amountToMake}', specialMaterialButton='{self.specialMaterialButton}', specialMaterialHue='{self.specialMaterialHue}', recipe={self.recipe})"        
+        return f"SmallBod(craftedItemName='{self.craftedItemName}', amountMade='{self.amountMade}', isExceptional={self.isExceptional}, amountToMake='{self.amountToMake}', specialMaterialButton='{self.specialMaterialButton}', specialMaterialHue='{self.specialMaterialHue}', recipe={self.recipe})"        
 
 # Default list of recipes. See SmallBodRecipe. You can use these, edit these, or just define your own.
 # TBD: Other professions like tailoring, alchemy, etc.
@@ -324,19 +326,28 @@ RECIPES = [
 ]
 
 # Helper method to salvage stuff.
-def recycle(salvageBag, recipes):
+#def recycle(salvageBag, recipes):
+def recycle(salvageBag, smallBod):
     if salvageBag is None:
         return None
-        
-    found = False
-    for itemName in recipes:
-        while True:
-            item = Items.FindByName(itemName, -1, Player.Backpack.Serial, 0)
-            if item is None:
-                break
-            found = True
-            Items.Move(item, salvageBag, item.Amount)
-            Misc.Pause(800)
+    
+    found = False        
+    while True:
+        item = Items.FindByName(smallBod.craftedItemName, -1, Player.Backpack.Serial, 0)
+        if item is None:
+            break
+        found = True
+        Items.Move(item, salvageBag, item.Amount)
+        Misc.Pause(800)
+    
+    #for itemName in recipes:
+    #    while True:
+    #        item = Items.FindByName(itemName, -1, Player.Backpack.Serial, 0)
+    #        if item is None:
+    #            break
+    #        found = True
+    #        Items.Move(item, salvageBag, item.Amount)
+    #        Misc.Pause(800)
 
     if found:
         Misc.WaitForContext(salvageBag, 10000)
@@ -355,12 +366,12 @@ def get_small_bod(bod, recipes):
     PROP_ID_ITEM_TEXT = 1060658
     
     DEFAULT_MATERIAL_BY_HUE_MAP = {
-        HUE_BLACKSMITHY: { "button": 6, "hue": RESOURCE_HUE_DEFAULT },    # Iron Ingots
-        HUE_TAILORING: { "button": 6, "hue": RESOURCE_HUE_DEFAULT },       # Leather
-        HUE_CARPENTRY: { "button": 6, "hue": RESOURCE_HUE_DEFAULT },       # Wood
-        HUE_TINKERING: { "button": 6, "hue": RESOURCE_HUE_DEFAULT },       # Iron Ingots
-        HUE_ALCHEMY: { "button": 0, "hue": RESOURCE_HUE_DEFAULT },          # None
-        HUE_INSCRIPTION: { "button": 0, "hue": RESOURCE_HUE_DEFAULT }      # None
+        HUE_BLACKSMITHY: { "button": 6, "hue": RESOURCE_HUE_DEFAULT, "name": None },    # Iron Ingots
+        HUE_TAILORING: { "button": 6,   "hue": RESOURCE_HUE_DEFAULT, "name": None },       # Leather
+        HUE_CARPENTRY: { "button": 6,   "hue": RESOURCE_HUE_DEFAULT, "name": None },       # Wood
+        HUE_TINKERING: { "button": 6,   "hue": RESOURCE_HUE_DEFAULT, "name": None },       # Iron Ingots
+        HUE_ALCHEMY: { "button": 0,     "hue": RESOURCE_HUE_DEFAULT, "name": None },          # None
+        HUE_INSCRIPTION: { "button": 0, "hue": RESOURCE_HUE_DEFAULT, "name": None }      # None
     }    
     
     # This goes prop.Number -> { gump button id, special resource hue }
@@ -370,25 +381,25 @@ def get_small_bod(bod, recipes):
     # It just said "Oak". So, I got mad and just did an exact match for the 
     # Propert.Number. Whatever.
     SPECIAL_PROP_MATERIAL_MAP = {
-        1045142: { "button": 13, "hue": RESOURCE_HUE_DULL_COPPER },    # Dull Copper
-        1045143: { "button": 20, "hue": RESOURCE_HUE_SHADOW_IRON },    # Shadow Iron
-        1045144: { "button": 27, "hue": RESOURCE_HUE_COPPER },         # Copper
-        1045145: { "button": 34, "hue": RESOURCE_HUE_BRONZE },         # Bronze
-        1045146: { "button": 41, "hue": RESOURCE_HUE_GOLD },           # Gold
-        1045147: { "button": 48, "hue": RESOURCE_HUE_AGAPITE },        # Agapite
-        1045148: { "button": 55, "hue": RESOURCE_HUE_VERITE },         # Verite
-        1045149: { "button": 62, "hue": RESOURCE_HUE_VALORITE },       # Valorite
+        1045142: { "button": 13, "hue": RESOURCE_HUE_DULL_COPPER,   "name": "dull copper" },    # Dull Copper
+        1045143: { "button": 20, "hue": RESOURCE_HUE_SHADOW_IRON,   "name": "shadow iron" },    # Shadow Iron
+        1045144: { "button": 27, "hue": RESOURCE_HUE_COPPER,        "name": "copper" },         # Copper
+        1045145: { "button": 34, "hue": RESOURCE_HUE_BRONZE,        "name": "bronze" },         # Bronze
+        1045146: { "button": 41, "hue": RESOURCE_HUE_GOLD,          "name": "gold" },           # Gold
+        1045147: { "button": 48, "hue": RESOURCE_HUE_AGAPITE,       "name": "agapite" },        # Agapite
+        1045148: { "button": 55, "hue": RESOURCE_HUE_VERITE,        "name": "verite" },         # Verite
+        1045149: { "button": 62, "hue": RESOURCE_HUE_VALORITE,      "name": "valorite" },       # Valorite
 
-        1049348: { "button": 13, "hue": RESOURCE_HUE_SPINED },         # Spined
-        1049349: { "button": 20, "hue": RESOURCE_HUE_HORNED },         # Horned
-        1049350: { "button": 27, "hue": RESOURCE_HUE_BARBED },         # Barbed
+        1049348: { "button": 13, "hue": RESOURCE_HUE_SPINED,        "name": "spined" },         # Spined
+        1049349: { "button": 20, "hue": RESOURCE_HUE_HORNED,        "name": "horned" },         # Horned
+        1049350: { "button": 27, "hue": RESOURCE_HUE_BARBED,        "name": "barbed" },         # Barbed
         
-        1071428: { "button": 13, "hue": RESOURCE_HUE_OAK },             # Oak
-        1071429: { "button": 20, "hue": RESOURCE_HUE_ASH },             # Ash
-        1071430: { "button": 27, "hue": RESOURCE_HUE_YEW },             # Yew
-        1071431: { "button": 34, "hue": RESOURCE_HUE_HEARTWOOD },       # Heartwood
-        1071432: { "button": 41, "hue": RESOURCE_HUE_BLOODWOOD },       # Bloodwood
-        1071433: { "button": 48, "hue": RESOURCE_HUE_FROSTWOOD },       # Frostwood
+        1071428: { "button": 13, "hue": RESOURCE_HUE_OAK,           "name": None },             # Oak
+        1071429: { "button": 20, "hue": RESOURCE_HUE_ASH,           "name": None },             # Ash
+        1071430: { "button": 27, "hue": RESOURCE_HUE_YEW,           "name": None },             # Yew
+        1071431: { "button": 34, "hue": RESOURCE_HUE_HEARTWOOD,     "name": None },       # Heartwood
+        1071432: { "button": 41, "hue": RESOURCE_HUE_BLOODWOOD,     "name": None },       # Bloodwood
+        1071433: { "button": 48, "hue": RESOURCE_HUE_FROSTWOOD,     "name": None },       # Frostwood
     }    
     
     isExceptional = False
@@ -416,7 +427,8 @@ def get_small_bod(bod, recipes):
                 recipe = recipes[itemName]
             
     if recipe is not None and isSmallBod:
-        return SmallBod(itemName, amountMade, isExceptional, amountToMake, specialMaterial["button"], specialMaterial["hue"], recipe)
+        craftedItemName = specialMaterial["name"] + " " + recipe.itemName if specialMaterial["name"] is not None else recipe.itemName
+        return SmallBod(craftedItemName, amountMade, isExceptional, amountToMake, specialMaterial["button"], specialMaterial["hue"], recipe)
     elif isSmallBod == False:
         print("Warning: Skipping because this might be a LBOD")
     else:
@@ -440,10 +452,9 @@ def get_tool(smallBod, toolContainer):
 def check_resources(smallBod, resourceContainer):
     for resource in smallBod.recipe.resources:
         while True:
-            hue = smallBod.specialMaterialHue if resource.canOverrideHue else resource.hue 
+            hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
             items = Items.FindAllByID(resource.resourceId, hue, Player.Backpack.Serial, 0)
-            
-            
+
             amount = 0
             for item in items:
                 amount = amount + item.Amount
@@ -470,15 +481,32 @@ def check_resources(smallBod, resourceContainer):
     
     # Cleanup nonessentials, move to resource crate
     for resourceId in ALL_RESOURCES:
-        keep = False
-        for resource in smallBod.recipe.resources:
-            if resourceId == resource.resourceId:
-                keep = True
-                break
-        if not keep:
-            items = Items.FindAllByID(resourceId, -1, Player.Backpack.Serial, -1)
-            for item in items:
-                Items.Move(item, resourceContainer, item.Amount)
+        items = Items.FindAllByID(resourceId, -1, Player.Backpack.Serial, 0)
+        for item in items:
+            for resource in smallBod.recipe.resources:
+                hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
+                if not (item.ItemID == resource.resourceId and item.Color == hue):
+                    Items.Move(item, resourceContainer, item.Amount)    
+                    Misc.Pause(800)
+                #if item.ItemID == resource.resourceId and item.Color == hue:
+                #    pass
+                #else:
+                #    Items.Move(item, resourceContainer, item.Amount)    
+                #    Misc.Pause(800)
+                    
+
+    
+    # Cleanup nonessentials, move to resource crate
+#    for resourceId in ALL_RESOURCES:
+#        keep = False
+#        for resource in smallBod.recipe.resources:
+#            if resourceId == resource.resourceId:
+#                keep = True
+#                break
+#        if not keep:
+#            items = Items.FindAllByID(resourceId, -1, Player.Backpack.Serial, -1)
+#            for item in items:
+#                Items.Move(item, resourceContainer, item.Amount)
         
     return True
 
@@ -578,7 +606,7 @@ def run_bod_builder(
                     Misc.Pause(1000)                
                     break
                 else:
-                    print("{} {}/{}".format(smallBod.itemName, smallBod.amountMade, smallBod.amountToMake))
+                    print("Bod progress: {} {}/{}".format(smallBod.craftedItemName, smallBod.amountMade, smallBod.amountToMake))
                     
                     tool = get_tool(smallBod, toolContainer)
                     
@@ -642,9 +670,10 @@ def run_bod_builder(
                     Gumps.CloseGump(SMALL_BOD_GUMP_ID)
                 
                 if Player.MaxWeight - Player.Weight < 100:
-                    recycle(salvageBag, recipes)         
+                    recycle(salvageBag, smallBod)         
 
             else:
                 break
                 
-            recycle(salvageBag, recipes)                     
+            Misc.Pause(1000)
+            recycle(salvageBag, smallBod)                     
