@@ -61,7 +61,7 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 
 # Automate small bod building. You just need to specify a few containers,
 # have a container fully stocked, have a container of tools, and you are good to go.
-# Supports these skills: Blacksmithy, Tailoring
+# Supports all crafting skills (allegedly), but currently only has recipes for Blacksmithy
 # Features: 
 #   - automatically adds items to small bod
 #   - salvages wasted (non exceptional items) with a salvage bag
