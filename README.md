@@ -5,7 +5,7 @@ These are scripts I've either written, liberally modified, or just stored for sa
 * UOAlive
 * InsaneUO
 
-They may or may not work on others.
+They may or may not work on others. Requires razor enhanced 0.8.2.242
 
 ### Setup
 
