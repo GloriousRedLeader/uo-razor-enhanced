@@ -368,6 +368,8 @@ def recycle(salvageBag, recipes):
 # Helper method to generate a small bod data structure.
 def get_small_bod(bod, recipes):
     
+    PROD_ID_LARGE_BULK_ORDER = 1060655
+    PROP_ID_SMALL_BULK_ORDER = 1060654 
     PROP_ID_AMOUNT_TO_MAKE = 1060656
     PROP_ID_EXCEPTIONAL = 1045141
     PROP_ID_SHADOW_IRON = 1045143
@@ -416,15 +418,16 @@ def get_small_bod(bod, recipes):
     itemText = None
     amountMade = 0
     recipe = None
+    isSmallBod = False
     for prop in bod.Properties:
+        if prop.Number == PROP_ID_SMALL_BULK_ORDER:
+            isSmallBod = True
         if prop.Number == PROP_ID_EXCEPTIONAL:
             isExceptional = True
         if prop.Number == PROP_ID_AMOUNT_TO_MAKE:
             amountToMake = int(prop.Args)
-            
         if prop.Number in SPECIAL_PROP_MATERIAL_MAP:
             specialMaterial = SPECIAL_PROP_MATERIAL_MAP[prop.Number]
-            
         if prop.Number == PROP_ID_ITEM_TEXT:
             print("PROP STRING:", prop.ToString())
             propList = prop.ToString().split(": ")
@@ -433,8 +436,10 @@ def get_small_bod(bod, recipes):
             if itemName in recipes:
                 recipe = recipes[itemName]
             
-    if recipe is not None:
+    if recipe is not None and isSmallBod:
         return SmallBod(itemName, amountMade, isExceptional, amountToMake, specialMaterial["button"], specialMaterial["hue"], recipe)
+    elif isSmallBod == False:
+        print("Warning: Skipping because this might be a LBOD")
     else:
         print("Warning: Could not find static info for:")
         for prop in bod.Properties:
