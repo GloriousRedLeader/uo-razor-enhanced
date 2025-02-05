@@ -4,21 +4,6 @@
 #   2025-02-04
 # Use at your own risk. 
 
-#from System.Collections.Generic import List
-#import sys
-#import re
-#from System import Byte, Int32
-#from Scripts.fm_core.core_player import find_first_in_container_by_ids
-#from Scripts.fm_core.core_player import find_first_in_hands_by_id
-#from Scripts.fm_core.core_player import move_all_items_from_container
-#from Scripts.fm_core.core_player import move_item_to_container_by_id
-#from Scripts.fm_core.core_player import find_in_container_by_id
-#from Scripts.fm_core.core_player import find_first_in_container_by_name
-#from Scripts.fm_core.core_player import find_all_in_container_by_id
-#from Scripts.fm_core.core_mobiles import get_friends_by_names
-#from Scripts.fm_core.core_rails import move
-#from Scripts.fm_core.core_rails import go_to_tile
-#from Scripts.fm_core.core_rails import get_tile_in_front
 from Scripts.fm_core.core_items import AXE_STATIC_IDS
 from Scripts.fm_core.core_items import LOG_STATIC_IDS
 from Scripts.fm_core.core_items import TREE_STATIC_IDS
@@ -106,6 +91,7 @@ class RestockItem:
     def __str__(self):
         return f"RestockItem(itemId='{self.itemId}', itemHue={self.itemHue}, amount='{self.amount}', resourceBoxSerial='{self.resourceBoxSerial}', resourceBoxButton='{self.resourceBoxButton}', resourceBoxPage='{self.resourceBoxPage}')"        
 
+# User would define something like this and pass it as an arg to the run_restocker() function.
 #RESOURCES = [
 #    RestockItem(BLACKPEARL, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 100, 10000, 0),
 #    RestockItem(BLOODMOSS, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 101, 10000, 0),
@@ -146,7 +132,7 @@ class RestockItem:
 #    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_BARBED, leatherResourceBoxSerial, 103, 10000, 0),
 #]
 
-# Returns sum of all the stacks in a container, ideally there would just be one stack.
+# Helper that returns sum of all the stacks in a container, ideally there would just be one stack.
 def get_amount_in_container(resource, containerSerial):
     amount = 0
     items = Items.FindAllByID(resource.itemId, resource.itemHue, containerSerial, 0)
@@ -212,14 +198,6 @@ def run_restocker(
 
             if not runAgain:
                 break
-                
-
-
-
-
-
-
-
 
 ################## ################## ################## ##################
 #
@@ -281,6 +259,7 @@ class SmallBod:
         return f"SmallBod(itemName='{self.itemName}', amountMade='{self.amountMade}', isExceptional={self.isExceptional}, amountToMake='{self.amountToMake}', specialMaterialButton='{self.specialMaterialButton}', specialMaterialHue='{self.specialMaterialHue}', recipe={self.recipe})"        
 
 # Default list of recipes. See SmallBodRecipe. You can use these, edit these, or just define your own.
+# TBD: Other professions like tailoring, alchemy, etc.
 RECIPES = [
     SmallBodRecipe("war hammer", CAT_BLACKSMITHY_BASHING, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
     SmallBodRecipe("kryss", CAT_BLACKSMITHY_BLADED, 44, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
@@ -443,9 +422,7 @@ def get_small_bod(bod, recipes):
     else:
         print("Warning: Could not find static info for:")
         for prop in bod.Properties:
-            #print("\t", prop.ToString(), prop.Args.ToString(), prop.Number)
             print("\t", prop.ToString(), "(", prop.Number, ")")
-            #print("\t", prop.ToString())
       
 # Helper method to get a tool from the toolContainer. You dont need to worry about this.  
 def get_tool(smallBod, toolContainer):
