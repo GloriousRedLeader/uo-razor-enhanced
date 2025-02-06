@@ -248,17 +248,40 @@ class SmallBodRecipe:
         
 # Internal data structure used in our main method. Represents a bod and its recipe. 
 class SmallBod:
-    def __init__(self, craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, recipe):
+    def __init__(self, craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, recipe):
         self.craftedItemName = craftedItemName
         self.amountMade = amountMade
         self.isExceptional = isExceptional
         self.amountToMake = amountToMake
         self.specialMaterialButton = specialMaterialButton
         self.specialMaterialHue = specialMaterialHue
+        self.specialMaterialPropId = specialMaterialPropId
         self.recipe = recipe
+        
+    def isComplete(self):
+        return self.amountToMake == self.amountMade
 
     def __str__(self):
-        return f"SmallBod(craftedItemName='{self.craftedItemName}', amountMade='{self.amountMade}', isExceptional={self.isExceptional}, amountToMake='{self.amountToMake}', specialMaterialButton='{self.specialMaterialButton}', specialMaterialHue='{self.specialMaterialHue}', recipe={self.recipe})"        
+        return f"SmallBod(craftedItemName='{self.craftedItemName}', amountMade='{self.amountMade}', isExceptional={self.isExceptional}, amountToMake='{self.amountToMake}', specialMaterialButton='{self.specialMaterialButton}', specialMaterialHue='{self.specialMaterialHue}', specialMaterialPropId={self.specialMaterialPropId}, recipe={self.recipe})"        
+        
+# Internal data structure used for filling LBODS.
+class LargeBod:
+    def __init__(self, isExceptional, amountToMake, specialMaterialPropId, smallBodItems):
+        self.isExceptional = isExceptional
+        self.amountToMake = amountToMake
+        self.specialMaterialPropId = specialMaterialPropId
+        self.smallBodItems = smallBodItems
+        
+    def isComplete(self):
+        isComplete = False
+        numCompleted = 0
+        for smallBodItem in self.smallBodItems:
+            if smallBodItem['amountMade'] == self.amountToMake:
+                numCompleted = numCompleted + 1
+        return numCompleted == len(self.smallBodItems)
+
+    def __str__(self):
+        return f"LargeBod(isExceptional='{self.isExceptional}', amountToMake='{self.amountToMake}', specialMaterialPropId={self.specialMaterialPropId}, smallBodItems={self.smallBodItems})"                
 
 # Default list of recipes. See SmallBodRecipe. You can use these, edit these, or just define your own.
 # TBD: Other professions like tailoring, alchemy, etc.
@@ -355,60 +378,63 @@ def recycle(salvageBag, smallBod):
         Misc.Pause(1000)
     return None
 
+PROD_ID_LARGE_BULK_ORDER = 1060655
+PROP_ID_SMALL_BULK_ORDER = 1060654 
+PROP_ID_AMOUNT_TO_MAKE = 1060656
+PROP_ID_EXCEPTIONAL = 1045141
+PROP_ID_SHADOW_IRON = 1045143
+PROP_ID_ITEM_TEXT = 1060658
+
+# This goes prop.Number -> { gump button id, special resource hue }
+# ServUO\Scripts\Services\BulkOrders\SmallBODs\SmallBODGump.cs
+# Tried doing a regex by special material name, e.g. All items must be made
+# with Dull Copper Ingots, but it didnt follow that convetion for carpenty.
+# It just said "Oak". So, I got mad and just did an exact match for the 
+# Propert.Number. Whatever.
+SPECIAL_PROP_MATERIAL_MAP = {
+    1045142: { "button": 13, "hue": RESOURCE_HUE_DULL_COPPER,   "name": "dull copper" },    # Dull Copper
+    1045143: { "button": 20, "hue": RESOURCE_HUE_SHADOW_IRON,   "name": "shadow iron" },    # Shadow Iron
+    1045144: { "button": 27, "hue": RESOURCE_HUE_COPPER,        "name": "copper" },         # Copper
+    1045145: { "button": 34, "hue": RESOURCE_HUE_BRONZE,        "name": "bronze" },         # Bronze
+    1045146: { "button": 41, "hue": RESOURCE_HUE_GOLD,          "name": "gold" },           # Gold
+    1045147: { "button": 48, "hue": RESOURCE_HUE_AGAPITE,       "name": "agapite" },        # Agapite
+    1045148: { "button": 55, "hue": RESOURCE_HUE_VERITE,        "name": "verite" },         # Verite
+    1045149: { "button": 62, "hue": RESOURCE_HUE_VALORITE,      "name": "valorite" },       # Valorite
+
+    1049348: { "button": 13, "hue": RESOURCE_HUE_SPINED,        "name": "spined" },         # Spined
+    1049349: { "button": 20, "hue": RESOURCE_HUE_HORNED,        "name": "horned" },         # Horned
+    1049350: { "button": 27, "hue": RESOURCE_HUE_BARBED,        "name": "barbed" },         # Barbed
+    
+    1071428: { "button": 13, "hue": RESOURCE_HUE_OAK,           "name": None },             # Oak
+    1071429: { "button": 20, "hue": RESOURCE_HUE_ASH,           "name": None },             # Ash
+    1071430: { "button": 27, "hue": RESOURCE_HUE_YEW,           "name": None },             # Yew
+    1071431: { "button": 34, "hue": RESOURCE_HUE_HEARTWOOD,     "name": None },       # Heartwood
+    1071432: { "button": 41, "hue": RESOURCE_HUE_BLOODWOOD,     "name": None },       # Bloodwood
+    1071433: { "button": 48, "hue": RESOURCE_HUE_FROSTWOOD,     "name": None },       # Frostwood
+}
+    
+#DEFAULT_MATERIAL_BY_HUE_MAP = {
+#    HUE_BLACKSMITHY: { "button": 6, "hue": RESOURCE_HUE_DEFAULT, "name": None },    # Iron Ingots
+#    HUE_TAILORING: { "button": 6,   "hue": RESOURCE_HUE_DEFAULT, "name": None },       # Leather
+#    HUE_CARPENTRY: { "button": 6,   "hue": RESOURCE_HUE_DEFAULT, "name": None },       # Wood
+#    HUE_TINKERING: { "button": 6,   "hue": RESOURCE_HUE_DEFAULT, "name": None },       # Iron Ingots
+#    HUE_ALCHEMY: { "button": 0,     "hue": RESOURCE_HUE_DEFAULT, "name": None },          # None
+#    HUE_INSCRIPTION: { "button": 0, "hue": RESOURCE_HUE_DEFAULT, "name": None }      # None
+#}    
+
 # Helper method to generate a small bod data structure.
 def get_small_bod(bod, recipes):
-    
-    PROD_ID_LARGE_BULK_ORDER = 1060655
-    PROP_ID_SMALL_BULK_ORDER = 1060654 
-    PROP_ID_AMOUNT_TO_MAKE = 1060656
-    PROP_ID_EXCEPTIONAL = 1045141
-    PROP_ID_SHADOW_IRON = 1045143
-    PROP_ID_ITEM_TEXT = 1060658
-    
-    DEFAULT_MATERIAL_BY_HUE_MAP = {
-        HUE_BLACKSMITHY: { "button": 6, "hue": RESOURCE_HUE_DEFAULT, "name": None },    # Iron Ingots
-        HUE_TAILORING: { "button": 6,   "hue": RESOURCE_HUE_DEFAULT, "name": None },       # Leather
-        HUE_CARPENTRY: { "button": 6,   "hue": RESOURCE_HUE_DEFAULT, "name": None },       # Wood
-        HUE_TINKERING: { "button": 6,   "hue": RESOURCE_HUE_DEFAULT, "name": None },       # Iron Ingots
-        HUE_ALCHEMY: { "button": 0,     "hue": RESOURCE_HUE_DEFAULT, "name": None },          # None
-        HUE_INSCRIPTION: { "button": 0, "hue": RESOURCE_HUE_DEFAULT, "name": None }      # None
-    }    
-    
-    # This goes prop.Number -> { gump button id, special resource hue }
-    # ServUO\Scripts\Services\BulkOrders\SmallBODs\SmallBODGump.cs
-    # Tried doing a regex by special material name, e.g. All items must be made
-    # with Dull Copper Ingots, but it didnt follow that convetion for carpenty.
-    # It just said "Oak". So, I got mad and just did an exact match for the 
-    # Propert.Number. Whatever.
-    SPECIAL_PROP_MATERIAL_MAP = {
-        1045142: { "button": 13, "hue": RESOURCE_HUE_DULL_COPPER,   "name": "dull copper" },    # Dull Copper
-        1045143: { "button": 20, "hue": RESOURCE_HUE_SHADOW_IRON,   "name": "shadow iron" },    # Shadow Iron
-        1045144: { "button": 27, "hue": RESOURCE_HUE_COPPER,        "name": "copper" },         # Copper
-        1045145: { "button": 34, "hue": RESOURCE_HUE_BRONZE,        "name": "bronze" },         # Bronze
-        1045146: { "button": 41, "hue": RESOURCE_HUE_GOLD,          "name": "gold" },           # Gold
-        1045147: { "button": 48, "hue": RESOURCE_HUE_AGAPITE,       "name": "agapite" },        # Agapite
-        1045148: { "button": 55, "hue": RESOURCE_HUE_VERITE,        "name": "verite" },         # Verite
-        1045149: { "button": 62, "hue": RESOURCE_HUE_VALORITE,      "name": "valorite" },       # Valorite
-
-        1049348: { "button": 13, "hue": RESOURCE_HUE_SPINED,        "name": "spined" },         # Spined
-        1049349: { "button": 20, "hue": RESOURCE_HUE_HORNED,        "name": "horned" },         # Horned
-        1049350: { "button": 27, "hue": RESOURCE_HUE_BARBED,        "name": "barbed" },         # Barbed
-        
-        1071428: { "button": 13, "hue": RESOURCE_HUE_OAK,           "name": None },             # Oak
-        1071429: { "button": 20, "hue": RESOURCE_HUE_ASH,           "name": None },             # Ash
-        1071430: { "button": 27, "hue": RESOURCE_HUE_YEW,           "name": None },             # Yew
-        1071431: { "button": 34, "hue": RESOURCE_HUE_HEARTWOOD,     "name": None },       # Heartwood
-        1071432: { "button": 41, "hue": RESOURCE_HUE_BLOODWOOD,     "name": None },       # Bloodwood
-        1071433: { "button": 48, "hue": RESOURCE_HUE_FROSTWOOD,     "name": None },       # Frostwood
-    }    
-    
     isExceptional = False
     amountToMake = 0
-    specialMaterial = DEFAULT_MATERIAL_BY_HUE_MAP[bod.Color]
+    #specialMaterial = DEFAULT_MATERIAL_BY_HUE_MAP[bod.Color]
     itemText = None
     amountMade = 0
     recipe = None
     isSmallBod = False
+    specialMaterialButton = 6 if bod.Color in [HUE_BLACKSMITHY, HUE_TAILORING, HUE_CARPENTRY, HUE_TINKERING] else 0
+    specialMaterialHue = RESOURCE_HUE_DEFAULT
+    specialMaterialPropId = None
+    specialMaterialName = None
     for prop in bod.Properties:
         if prop.Number == PROP_ID_SMALL_BULK_ORDER:
             isSmallBod = True
@@ -417,9 +443,13 @@ def get_small_bod(bod, recipes):
         if prop.Number == PROP_ID_AMOUNT_TO_MAKE:
             amountToMake = int(prop.Args)
         if prop.Number in SPECIAL_PROP_MATERIAL_MAP:
-            specialMaterial = SPECIAL_PROP_MATERIAL_MAP[prop.Number]
+            #specialMaterial = SPECIAL_PROP_MATERIAL_MAP[prop.Number]
+            specialMaterialPropId = prop.Number
+            specialMaterialButton = SPECIAL_PROP_MATERIAL_MAP[prop.Number]["button"]
+            specialMaterialHue = SPECIAL_PROP_MATERIAL_MAP[prop.Number]["hue"]
+            specialMaterialName = SPECIAL_PROP_MATERIAL_MAP[prop.Number]["name"]
         if prop.Number == PROP_ID_ITEM_TEXT:
-            print("PROP STRING:", prop.ToString())
+            #print("PROP STRING:", prop.ToString())
             propList = prop.ToString().split(": ")
             itemName = propList[0]
             amountMade = int(propList[1])
@@ -427,15 +457,47 @@ def get_small_bod(bod, recipes):
                 recipe = recipes[itemName]
             
     if recipe is not None and isSmallBod:
-        craftedItemName = specialMaterial["name"] + " " + recipe.itemName if specialMaterial["name"] is not None else recipe.itemName
-        return SmallBod(craftedItemName, amountMade, isExceptional, amountToMake, specialMaterial["button"], specialMaterial["hue"], recipe)
-    elif isSmallBod == False:
-        print("Warning: Skipping because this might be a LBOD")
-    else:
-        print("Warning: Could not find static info for:")
+        #craftedItemName = specialMaterial["name"] + " " + recipe.itemName if specialMaterial["name"] is not None else recipe.itemName
+        craftedItemName = specialMaterialName + " " + recipe.itemName if specialMaterialName is not None else recipe.itemName
+        #return SmallBod(craftedItemName, amountMade, isExceptional, amountToMake, specialMaterial["button"], specialMaterial["hue"], recipe)
+        return SmallBod(craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, recipe)
+    elif isSmallBod == True:
+        print("Warning: Skipping because not in recipe list {}".format(itemText))
         for prop in bod.Properties:
             print("\t", prop.ToString(), "(", prop.Number, ")")
-      
+
+    #    print("Warning: Skipping because this might be a LBOD")
+        #for prop in bod.Properties:
+        #    print("\t", prop.ToString(), "(", prop.Number, ")")        
+    #else:
+    #    print("Warning: Skipping because not in recipe list {}".format(itemText))
+        #for prop in bod.Properties:
+        #    print("\t", prop.ToString(), "(", prop.Number, ")")
+
+# Internal: Build a data structure to check progress and get dependencies of large bod
+def get_large_bod(bod):
+    isLargeBod = False
+    smallBodItems = []
+    specialMaterialPropId = None
+    isExceptional = False
+    amountToMake = 0
+    for prop in bod.Properties:
+        if prop.Number == PROD_ID_LARGE_BULK_ORDER:
+            isLargeBod = True
+        if prop.Number == PROP_ID_EXCEPTIONAL:
+            isExceptional = True
+        if prop.Number == PROP_ID_AMOUNT_TO_MAKE:
+            amountToMake = int(prop.Args)
+        if prop.Number in SPECIAL_PROP_MATERIAL_MAP:
+            specialMaterialPropId = prop.Number
+        if prop.Number in range(PROP_ID_ITEM_TEXT, PROP_ID_ITEM_TEXT + 4):    
+            propList = prop.ToString().split(": ")
+            itemName = propList[0]
+            amountMade = int(propList[1])
+            smallBodItems.append({ "name": itemName, "amountMade": amountMade })
+    if isLargeBod:
+        return LargeBod(isExceptional, amountToMake, specialMaterialPropId, smallBodItems)
+
 # Helper method to get a tool from the toolContainer. You dont need to worry about this.  
 def get_tool(smallBod, toolContainer):
     tool = Items.FindByID(smallBod.recipe.toolId, -1, Player.Backpack.Serial, -1)
@@ -458,12 +520,11 @@ def check_resources(smallBod, resourceContainer):
             amount = 0
             for item in items:
                 amount = amount + item.Amount
-                
-            print("we have {}/{}".format(amount, resource.amount))
             
             if amount >= resource.amount:
                 break
         
+            print("Resources: {}/{}, getting more...".format(amount, resource.amount))
             item = Items.FindByID(resource.resourceId, hue, resourceContainer, -1)
             if item is not None:
                 amountNeeded = resource.amount - amount
@@ -488,28 +549,47 @@ def check_resources(smallBod, resourceContainer):
                 if not (item.ItemID == resource.resourceId and item.Color == hue):
                     Items.Move(item, resourceContainer, item.Amount)    
                     Misc.Pause(800)
-                #if item.ItemID == resource.resourceId and item.Color == hue:
-                #    pass
-                #else:
-                #    Items.Move(item, resourceContainer, item.Amount)    
-                #    Misc.Pause(800)
-                    
-
-    
-    # Cleanup nonessentials, move to resource crate
-#    for resourceId in ALL_RESOURCES:
-#        keep = False
-#        for resource in smallBod.recipe.resources:
-#            if resourceId == resource.resourceId:
-#                keep = True
-#                break
-#        if not keep:
-#            items = Items.FindAllByID(resourceId, -1, Player.Backpack.Serial, -1)
-#            for item in items:
-#                Items.Move(item, resourceContainer, item.Amount)
-        
     return True
+    
+# Internal: Build database of small bods using itemName (not craftedItemName as PK)
+# Data is structed as:
+# "kryss": [ { "smallBod": 123, "smallBod": SmallBod }, ... ],
+# "cutlass": [ { "smallBod": 123, "smallBod": SmallBod }, ... ],
+def build_complete_small_bod_db(completeSmallBodContainers, recipes):
+    db = {}
+    itemsInDb = 0
+    for completeSmallBodContainer in completeSmallBodContainers:
+        bods = Items.FindAllByID(BOD_STATIC_ID, -1, completeSmallBodContainer, 1)
+        for bod in bods:
+            smallBod = get_small_bod(bod, recipes)
+            if smallBod is not None and smallBod.isComplete():
+                if smallBod.recipe.itemName not in db:
+                    db[smallBod.recipe.itemName] = []
+                db[smallBod.recipe.itemName].append({ "Serial": bod.Serial, "smallBod": smallBod })
+                itemsInDb = itemsInDb + 1    
+                    
+    print("****** Database Built ({}) ******".format(itemsInDb))
+    return db
 
+# Internal: Search our DB for a completed small bod
+def search_complete_small_bod_db(db, largeBod):
+    entries = []
+    for smallBodItem in largeBod.smallBodItems:
+        if smallBodItem["amountMade"] == largeBod.amountToMake:
+            continue
+        if smallBodItem["name"] in db:
+            index = 0
+            found = False
+            for entry in db[smallBodItem["name"]]:
+                if entry["smallBod"].isExceptional == largeBod.isExceptional and entry["smallBod"].amountMade == largeBod.amountToMake and entry["smallBod"].specialMaterialPropId == largeBod.specialMaterialPropId:
+                    entries.append(entry)
+                    found = True
+                    break
+                index = index + 1
+            if found:
+                del db[smallBodItem["name"]][index]
+    return entries
+                
 # Automate small bod building. You just need to specify a few containers,
 # have a container fully stocked, have a container of tools, and you are good to go.
 # Supports all crafting skills (allegedly), but currently only has recipes for Blacksmithy
@@ -531,11 +611,17 @@ def check_resources(smallBod, resourceContainer):
 # https://github.com/matsamilla/Razor-Enhanced/blob/master/NoxBodFiles/Smithbodgod.py
 def run_bod_builder(
     
-    # Serial of container to put your small bods in. The script will start with these.
-    incompleteSmallBodContainer,
+    # Array of serials for containers to put your bods in to start things off (both small and large).
+    # You put your bods in here.
+    incompleteBodContainers,
     
-    # Serial of container to put completed small bods.
-    completeSmallBodContainer,
+    # Array of serials of containers to put completed small bods.
+    # The script will store completed small bods in these.
+    completeSmallBodContainers,
+    
+    # Serial of container for completed LBODs. This is where you can pick them
+    # up and then go turn them in. 
+    completeLargeBodContainer,
     
     # Stash a bunch of tools in here and let it rip. Serial of container.
     toolContainer,
@@ -561,17 +647,20 @@ def run_bod_builder(
     gumpDelayMs = 250
 ):
     # Open containers because we may not have that item data yet.
-    Items.UseItem(completeSmallBodContainer)
-    Misc.Pause(1000)
-    Items.UseItem(incompleteSmallBodContainer)
-    Misc.Pause(1000)
+    for incompleteBodContainer in incompleteBodContainers:
+        Items.UseItem(incompleteBodContainer)
+        Misc.Pause(1000)
+    for completeSmallBodContainer in completeSmallBodContainers:
+        Items.UseItem(completeSmallBodContainer)
+        Misc.Pause(1000)
     Items.UseItem(toolContainer)
     Misc.Pause(1000)
     Items.UseItem(resourceContainer)
     Misc.Pause(1000)    
     
     CRAFTING_GUMP_ID = 0x38920abd
-    SMALL_BOD_GUMP_ID =  0x5afbd742
+    SMALL_BOD_GUMP_ID = 0x5afbd742
+    LARGE_BOD_GUMP_ID = 0xa125b54a
     
     # Turn this array into a dictionary keyed on item name. Its just easier that way.
     # So instead of [SmallBodRecipe, SmallBodRecipe...] we get:
@@ -581,99 +670,163 @@ def run_bod_builder(
         x[recipe.itemName] = recipe
     recipes = x
         
-    print("-------=======------________-------=======------")
-    bods = Items.FindAllByID(BOD_STATIC_ID, -1, incompleteSmallBodContainer, 1)
-    for bod in bods:
-        while True:
-            # Get fresh version of bod
-            freshBod = Items.FindBySerial(bod.Serial)
-            smallBod = get_small_bod(freshBod, recipes)
-            
-            if smallBod is not None:
-                if smallBod.specialMaterialHue not in allowedResourceHues:
-                    print("Warning: Skipping because material is not in allowed list: {}".format(smallBod))
-                    break
-                    
-                if freshBod.Container != Player.Backpack.Serial:
-                    Items.Move(freshBod, Player.Backpack.Serial, freshBod.Amount)
-                    Misc.Pause(1000)                
-                    
-                print(smallBod)
+    print("****** Start Small BOD ******")
+    for incompleteBodContainer in incompleteBodContainers:
+        bods = Items.FindAllByID(BOD_STATIC_ID, -1, incompleteBodContainer, 1)
+        for bod in bods:
+            while True:
+                # Get fresh version of bod
+                freshBod = Items.FindBySerial(bod.Serial)
+                smallBod = get_small_bod(freshBod, recipes)
                 
-                if smallBod.amountToMake == smallBod.amountMade:
-                    print("All done with this one")
-                    Items.Move(freshBod, completeSmallBodContainer, freshBod.Amount)
-                    Misc.Pause(1000)                
-                    break
-                else:
-                    print("Bod progress: {} {}/{}".format(smallBod.craftedItemName, smallBod.amountMade, smallBod.amountToMake))
-                    
-                    tool = get_tool(smallBod, toolContainer)
-                    
-                    if tool is None:
-                        print("Error: Cannot find tool")
-                        sys.exit()
+                if smallBod is not None:
+                    if smallBod.specialMaterialHue not in allowedResourceHues:
+                        print("Warning: Skipping because material is not in allowed list: {}".format(smallBod))
+                        break
                         
-                    if not check_resources(smallBod, resourceContainer):
-                        print("Error: Out of resources")
-                        sys.exit()
+                    if freshBod.Container != Player.Backpack.Serial:
+                        Items.Move(freshBod, Player.Backpack.Serial, freshBod.Amount)
+                        Misc.Pause(1000)                
+                        
+                    print(smallBod)
+                    
+                    #if smallBod.amountToMake == smallBod.amountMade:
+                    if smallBod.isComplete():
+                        print("Filled small BOD!")
+                        print
+                        for completeSmallBodContainer in completeSmallBodContainers:
+                            container = Items.FindBySerial(completeSmallBodContainer)
+                            if container.Contains.Count < 125:
+                                Items.Move(freshBod, completeSmallBodContainer, freshBod.Amount)
+                                Misc.Pause(1000)                
+                                break
+                        break
+                    else:
+                        print("Bod progress: {} {}/{}".format(smallBod.craftedItemName, smallBod.amountMade, smallBod.amountToMake))
+                        
+                        tool = get_tool(smallBod, toolContainer)
+                        
+                        if tool is None:
+                            print("Error: Cannot find tool")
+                            sys.exit()
+                            
+                        if not check_resources(smallBod, resourceContainer):
+                            print("Error: Out of resources")
+                            sys.exit()
 
-                    Items.UseItem(tool)
-                    Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
-                    Misc.Pause(gumpDelayMs)
-                    if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                        continue
-                        
-                    # Set material (not every profession has it, e.g. alchemy)
-                    if smallBod.specialMaterialButton > 0:
-                        # The menu button to select material
-                        Gumps.SendAction(CRAFTING_GUMP_ID, 7)
+                        Items.UseItem(tool)
                         Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
                         Misc.Pause(gumpDelayMs)
+                        if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                            continue
+                            
+                        # Set material (not every profession has it, e.g. alchemy)
+                        if smallBod.specialMaterialButton > 0:
+                            # The menu button to select material
+                            Gumps.SendAction(CRAFTING_GUMP_ID, 7)
+                            Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                            Misc.Pause(gumpDelayMs)
+                            if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                                continue                    
+                                
+                            # The actual special material button
+                            Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.specialMaterialButton)
+                            Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                            Misc.Pause(gumpDelayMs)
+                            if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                                continue     
+                        
+                        # Sets category
+                        Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpCategory)
+                        Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                        Misc.Pause(gumpDelayMs)
+                        if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                            continue
+                                
+                        # Actually does crafting
+                        Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpSelection)                    
+                        Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                        Misc.Pause(1000)
                         if not Gumps.HasGump(CRAFTING_GUMP_ID):
                             continue                    
-                            
-                        # The actual special material button
-                        Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.specialMaterialButton)
-                        Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+       
+                        # Open small bod gump
+                        Items.UseItem(freshBod)
+                        Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 5000)
                         Misc.Pause(gumpDelayMs)
-                        if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                            continue     
+                        Target.Cancel()
+                        
+                        # Combine with contained items (backpack)
+                        Gumps.SendAction(SMALL_BOD_GUMP_ID, 4) 
+                        Target.WaitForTarget(5000)
+                        Target.TargetExecute(Player.Backpack.Serial)
+                        Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 3000)
+                        Misc.Pause(1000)
+                        Target.Cancel()
+                        Gumps.CloseGump(SMALL_BOD_GUMP_ID)
                     
-                    # Sets category
-                    Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpCategory)
-                    Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
-                    Misc.Pause(gumpDelayMs)
-                    if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                        continue
-                            
-                    # Actually does crafting
-                    Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpSelection)                    
-                    Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
-                    Misc.Pause(1000)
-                    if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                        continue                    
-   
-                    # Open small bod gump
-                    Items.UseItem(freshBod)
-                    Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 5000)
-                    Misc.Pause(gumpDelayMs)
+                    if Player.MaxWeight - Player.Weight < 100:
+                        recycle(salvageBag, smallBod)         
+
+                else:
+                    break
+                    
+                Misc.Pause(1000)
+                recycle(salvageBag, smallBod)         
+
+    db = build_complete_small_bod_db(completeSmallBodContainers, recipes)
+    
+    print("****** Start Large BOD ******")
+    for incompleteBodContainer in incompleteBodContainers:
+        bods = Items.FindAllByID(BOD_STATIC_ID, -1, incompleteBodContainer, 1)
+        for bod in bods:
+            # Get fresh version of bod
+            freshBod = Items.FindBySerial(bod.Serial)
+            largeBod = get_large_bod(freshBod)
+            if largeBod is not None:  
+                entries = search_complete_small_bod_db(db, largeBod)
+                if len(entries) > 0:
+                    print(largeBod)
+                    Items.Move(bod, Player.Backpack.Serial, bod.Amount)
+                    Misc.Pause(800)
+                    for entry in entries:
+                        Items.Move(entry["Serial"], Player.Backpack.Serial, 1)
+                        Misc.Pause(1000)
+                       
+                    # Open Large bod gump
                     Target.Cancel()
+                    Items.UseItem(bod)
+                    Gumps.WaitForGump(LARGE_BOD_GUMP_ID, 3000)
+                    Target.Cancel()
+                    Misc.Pause(800)
                     
                     # Combine with contained items (backpack)
-                    Gumps.SendAction(SMALL_BOD_GUMP_ID, 4) 
+                    Gumps.SendAction(LARGE_BOD_GUMP_ID, 4) 
                     Target.WaitForTarget(5000)
                     Target.TargetExecute(Player.Backpack.Serial)
-                    Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 3000)
+                    Gumps.WaitForGump(LARGE_BOD_GUMP_ID, 3000)
                     Misc.Pause(1000)
                     Target.Cancel()
-                    Gumps.CloseGump(SMALL_BOD_GUMP_ID)
-                
-                if Player.MaxWeight - Player.Weight < 100:
-                    recycle(salvageBag, smallBod)         
-
-            else:
-                break
-                
-            Misc.Pause(1000)
-            recycle(salvageBag, smallBod)                     
+                    Gumps.CloseGump(LARGE_BOD_GUMP_ID)
+                    
+                    #print(" -------------------------------- beg LARGE BOD -------------------------------------")
+                    #print("BEFORE: ", largeBod)
+                    #for entry in entries:
+                    #    print("\t", entry["smallBod"])
+                    
+                    freshBod = Items.FindBySerial(bod.Serial)
+                    largeBod = get_large_bod(freshBod)
+                    #print("AFTER: ", largeBod)
+                    #print(" -------------------------------- end LARGE BOD -------------------------------------")
+                    
+                    if largeBod.isComplete():
+                        print("\tLarge BOD filled!")
+                        Items.Move(bod, completeLargeBodContainer, bod.Amount)
+                        Misc.Pause(800)
+                    else:
+                        #print("Large Bod back to incompleteBodContainer :(")
+                        Items.Move(bod, incompleteBodContainer, bod.Amount)
+                        Misc.Pause(800)
+                        
+                        
+                    

@@ -80,14 +80,20 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 # https://github.com/matsamilla/Razor-Enhanced/blob/master/NoxBodFiles/Smithbodgod.py
 run_bod_builder(
     
-    # Serial of container to put your small bods in. The script will start with these.
-    incompleteSmallBodContainer = 0x4025193E,
+    # Array of serials for containers to put your bods in to start things off (both small and large).
+    # You put your bods in here.
+    incompleteBodContainers = [0x40251A02, 0x402519AE, 0x4025193E],
     
-    # Serial of container to put completed small bods.
-    completeSmallBodContainer = 0x402519AE,
+    # Array of serials of containers to put completed small bods.
+    # The script will store completed small bods in these.
+    completeSmallBodContainers = [0x40251A68, 0x4042D758, 0x4042D779],
+    
+    # Serial of container for completed LBODs. This is where you can pick them
+    # up and then go turn them in. 
+    completeLargeBodContainer = 0x4042E137,
     
     # Stash a bunch of tools in here and let it rip. Serial of container.
-    toolContainer = 0x40251A02,
+    toolContainer = 0x4042E100,
     
     # Serial of regular container / commodity deed box (not a special resource box like insaneuo).
     # Fill this with ingots, reagents, etc. Use the run_restocker() function to help fill it up.
