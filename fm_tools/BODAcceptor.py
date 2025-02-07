@@ -6,40 +6,35 @@
 
 from System.Collections.Generic import List
 from System import Byte, Int32
+import sys
 from Scripts.fm_core.core_mobiles import get_yellows_in_range
 from Scripts.fm_core.core_items import BOD_STATIC_ID
 from Scripts.fm_core.core_items import BOD_BOOK_STATIC_ID
-import sys
+
+# Accepts bods from NPC vendors if you are too lazy to click like me
+# Just stand near them, turn this on, and let it rip.
+# You can the bods automatically placed into a BOD book if you wish.
+# (it uses color to do this).
+# You can use this in conjunction with the run_bod_builder tool for
+# maximum boddage.
+
+placeInBodBook = True
 
 NPC_BOD_GUMP_ID =  0x9bade6ea
 BOD_BOOK_GUMP_ID =  0x54f555df
 ALLOWED_SUFFIXES = ["scribe", "alchemist", "carpenter", "bowyer", "tinker", "tailor", "blacksmith", "cook"]
- 
-
-    
-#sys.exit()
-
-# 0x9bade6ea
 
 # Looks up nearby npcs and attempts to accept BODs
 while True:
     Gumps.CloseGump(BOD_BOOK_GUMP_ID)
     Misc.Pause(500)
-    
-    #npcs = get_yellows_in_range(3)
-    #for npc in npcs:
-    #    print("NPC {}".format(npc.Name))
-        
+
     npcs = get_yellows_in_range(4)
     for npc in npcs:
-        
         for prop in npc.Properties:
-            #print("Possible: ", type(prop), prop.ToString())        
             res = any(s in prop.ToString() for s in ALLOWED_SUFFIXES)
             if res == True:
-                print(type(prop), prop.ToString(), type(prop.Args), prop.Args, res)        
                 Misc.UseContextMenu(npc.Serial,"Bulk Order Info",3000)
-        
                 Misc.Pause(1000)
                 gid = Gumps.CurrentGump()
 
@@ -53,15 +48,10 @@ while True:
                     Gumps.CloseGump(BOD_BOOK_GUMP_ID)
                     Misc.Pause(500)                    
     
-#    if True:
-                
-                bods = Items.FindAllByID(itemid = BOD_STATIC_ID,color = -1, container = Player.Backpack.Serial, range = 1)
-                for bod in bods:
-                    bodBook = Items.FindByID(itemid = BOD_BOOK_STATIC_ID, color = bod.Hue, container = Player.Backpack.Serial, range = 3)
-                    if bodBook is not None:
-                        print("Moving {} to {}".format(bod.Name, bodBook.Name))
-                        Items.Move(bod.Serial, bodBook.Serial, 1)
-                        Misc.Pause(650)
-                
-                
-    
+    if placeInBodBook:
+        bods = Items.FindAllByID(itemid = BOD_STATIC_ID,color = -1, container = Player.Backpack.Serial, range = 1)
+        for bod in bods:
+            bodBook = Items.FindByID(itemid = BOD_BOOK_STATIC_ID, color = bod.Hue, container = Player.Backpack.Serial, range = 3)
+            if bodBook is not None:
+                Items.Move(bod.Serial, bodBook.Serial, 1)
+                Misc.Pause(650)

@@ -12,12 +12,6 @@ import sys
 from System import Byte, Int32
 import time
 
-#TRASH_ITEMS = [
-    #0x0EED, # GOLD
-    #0x0F52, # DAGGER
-#    0x2689, # Helm of Swiftness
-#]
-
 TRASH_NAMES = [
     "Helm of Swiftness",
     "Talon Bite",
@@ -48,6 +42,8 @@ TRASH_NAMES = [
     "Staff of Power",
     "Violet Courage",
     "Gold Bricks",
+    "Lord Blackthorn's Exemplar", # '
+    "Wrath of the Dryad",
     
 ]
 

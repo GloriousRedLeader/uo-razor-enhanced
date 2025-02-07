@@ -16,6 +16,8 @@ from Scripts.fm_core.core_items import INGOT_STATIC_ID
 from Scripts.fm_core.core_items import BOARD_STATIC_ID 
 from Scripts.fm_core.core_items import CLOTH_STATIC_ID 
 from Scripts.fm_core.core_items import LEATHER_STATIC_ID 
+from Scripts.fm_core.core_items import EMPTY_BOTTLE_STATIC_ID
+from Scripts.fm_core.core_items import BLANK_SCROLL
 from Scripts.fm_core.core_items import MANDRAKEROOT
 from Scripts.fm_core.core_items import BLOODMOSS
 from Scripts.fm_core.core_items import SULPHUROUSASH
@@ -110,8 +112,8 @@ run_bod_builder(
     # (Optional) By default only regular materials are allowed (Iron, Leather). If you want
     # to add others like copper, spined leather, etc. then you need to explicitly add them here.
     # This is just an array of color ids. I have constants for them (see imports)
-    allowedResourceHues = [RESOURCE_HUE_DEFAULT, RESOURCE_HUE_COPPER, RESOURCE_HUE_SHADOW_IRON, RESOURCE_HUE_DULL_COPPER, RESOURCE_HUE_BRONZE, RESOURCE_HUE_GOLD, RESOURCE_HUE_AGAPITE, RESOURCE_HUE_VERITE, RESOURCE_HUE_VALORITE],
-    
+    allowedResourceHues = [RESOURCE_HUE_DEFAULT, RESOURCE_HUE_COPPER, RESOURCE_HUE_SHADOW_IRON, RESOURCE_HUE_DULL_COPPER, RESOURCE_HUE_BRONZE, RESOURCE_HUE_GOLD, RESOURCE_HUE_AGAPITE, RESOURCE_HUE_VERITE, RESOURCE_HUE_VALORITE, RESOURCE_HUE_BARBED, RESOURCE_HUE_SPINED, RESOURCE_HUE_HORNED, RESOURCE_HUE_OAK, RESOURCE_HUE_ASH, RESOURCE_HUE_YEW, RESOURCE_HUE_HEARTWOOD, RESOURCE_HUE_BLOODWOOD, RESOURCE_HUE_FROSTWOOD ],
+
     # (Optional) God save the queen
     gumpDelayMs = 250
 )
