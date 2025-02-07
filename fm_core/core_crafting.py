@@ -218,6 +218,17 @@ CAT_BLACKSMITHY_BASHING = 43
 CAT_BLACKSMITHY_CANNONS = 50
 CAT_BLACKSMITHY_THROWING = 57
 
+CAT_TAILORING_MATERIALS = 1
+CAT_TAILORING_HATS = 8
+CAT_TAILORING_SHIRTS_AND_PANTS = 15
+CAT_TAILORING_MISCELLANEOUS = 22
+CAT_TAILORING_FOOTWEAR = 29
+CAT_TAILORING_LEATHER_ARMOR = 36
+CAT_TAILORING_CLOTH_ARMOR = 43
+CAT_TAILORING_STUDDED_ARMOR = 50
+CAT_TAILORING_FEMALE_ARMOR = 57
+CAT_TAILORING_BONE_ARMOR = 64
+
 # Internal data structure of storing ingredients for a recipe.
 class SmallBodResource:
     def __init__(self, resourceId, amount = 100):
@@ -284,9 +295,146 @@ class LargeBod:
     def __str__(self):
         return f"LargeBod(isExceptional='{self.isExceptional}', amountToMake='{self.amountToMake}', specialMaterialPropId={self.specialMaterialPropId}, smallBodItems={self.smallBodItems})"                
 
+
 # Default list of recipes. See SmallBodRecipe. You can use these, edit these, or just define your own.
 # TBD: Other professions like tailoring, alchemy, etc.
 RECIPES = [
+#CAT_TAILORING_MATERIALS = 1
+#CAT_TAILORING_HATS = 8
+#CAT_TAILORING_SHIRTS_AND_PANTS = 15
+#CAT_TAILORING_MISCELLANEOUS = 22
+#CAT_TAILORING_FOOTWEAR = 29
+#CAT_TAILORING_LEATHER_ARMOR = 36
+#CAT_TAILORING_CLOTH_ARMOR = 43
+#CAT_TAILORING_STUDDED_ARMOR = 50
+#CAT_TAILORING_FEMALE_ARMOR = 57
+#CAT_TAILORING_BONE_ARMOR = 64
+
+#LEATHER_STATIC_ID
+#CLOTH_STATIC_ID
+
+    # Tailoring
+    SmallBodRecipe("skullcap", CAT_TAILORING_HATS, 2, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("bandana", CAT_TAILORING_HATS, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("floppy hat", CAT_TAILORING_HATS, 16, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("cap", CAT_TAILORING_HATS, 23, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("wide-brim hat", CAT_TAILORING_HATS, 30, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("straw hat", CAT_TAILORING_HATS, 37, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("tall straw hat", CAT_TAILORING_HATS, 44, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("wizard's hat", CAT_TAILORING_HATS, 51, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ), # grr
+    SmallBodRecipe("bonnet", CAT_TAILORING_HATS, 58, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("feathered hat", CAT_TAILORING_HATS, 65, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("cap", CAT_TAILORING_HATS, 72, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("tricorne hat", CAT_TAILORING_HATS, 79, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("jester hat", CAT_TAILORING_HATS, 86, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("flower garland", CAT_TAILORING_HATS, 93, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    
+    SmallBodRecipe("doublet", CAT_TAILORING_SHIRTS_AND_PANTS, 2, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("shirt", CAT_TAILORING_SHIRTS_AND_PANTS, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("fancy shirt", CAT_TAILORING_SHIRTS_AND_PANTS, 16, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("tunic", CAT_TAILORING_SHIRTS_AND_PANTS, 23, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("surcoat", CAT_TAILORING_SHIRTS_AND_PANTS, 30, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("plain dress", CAT_TAILORING_SHIRTS_AND_PANTS, 37, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("fancy dress", CAT_TAILORING_SHIRTS_AND_PANTS, 44, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("cloak", CAT_TAILORING_SHIRTS_AND_PANTS, 51, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("robe", CAT_TAILORING_SHIRTS_AND_PANTS, 58, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("jester suit", CAT_TAILORING_SHIRTS_AND_PANTS, 65, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("fur cape", CAT_TAILORING_SHIRTS_AND_PANTS, 72, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_SHIRTS_AND_PANTS, 79, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_SHIRTS_AND_PANTS, 86, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_SHIRTS_AND_PANTS, 93, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("long pants", CAT_TAILORING_SHIRTS_AND_PANTS, 142, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("kilt", CAT_TAILORING_SHIRTS_AND_PANTS, 149, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("skirt", CAT_TAILORING_SHIRTS_AND_PANTS, 156, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    
+    SmallBodRecipe("body sash", CAT_TAILORING_MISCELLANEOUS, 2, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("half apron", CAT_TAILORING_MISCELLANEOUS, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("full apron", CAT_TAILORING_MISCELLANEOUS, 16, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_MISCELLANEOUS, 23, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_MISCELLANEOUS, 30, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_MISCELLANEOUS, 37, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_MISCELLANEOUS, 44, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_MISCELLANEOUS, 51, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_MISCELLANEOUS, 58, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_MISCELLANEOUS, 65, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_MISCELLANEOUS, 72, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_MISCELLANEOUS, 79, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_MISCELLANEOUS, 86, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_MISCELLANEOUS, 93, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    
+    SmallBodRecipe("elven boots", CAT_TAILORING_FOOTWEAR, 2, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("fur boots", CAT_TAILORING_FOOTWEAR, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FOOTWEAR, 16, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FOOTWEAR, 23, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("sandals", CAT_TAILORING_FOOTWEAR, 30, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("shoes", CAT_TAILORING_FOOTWEAR, 37, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("boots", CAT_TAILORING_FOOTWEAR, 44, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("thigh boots", CAT_TAILORING_FOOTWEAR, 51, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FOOTWEAR, 58, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("jester shoes", CAT_TAILORING_FOOTWEAR, 65, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FOOTWEAR, 72, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FOOTWEAR, 79, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FOOTWEAR, 86, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FOOTWEAR, 93, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    
+    
+    SmallBodRecipe("00000000", CAT_TAILORING_LEATHER_ARMOR, 2, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_LEATHER_ARMOR, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_LEATHER_ARMOR, 16, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("leather gorget", CAT_TAILORING_LEATHER_ARMOR, 23, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("leather cap", CAT_TAILORING_LEATHER_ARMOR, 30, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("leather gloves", CAT_TAILORING_LEATHER_ARMOR, 37, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("leather sleeves", CAT_TAILORING_LEATHER_ARMOR, 44, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("leather leggings", CAT_TAILORING_LEATHER_ARMOR, 51, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("leather tunic", CAT_TAILORING_LEATHER_ARMOR, 58, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_LEATHER_ARMOR, 65, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_LEATHER_ARMOR, 72, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_LEATHER_ARMOR, 79, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_LEATHER_ARMOR, 86, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_LEATHER_ARMOR, 93, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    
+    SmallBodRecipe("studded gorget", CAT_TAILORING_STUDDED_ARMOR, 2, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("studded gloves", CAT_TAILORING_STUDDED_ARMOR, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("studded sleeves", CAT_TAILORING_STUDDED_ARMOR, 16, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("studded leggings", CAT_TAILORING_STUDDED_ARMOR, 23, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("studded tunic", CAT_TAILORING_STUDDED_ARMOR, 30, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_STUDDED_ARMOR, 37, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_STUDDED_ARMOR, 44, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_STUDDED_ARMOR, 51, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_STUDDED_ARMOR, 58, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_STUDDED_ARMOR, 65, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_STUDDED_ARMOR, 72, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_STUDDED_ARMOR, 79, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_STUDDED_ARMOR, 86, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_STUDDED_ARMOR, 93, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    
+    SmallBodRecipe("leather shorts", CAT_TAILORING_FEMALE_ARMOR, 2, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("leather skirt", CAT_TAILORING_FEMALE_ARMOR, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("leather bustier", CAT_TAILORING_FEMALE_ARMOR, 16, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("studded bustier", CAT_TAILORING_FEMALE_ARMOR, 23, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("female leather armor", CAT_TAILORING_FEMALE_ARMOR, 30, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("studded armor", CAT_TAILORING_FEMALE_ARMOR, 37, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FEMALE_ARMOR, 44, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FEMALE_ARMOR, 51, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FEMALE_ARMOR, 58, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FEMALE_ARMOR, 65, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FEMALE_ARMOR, 72, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FEMALE_ARMOR, 79, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FEMALE_ARMOR, 86, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    SmallBodRecipe("00000000", CAT_TAILORING_FEMALE_ARMOR, 93, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    
+    
+    #SmallBodRecipe("cap", CAT_TAILORING_SHIRTS_AND_PANTS, , TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    #SmallBodRecipe("cap", CAT_TAILORING_HATS, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    #SmallBodRecipe("cap", CAT_TAILORING_HATS, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    #SmallBodRecipe("cap", CAT_TAILORING_HATS, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    
+    
+    
+    
+    #SmallBodRecipe("FILL_ME", CAT, 0000000, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
+    
+    # Blacksmith
     SmallBodRecipe("war hammer", CAT_BLACKSMITHY_BASHING, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
     SmallBodRecipe("kryss", CAT_BLACKSMITHY_BLADED, 44, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
     SmallBodRecipe("heater shield", CAT_BLACKSMITHY_SHIELDS, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
@@ -534,7 +682,7 @@ def build_complete_small_bod_db(completeSmallBodContainers, recipes):
                 db[smallBod.recipe.itemName].append({ "Serial": bod.Serial, "smallBod": smallBod })
                 itemsInDb = itemsInDb + 1    
                     
-    print("****** Database Built ({}) ******".format(itemsInDb))
+    print("Database built with {} complete small bods".format(itemsInDb))
     return db
 
 # Internal: Search our DB for a completed small bod
@@ -665,7 +813,7 @@ def run_bod_builder(
                 
                 if smallBod is not None:
                     if smallBod.specialMaterialHue not in allowedResourceHues:
-                        print("Warning: Skipping because material is not in allowed list: {}".format(smallBod))
+                        print("Warning: Skipping because material is not in allowed list: {}".format(smallBod.craftedItemName))
                         break
                         
                     if freshBod.Container != Player.Backpack.Serial:
@@ -695,8 +843,8 @@ def run_bod_builder(
                             sys.exit()
                             
                         if not check_resources(smallBod, resourceContainer):
-                            print("Error: Out of resources")
-                            sys.exit()
+                            print("Warning: Out of resources, skipping {}".format(smallBod.craftedItemName))
+                            break
 
                         Items.UseItem(tool)
                         Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
@@ -761,6 +909,8 @@ def run_bod_builder(
     db = build_complete_small_bod_db(completeSmallBodContainers, recipes)
     
     print("****** Start Large BOD ******")
+    totalLargeBods = 0
+    completeLargeBods = 0
     for incompleteBodContainer in incompleteBodContainers:
         bods = Items.FindAllByID(BOD_STATIC_ID, -1, incompleteBodContainer, 1)
         for bod in bods:
@@ -768,6 +918,7 @@ def run_bod_builder(
             freshBod = Items.FindBySerial(bod.Serial)
             largeBod = parse_large_bod(freshBod)
             if largeBod is not None:  
+                totalLargeBods = totalLargeBods + 1
                 entries = search_complete_small_bod_db(db, largeBod)
                 if len(entries) > 0:
                     print(largeBod)
@@ -793,24 +944,17 @@ def run_bod_builder(
                     Target.Cancel()
                     Gumps.CloseGump(LARGE_BOD_GUMP_ID)
                     
-                    #print(" -------------------------------- beg LARGE BOD -------------------------------------")
-                    #print("BEFORE: ", largeBod)
-                    #for entry in entries:
-                    #    print("\t", entry["smallBod"])
-                    
                     freshBod = Items.FindBySerial(bod.Serial)
                     largeBod = parse_large_bod(freshBod)
-                    #print("AFTER: ", largeBod)
-                    #print(" -------------------------------- end LARGE BOD -------------------------------------")
                     
                     if largeBod.isComplete():
-                        print("\tLarge BOD filled!")
+                        completeLargeBods = completeLargeBods + 1
+                        print("Large BOD filled! :)")
                         Items.Move(bod, completeLargeBodContainer, bod.Amount)
                         Misc.Pause(800)
                     else:
-                        #print("Large Bod back to incompleteBodContainer :(")
+                        print("Large Bod back to incompleteBodContainer :(")
                         Items.Move(bod, incompleteBodContainer, bod.Amount)
                         Misc.Pause(800)
                         
-                        
-                    
+    print("Finished: {}/{} large bods filled.".format(completeLargeBods, totalLargeBods))
