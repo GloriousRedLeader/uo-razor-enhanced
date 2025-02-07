@@ -44,7 +44,11 @@ TRASH_NAMES = [
     "Gold Bricks",
     "Lord Blackthorn's Exemplar", # '
     "Wrath of the Dryad",
-    
+    "Jaana's Staff", #'
+    "Sentinel's Guard", #'
+    "a map of the known world",
+    "10th Anniversary Sculpture",
+    "Katrina's Crook", #'
 ]
 
 Timer.Create( 'pingTimer', 1 )

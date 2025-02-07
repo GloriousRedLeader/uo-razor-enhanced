@@ -61,15 +61,29 @@ from Scripts.fm_core.core_crafting import SmallBodRecipe
 from Scripts.fm_core.core_crafting import RECIPES
 from Scripts.fm_core.core_crafting import run_bod_builder
 
-# Automate small bod building. You just need to specify a few containers,
-# have a container fully stocked, have a container of tools, and you are good to go.
-# Supports all crafting skills (allegedly), but currently only has recipes for Blacksmithy
-# Features: 
+# Automate bod building (both small and large). You just dump all your bods into the starting
+# container and it will sort them, craft items, fill small bods, combine large bods, etc. 
+#
+# WARNING: OPERATES IN BACKPACK AND WILL SALVAGE BLACKSMITH AND TAILORING ITEMS. DO NOT HAVE
+# ANYTHING GOOD IN YOUR BACKPACK WHILE YOU RUN THIS SCRIPT YOU RISK LOSING IT.
+#
+# Requirements:
+#   - You need a container of resources (ingots, etc.)
+#   - You need a container of tools
+#   - You need a forge and anvil nearby
+#   - You need containers for incomplete (unsorted or not started bods), if you arent sure, dump here
+#   - You need a container for filled small bods
+#   - You need a container for filled large bods
+#
+# You just need to specify a few containers, have a resource container fully stocked, 
+# have a container of tools, and you are good to go. Supports all crafting skills (allegedly), 
+# but currently only has recipes for Blacksmithy. Some other features include: 
 #   - automatically adds items to small bod
 #   - salvages wasted (non exceptional items) with a salvage bag
 #   
 # General flow:
-#   - selects bods from incompleSmallBodContainer
+# 1. Small Bods
+#   - selects small bods from incompleBodContainer
 #   - filters for only those that match your list of recipes (see recipes param below)
 #   - One craft cycle includes:
 #       1. getting resources from resourceContainer
@@ -77,6 +91,13 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 #       3. attempting craft
 #       4. attempting to add crafted item to small bod
 #       5. recycle all items in bag that remain (everything in list of recipes)
+#   - Puts completed small bod in either incompleteBodContainer or completeSmallBodContainer
+#
+# 2. Large Bods
+#   - Creates a database of all small bods
+#   - Gets large bods from the incompleBodContainer, sorts them by "most complete"
+#   - Looks up small bods in db, transfers to backpack, attempts to combine
+#   - If complete, moves to completeLargeBodContainer, otherwise back to incompleBodContainer
 #
 # Based on:
 # https://github.com/matsamilla/Razor-Enhanced/blob/master/NoxBodFiles/Smithbodgod.py
@@ -113,6 +134,10 @@ run_bod_builder(
     # to add others like copper, spined leather, etc. then you need to explicitly add them here.
     # This is just an array of color ids. I have constants for them (see imports)
     allowedResourceHues = [RESOURCE_HUE_DEFAULT, RESOURCE_HUE_COPPER, RESOURCE_HUE_SHADOW_IRON, RESOURCE_HUE_DULL_COPPER, RESOURCE_HUE_BRONZE, RESOURCE_HUE_GOLD, RESOURCE_HUE_AGAPITE, RESOURCE_HUE_VERITE, RESOURCE_HUE_VALORITE, RESOURCE_HUE_BARBED, RESOURCE_HUE_SPINED, RESOURCE_HUE_HORNED, RESOURCE_HUE_OAK, RESOURCE_HUE_ASH, RESOURCE_HUE_YEW, RESOURCE_HUE_HEARTWOOD, RESOURCE_HUE_BLOODWOOD, RESOURCE_HUE_FROSTWOOD ],
+    
+    # Time to wait between item moves. Adjust with caution. Reducing this will increase speed
+    # of the script, but you risk disconnects and other issues maintaining state
+    itemMoveDelayMs = 1000,    
 
     # (Optional) God save the queen
     gumpDelayMs = 250

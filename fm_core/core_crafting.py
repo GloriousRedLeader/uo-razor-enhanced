@@ -155,13 +155,17 @@ def run_restocker(
     # Page is the page on the gump menu.
     resources,
     
+    # Time to wait between item moves. Adjust with caution. Reducing this will increase speed
+    # of the script, but you risk disconnects and other issues maintaining state
+    itemMoveDelayMs = 1000,    
+    
     # (Optional) Timeout between  gump button presses. Configure based on server latency.
     gumpDelayMs = 250
 ):
     RESOURCE_BOX_GUMP_ID = 0x23d0f169
     
     Items.UseItem(commodityBoxSerial)
-    Misc.Pause(1000)
+    Misc.Pause(itemMoveDelayMs)
     
     for resource in resources:
         print(resource)
@@ -197,7 +201,7 @@ def run_restocker(
                 items = Items.FindAllByID(r.itemId, r.itemHue, Player.Backpack.Serial, 0)
                 for item in items:
                     Items.Move(item, commodityBoxSerial, item.Amount)
-                    Misc.Pause(800)
+                    Misc.Pause(itemMoveDelayMs)
 
             if not runAgain:
                 break
@@ -270,6 +274,7 @@ class SmallBodResource:
         return f"SmallBodResource(resourceId='{self.resourceId}', amount={self.amount}, canOverrideHue='{self.can_override_hue()}')"        
 
 # Recipe template. Pass an array of these to the run_bod_builder function.
+# hasLarge: (NOT IMPLEMENTED) This small bod can be part of a large bod (several cannot)
 # itemName: Lower case as it appears in the small bod (very bottom last line), e.g. mace
 # gumpCategory: Represents a gump category button id. Use one of the constants above.
 # gumpSelection: The create now button specific to an item. Goes in increments of 7.
@@ -277,18 +282,22 @@ class SmallBodResource:
 # resources: Array of SmallBodResource
 class SmallBodRecipe:
     def __init__(self, itemName, gumpCategory, gumpSelection, toolId, resources):
+        #self.hasLarge = hasLarge
         self.itemName = itemName
         self.gumpCategory = gumpCategory
         self.gumpSelection = gumpSelection
         self.toolId = toolId
         self.resources = resources
         
+    def canSalvage(self):
+        return self.toolId in [BLACKSMITHY_TOOL_STATIC_ID, TAILORING_TOOL_STATIC_ID]
+        
     def __str__(self):
-        return f"SmallBodRecipe(itemName='{self.itemName}', gumpCategory='{self.gumpCategory}', gumpSelection='{self.gumpSelection}', toolId='{self.toolId}', resources='{self.resources}')"        
+        return f"SmallBodRecipe(hasLarge={self.hasLarge},itemName='{self.itemName}', gumpCategory='{self.gumpCategory}', gumpSelection='{self.gumpSelection}', toolId='{self.toolId}', resources='{self.resources}')"        
         
 # Internal data structure used in our main method. Represents a bod and its recipe. 
 class SmallBod:
-    def __init__(self, craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, recipe):
+    def __init__(self, itemSerial, craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, recipe):
         self.craftedItemName = craftedItemName
         self.amountMade = amountMade
         self.isExceptional = isExceptional
@@ -297,6 +306,7 @@ class SmallBod:
         self.specialMaterialHue = specialMaterialHue
         self.specialMaterialPropId = specialMaterialPropId
         self.recipe = recipe
+        self.itemSerial = itemSerial
         
     def isComplete(self):
         return self.amountToMake == self.amountMade
@@ -306,11 +316,27 @@ class SmallBod:
         
 # Internal data structure used for filling LBODS.
 class LargeBod:
-    def __init__(self, isExceptional, amountToMake, specialMaterialPropId, smallBodItems):
+    def __init__(self, itemSerial, isExceptional, amountToMake, specialMaterialPropId, smallBodItems):
         self.isExceptional = isExceptional
         self.amountToMake = amountToMake
         self.specialMaterialPropId = specialMaterialPropId
         self.smallBodItems = smallBodItems
+        self.itemSerial = itemSerial
+
+    # Use this to identify similar bods (material, exceptional, and items required)
+    # Need this to stort when filling large bods so we complete those with the most progress first
+    def getId(self):
+        part1 = "1" if self.isExceptional else "0"
+        part2 = str(self.specialMaterialPropId) if self.specialMaterialPropId is not None else "0"
+        part3 = "|".join(sorted(list(map(lambda smallBodItem: smallBodItem["name"], self.smallBodItems))))
+        return part1 + "|" + part2 + "|" + part3
+        
+    def numComplete(self):
+        numCompleted = 0
+        for smallBodItem in self.smallBodItems:
+            if smallBodItem['amountMade'] == self.amountToMake:
+                numCompleted = numCompleted + 1
+        return numCompleted
         
     def isComplete(self):
         isComplete = False
@@ -321,14 +347,53 @@ class LargeBod:
         return numCompleted == len(self.smallBodItems)
 
     def __str__(self):
-        return f"LargeBod(isExceptional='{self.isExceptional}', amountToMake='{self.amountToMake}', specialMaterialPropId={self.specialMaterialPropId}, smallBodItems={self.smallBodItems})"                
+        return f"LargeBod(isExceptional='{self.isExceptional}', amountToMake='{self.amountToMake}', specialMaterialPropId={self.specialMaterialPropId}, smallBodItems={self.smallBodItems}, isComplete={self.isComplete()}, numComplete={self.numComplete()})"                
 
+# Just for reporting in conjunction with the report() function.
+class BodReport:
+    def __init__(self, name):
+        self.name = name
+        self.numIncompleteSmallBods = 0
+        self.numCompleteSmallBods = 0
+        self.numIncompleteLargeBods = 0
+        self.numCompleteLargeBods = 0
+        self.numInWrongContainer = 0
+        self.numMissingRecipe = 0
+        self.numMissingResources = 0
+
+    def incrementNumIncompleteSmallBods(self):
+        self.numIncompleteSmallBods = self.numIncompleteSmallBods + 1
+        
+    def incrementNumCompleteSmallBods(self):
+        self.numCompleteSmallBods = self.numCompleteSmallBods + 1        
+        
+    def incrementNumIncompleteLargeBods(self):
+        self.numIncompleteLargeBods = self.numIncompleteLargeBods + 1
+        
+    def incrementNumCompleteLargeBods(self):
+        self.numCompleteLargeBods = self.numCompleteLargeBods + 1  
+  
+    def incrementNumInWrongContainer(self):
+        self.numInWrongContainer = self.numInWrongContainer + 1
+        
+    def incrementNumMissingRecipe(self):
+        self.numMissingRecipe = self.numMissingRecipe + 1
+        
+    def incrementNumMissingResources(self):
+        self.numMissingResources = self.numMissingResources + 1
+        
+    def __str__(self):
+        totalSmall = self.numIncompleteSmallBods + self.numCompleteSmallBods + self.numMissingRecipe
+        totalLarge = self.numIncompleteLargeBods + self.numCompleteLargeBods
+        #incompleteSmall = self.numIncompleteSmallBods - self.numMissingRecipe
+        return "{}:\t\tSmall ({}/{})\t\tLarge ({}/{})\tWrong Container ({})\tMissing Recipe ({})\tMissing Resources ({})".format(self.name, self.numCompleteSmallBods, totalSmall, self.numCompleteLargeBods, totalLarge, self.numInWrongContainer, self.numMissingRecipe, self.numMissingResources)
 
 # Default list of recipes. See SmallBodRecipe. You can use these, edit these, or just define your own.
 # TBD: Other professions like tailoring, alchemy, etc.
 RECIPES = [
-
-    # Tailoring
+    
+    ############################ Tailoring ############################
+    
     SmallBodRecipe("skullcap", CAT_TAILORING_HATS, 2, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
     SmallBodRecipe("bandana", CAT_TAILORING_HATS, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
     SmallBodRecipe("floppy hat", CAT_TAILORING_HATS, 16, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
@@ -339,10 +404,9 @@ RECIPES = [
     SmallBodRecipe("wizard's hat", CAT_TAILORING_HATS, 51, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ), # grr'
     SmallBodRecipe("bonnet", CAT_TAILORING_HATS, 58, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
     SmallBodRecipe("feathered hat", CAT_TAILORING_HATS, 65, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
-    SmallBodRecipe("cap", CAT_TAILORING_HATS, 72, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
-    SmallBodRecipe("tricorne hat", CAT_TAILORING_HATS, 79, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
-    SmallBodRecipe("jester hat", CAT_TAILORING_HATS, 86, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
-    SmallBodRecipe("flower garland", CAT_TAILORING_HATS, 93, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("tricorne hat", CAT_TAILORING_HATS, 72, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ), # should be 72
+    SmallBodRecipe("jester hat", CAT_TAILORING_HATS, 79, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
+    SmallBodRecipe("flower garland", CAT_TAILORING_HATS, 86, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
     
     SmallBodRecipe("doublet", CAT_TAILORING_SHIRTS_AND_PANTS, 2, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
     SmallBodRecipe("shirt", CAT_TAILORING_SHIRTS_AND_PANTS, 9, TAILORING_TOOL_STATIC_ID, [SmallBodResource(CLOTH_STATIC_ID)] ),
@@ -437,7 +501,8 @@ RECIPES = [
     #SmallBodRecipe("00000000", CAT_TAILORING_FEMALE_ARMOR, 86, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
     #SmallBodRecipe("00000000", CAT_TAILORING_FEMALE_ARMOR, 93, TAILORING_TOOL_STATIC_ID, [SmallBodResource(LEATHER_STATIC_ID)] ),
 
-    # Alchemy
+    ############################ Alchemy ############################
+    
     SmallBodRecipe("Refresh potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 2, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(BLACKPEARL, 1) ] ),
     SmallBodRecipe("Greater Refreshment potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 9, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(BLACKPEARL, 5) ] ),
     SmallBodRecipe("Lesser Heal potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 16, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GINSENG, 1) ] ),
@@ -518,23 +583,25 @@ RECIPES = [
     #SmallBodResource(DAEMONBLOOD, 10)
     #SmallBodResource(GRAVEDUST, 10)
     
-    # Inscription
+    
+    ############################ Inscription ############################
+    
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("Clumsy", CAT_INSCRIPTION_FIRST_SECOND, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(NIGHTSHADE, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 16, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 37, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1), SmallBodResource(NIGHTSHADE, 3) ] ),
+    SmallBodRecipe("Feeblemind", CAT_INSCRIPTION_FIRST_SECOND, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(GINSENG, 1) ] ),
+    SmallBodRecipe("Heal", CAT_INSCRIPTION_FIRST_SECOND, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(GINSENG, 1), SmallBodResource(SPIDERSILK, 1) ] ),
+    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 37, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1), SmallBodResource(00000000, 3) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 44, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 51, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 65, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 79, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 86, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ]  ),
+    SmallBodRecipe("Weaken", CAT_INSCRIPTION_FIRST_SECOND, 51, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(GARLIC, 1) ] ),
+    SmallBodRecipe("Agility", CAT_INSCRIPTION_FIRST_SECOND, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
+    SmallBodRecipe("Cunning", CAT_INSCRIPTION_FIRST_SECOND, 65, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
+    SmallBodRecipe("Cure", CAT_INSCRIPTION_FIRST_SECOND, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(GARLIC, 1) ] ),
+    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 79, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(GINSENG, 1) ] ),
+    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 86, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(MANDRAKEROOT, 1) ]  ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 93, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 100, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+    SmallBodRecipe("Strength", CAT_INSCRIPTION_FIRST_SECOND, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 114, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 121, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 128, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
@@ -542,6 +609,8 @@ RECIPES = [
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 149, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 156, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),  
   
+
+    
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 16, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
@@ -552,12 +621,12 @@ RECIPES = [
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 51, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 65, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+    SmallBodRecipe("Curse", CAT_INSCRIPTION_THIRD_FOURTH, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 79, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 86, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+    SmallBodRecipe("Greater Heal", CAT_INSCRIPTION_THIRD_FOURTH, 86, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(GINSENG, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 93, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 100, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+    SmallBodRecipe("Recall", CAT_INSCRIPTION_THIRD_FOURTH, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 114, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 121, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 128, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
@@ -565,14 +634,29 @@ RECIPES = [
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 149, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 156, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ), 
 
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIFTH_SIXTH, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIFTH_SIXTH, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+    
+    #SmallBodResource(MANDRAKEROOT, 10)
+    #SmallBodResource(BLOODMOSS, 10)
+    #SmallBodResource(SULPHUROUSASH, 10)
+    #SmallBodResource(NIGHTSHADE, 10)
+    #SmallBodResource(BLACKPEARL, 10)
+    #SmallBodResource(SPIDERSILK, 10)
+    #SmallBodResource(GINSENG, 10)
+    #SmallBodResource(GARLIC, 10)
+    #SmallBodResource(PIGIRON, 10)
+    #SmallBodResource(BATWING, 10)
+    #SmallBodResource(NOXCRYSTAL, 10)
+    #SmallBodResource(DAEMONBLOOD, 10)
+    #SmallBodResource(GRAVEDUST, 10)
+    
+    SmallBodRecipe("Blade Spirits", CAT_INSCRIPTION_FIFTH_SIXTH, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
+    SmallBodRecipe("Dispel Field", CAT_INSCRIPTION_FIFTH_SIXTH, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIFTH_SIXTH, 16, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIFTH_SIXTH, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+    SmallBodRecipe("Magic Reflection", CAT_INSCRIPTION_FIFTH_SIXTH, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIFTH_SIXTH, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIFTH_SIXTH, 37, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1), SmallBodResource(NIGHTSHADE, 3) ] ),
+    SmallBodRecipe("Paralyze", CAT_INSCRIPTION_FIFTH_SIXTH, 37, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIFTH_SIXTH, 44, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_FIFTH_SIXTH, 51, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+    SmallBodRecipe("Summon Creature", CAT_INSCRIPTION_FIFTH_SIXTH, 51, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIFTH_SIXTH, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIFTH_SIXTH, 65, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIFTH_SIXTH, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
@@ -611,17 +695,32 @@ RECIPES = [
     SmallBodRecipe("00000000", CAT_INSCRIPTION_SEVENTH_EIGTH, 149, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_SEVENTH_EIGTH, 156, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ), 
 
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 16, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 37, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1), SmallBodResource(NIGHTSHADE, 3) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 44, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+
+    #SmallBodResource(MANDRAKEROOT, 10)
+    #SmallBodResource(BLOODMOSS, 10)
+    #SmallBodResource(SULPHUROUSASH, 10)
+    #SmallBodResource(NIGHTSHADE, 10)
+    #SmallBodResource(BLACKPEARL, 10)
+    #SmallBodResource(SPIDERSILK, 10)
+    #SmallBodResource(GINSENG, 10)
+    #SmallBodResource(GARLIC, 10)
+    #SmallBodResource(PIGIRON, 10)
+    #SmallBodResource(BATWING, 10)
+    #SmallBodResource(NOXCRYSTAL, 10)
+    #SmallBodResource(DAEMONBLOOD, 10)
+    #SmallBodResource(GRAVEDUST, 10)
+    
+    SmallBodRecipe("Animate Dead", CAT_INSCRIPTION_NECRO, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(DAEMONBLOOD, 1) ] ),
+    SmallBodRecipe("Blood Oath", CAT_INSCRIPTION_NECRO, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(DAEMONBLOOD, 1) ] ),
+    SmallBodRecipe("Corpse Skin", CAT_INSCRIPTION_NECRO, 16, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(GRAVEDUST, 1) ] ),
+    SmallBodRecipe("Curse Weapon", CAT_INSCRIPTION_NECRO, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(PIGIRON, 1) ] ),
+    SmallBodRecipe("Evil Omen", CAT_INSCRIPTION_NECRO, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(NOXCRYSTAL, 1) ] ),
+    SmallBodRecipe("Horrific Beast", CAT_INSCRIPTION_NECRO, 37, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(DAEMONBLOOD, 3) ] ),
+    SmallBodRecipe("Mind Rot", CAT_INSCRIPTION_NECRO, 44, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(DAEMONBLOOD, 1), SmallBodResource(PIGIRON, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 51, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 65, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+    SmallBodRecipe("Pain Spike", CAT_INSCRIPTION_NECRO, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(PIGIRON, 1) ] ),
+    SmallBodRecipe("Poison Strike", CAT_INSCRIPTION_NECRO, 65, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NOXCRYSTAL, 1) ] ),
+    SmallBodRecipe("Summon Familiar", CAT_INSCRIPTION_NECRO, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(PIGIRON, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 79, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 86, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 93, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
@@ -668,7 +767,8 @@ RECIPES = [
     #CAT_CARPENTRY_ANVILS_AND_FORGES = 57
     #CAT_CARPENTRY_TRAINING = 64    
 
-    # Carpentry
+    ############################ Carpentry ############################
+    
     SmallBodRecipe("foot stool", CAT_CARPENTRY_FURNITURE, 2, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe("stool", CAT_CARPENTRY_FURNITURE, 9, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe("straw chair", CAT_CARPENTRY_FURNITURE, 16, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
@@ -685,7 +785,7 @@ RECIPES = [
     SmallBodRecipe("00000000", CAT_CARPENTRY_FURNITURE, 93, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     
     SmallBodRecipe("wooden box", CAT_CARPENTRY_CONTAINERS, 2, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
-    SmallBodRecipe("small crate", CAT_CARPENTRY_CONTAINERS, 9, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe("Small Crate", CAT_CARPENTRY_CONTAINERS, 9, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe("medium crate", CAT_CARPENTRY_CONTAINERS, 16, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe("large crate", CAT_CARPENTRY_CONTAINERS, 23, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe("wooden chest", CAT_CARPENTRY_CONTAINERS, 30, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
@@ -744,68 +844,81 @@ RECIPES = [
     SmallBodRecipe("00000000", CAT_CARPENTRY_INSTRUMENTS, 86, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe("00000000", CAT_CARPENTRY_INSTRUMENTS, 93, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     
+    ############################ Blacksmith ############################
     
-    # Blacksmith
-    SmallBodRecipe("war hammer", CAT_BLACKSMITHY_BASHING, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("kryss", CAT_BLACKSMITHY_BLADED, 44, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("heater shield", CAT_BLACKSMITHY_SHIELDS, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("small plate shield", CAT_BLACKSMITHY_SHIELDS, 58, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("bladed staff", CAT_BLACKSMITHY_POLEARMS, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("axe", CAT_BLACKSMITHY_AXES, 2, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("chaos shield", CAT_BLACKSMITHY_SHIELDS, 44, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("maul", CAT_BLACKSMITHY_BASHING, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("medium plate shield", CAT_BLACKSMITHY_SHIELDS, 79, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("platemail legs", CAT_BLACKSMITHY_METAL_ARMOR, 72, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("viking sword", CAT_BLACKSMITHY_BLADED, 65, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("double bladed staff", CAT_BLACKSMITHY_POLEARMS, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("hammer pick", CAT_BLACKSMITHY_BASHING, 2, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("scythe", CAT_BLACKSMITHY_POLEARMS, 51, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    # Metal Armor
     SmallBodRecipe("ringmail gloves", CAT_BLACKSMITHY_METAL_ARMOR, 2, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("metal kite shield", CAT_BLACKSMITHY_SHIELDS, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("tear kite shield", CAT_BLACKSMITHY_SHIELDS, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("female plate", CAT_BLACKSMITHY_METAL_ARMOR, 86, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("chainmail leggings", CAT_BLACKSMITHY_METAL_ARMOR, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
     SmallBodRecipe("ringmail leggings", CAT_BLACKSMITHY_METAL_ARMOR, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("close helmet", CAT_BLACKSMITHY_HELMETS, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("double axe", CAT_BLACKSMITHY_AXES, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("katana", CAT_BLACKSMITHY_BLADED, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("halberd", CAT_BLACKSMITHY_POLEARMS, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("lance", CAT_BLACKSMITHY_POLEARMS, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("war mace", CAT_BLACKSMITHY_BASHING, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("ringmail sleeves", CAT_BLACKSMITHY_METAL_ARMOR, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("ringmail tunic", CAT_BLACKSMITHY_METAL_ARMOR, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
     SmallBodRecipe("chainmail coif", CAT_BLACKSMITHY_METAL_ARMOR, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("mace", CAT_BLACKSMITHY_BASHING, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("metal shield", CAT_BLACKSMITHY_SHIELDS, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("war fork", CAT_BLACKSMITHY_POLEARMS, 65, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("scepter", CAT_BLACKSMITHY_BASHING, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("chainmail leggings", CAT_BLACKSMITHY_METAL_ARMOR, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
     SmallBodRecipe("chainmail tunic", CAT_BLACKSMITHY_METAL_ARMOR, 44, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
     SmallBodRecipe("platemail arms", CAT_BLACKSMITHY_METAL_ARMOR, 51, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("broadsword", CAT_BLACKSMITHY_BLADED, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("longsword", CAT_BLACKSMITHY_BLADED, 51, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("executioner's axe", CAT_BLACKSMITHY_AXES, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ), #'
-    SmallBodRecipe("two handed axe", CAT_BLACKSMITHY_AXES, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("bascinet", CAT_BLACKSMITHY_HELMETS, 2, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("pike", CAT_BLACKSMITHY_POLEARMS, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("spear", CAT_BLACKSMITHY_POLEARMS, 58, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("ringmail tunic", CAT_BLACKSMITHY_METAL_ARMOR, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("plate helm", CAT_BLACKSMITHY_HELMETS, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("large plate shield", CAT_BLACKSMITHY_SHIELDS, 72, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("large battle axe", CAT_BLACKSMITHY_AXES, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("war axe", CAT_BLACKSMITHY_AXES, 44, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("platemail gorget", CAT_BLACKSMITHY_METAL_ARMOR, 65, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("ringmail sleeves", CAT_BLACKSMITHY_METAL_ARMOR, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("platemail tunic", CAT_BLACKSMITHY_METAL_ARMOR, 79, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("buckler", CAT_BLACKSMITHY_SHIELDS, 2, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("bronze shield", CAT_BLACKSMITHY_SHIELDS, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("short spear", CAT_BLACKSMITHY_POLEARMS, 44, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("bardiche", CAT_BLACKSMITHY_POLEARMS, 2, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("scimitar", CAT_BLACKSMITHY_BLADED, 58, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
     SmallBodRecipe("platemail gloves", CAT_BLACKSMITHY_METAL_ARMOR, 58, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("platemail gorget", CAT_BLACKSMITHY_METAL_ARMOR, 65, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("platemail legs", CAT_BLACKSMITHY_METAL_ARMOR, 72, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("platemail tunic", CAT_BLACKSMITHY_METAL_ARMOR, 79, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("female plate", CAT_BLACKSMITHY_METAL_ARMOR, 86, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    
+    # Helmets
+    SmallBodRecipe("bascinet", CAT_BLACKSMITHY_HELMETS, 2, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("close helmet", CAT_BLACKSMITHY_HELMETS, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
     SmallBodRecipe("helmet", CAT_BLACKSMITHY_HELMETS, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
     SmallBodRecipe("norse helm", CAT_BLACKSMITHY_HELMETS, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("dagger", CAT_BLACKSMITHY_BLADED, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("cutlass", CAT_BLACKSMITHY_BLADED, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
-    SmallBodRecipe("battle axe", CAT_BLACKSMITHY_AXES, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("plate helm", CAT_BLACKSMITHY_HELMETS, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    
+    # Shields
+    SmallBodRecipe("buckler", CAT_BLACKSMITHY_SHIELDS, 2, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("bronze shield", CAT_BLACKSMITHY_SHIELDS, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("heater shield", CAT_BLACKSMITHY_SHIELDS, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("metal shield", CAT_BLACKSMITHY_SHIELDS, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("metal kite shield", CAT_BLACKSMITHY_SHIELDS, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("tear kite shield", CAT_BLACKSMITHY_SHIELDS, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("chaos shield", CAT_BLACKSMITHY_SHIELDS, 44, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
     SmallBodRecipe("order shield", CAT_BLACKSMITHY_SHIELDS, 51, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("small plate shield", CAT_BLACKSMITHY_SHIELDS, 58, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("large plate shield", CAT_BLACKSMITHY_SHIELDS, 72, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("medium plate shield", CAT_BLACKSMITHY_SHIELDS, 79, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    
+    # Bladed
+    SmallBodRecipe("broadsword", CAT_BLACKSMITHY_BLADED, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("cutlass", CAT_BLACKSMITHY_BLADED, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("dagger", CAT_BLACKSMITHY_BLADED, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("katana", CAT_BLACKSMITHY_BLADED, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("kryss", CAT_BLACKSMITHY_BLADED, 44, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("longsword", CAT_BLACKSMITHY_BLADED, 51, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("scimitar", CAT_BLACKSMITHY_BLADED, 58, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("viking sword", CAT_BLACKSMITHY_BLADED, 65, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    
+    # Axes
+    SmallBodRecipe("axe", CAT_BLACKSMITHY_AXES, 2, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("battle axe", CAT_BLACKSMITHY_AXES, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("double axe", CAT_BLACKSMITHY_AXES, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("executioner's axe", CAT_BLACKSMITHY_AXES, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ), #'
+    SmallBodRecipe("large battle axe", CAT_BLACKSMITHY_AXES, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("two handed axe", CAT_BLACKSMITHY_AXES, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("war axe", CAT_BLACKSMITHY_AXES, 44, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    
+    # Polearms
+    SmallBodRecipe("bardiche", CAT_BLACKSMITHY_POLEARMS, 2, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("bladed staff", CAT_BLACKSMITHY_POLEARMS, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("double bladed staff", CAT_BLACKSMITHY_POLEARMS, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("halberd", CAT_BLACKSMITHY_POLEARMS, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("lance", CAT_BLACKSMITHY_POLEARMS, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("pike", CAT_BLACKSMITHY_POLEARMS, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("short spear", CAT_BLACKSMITHY_POLEARMS, 44, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("scythe", CAT_BLACKSMITHY_POLEARMS, 51, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("spear", CAT_BLACKSMITHY_POLEARMS, 58, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("war fork", CAT_BLACKSMITHY_POLEARMS, 65, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    
+    # Bashing
+    SmallBodRecipe("hammer pick", CAT_BLACKSMITHY_BASHING, 2, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("mace", CAT_BLACKSMITHY_BASHING, 9, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("maul", CAT_BLACKSMITHY_BASHING, 16, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("scepter", CAT_BLACKSMITHY_BASHING, 23, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("war mace", CAT_BLACKSMITHY_BASHING, 30, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe("war hammer", CAT_BLACKSMITHY_BASHING, 37, BLACKSMITHY_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
 ]
 
 # Item property Number for important props within a bod item in game
@@ -842,7 +955,7 @@ SPECIAL_PROP_MATERIAL_MAP = {
 }
     
 # Internal: Helper method to generate a small bod data structure.
-def parse_small_bod(bod, recipes):
+def parse_small_bod(bod, recipes, alertMissingRecipe = False):
     isExceptional = False
     amountToMake = 0
     amountMade = 0
@@ -873,8 +986,8 @@ def parse_small_bod(bod, recipes):
                 
     if recipe is not None and isSmallBod:
         craftedItemName = specialMaterialName + " " + recipe.itemName if specialMaterialName is not None else recipe.itemName
-        return SmallBod(craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, recipe)
-    elif isSmallBod == True:
+        return SmallBod(bod.Serial, craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, recipe)
+    elif isSmallBod == True and alertMissingRecipe:
         print("Warning: Skipping because not in recipe list")
         for prop in bod.Properties:
             print("\t", prop.ToString(), "(", prop.Number, ")")
@@ -901,7 +1014,7 @@ def parse_large_bod(bod):
             amountMade = int(propList[1])
             smallBodItems.append({ "name": itemName, "amountMade": amountMade })
     if isLargeBod:
-        return LargeBod(isExceptional, amountToMake, specialMaterialPropId, smallBodItems)
+        return LargeBod(bod.Serial, isExceptional, amountToMake, specialMaterialPropId, smallBodItems)
 
 # Helper method to get a tool from the toolContainer. You dont need to worry about this.  
 def get_tool(smallBod, toolContainer):
@@ -964,7 +1077,7 @@ def check_resources(smallBod, resourceContainer):
     
 # Internal: Helper method to salvage stuff.
 def recycle(salvageBag, smallBod):
-    if salvageBag is None:
+    if salvageBag is None or not smallBod.recipe.canSalvage():
         return None
     
     found = False        
@@ -1004,6 +1117,7 @@ def build_complete_small_bod_db(completeSmallBodContainers, recipes):
 
 # Internal: Search our DB for a completed small bod
 def search_complete_small_bod_db(db, largeBod):
+    # smallBodItems.append({ "name": itemName, "amountMade": amountMade })
     entries = []
     for smallBodItem in largeBod.smallBodItems:
         if smallBodItem["amountMade"] == largeBod.amountToMake:
@@ -1020,9 +1134,122 @@ def search_complete_small_bod_db(db, largeBod):
             if found:
                 del db[smallBodItem["name"]][index]
     return entries
+
+
+#from Scripts.fm_core.core_items import HUE_BLACKSMITHY
+#from Scripts.fm_core.core_items import HUE_TAILORING
+#from Scripts.fm_core.core_items import HUE_CARPENTRY
+#from Scripts.fm_core.core_items import HUE_ALCHEMY
+#from Scripts.fm_core.core_items import HUE_INSCRIPTION
+#from Scripts.fm_core.core_items import HUE_TINKERING    
+
+
+# Internal: Helper that summarizes final state of bods
+def report_final_metrics(reports, recipes, incompleteBodContainers, completeSmallBodContainers, completeLargeBodContainer):
+
+    
+    for incompleteBodContainer in incompleteBodContainers:
+        bods = Items.FindAllByID(BOD_STATIC_ID, -1, incompleteBodContainer, 1)
+        for bod in bods:
+            smallBod = parse_small_bod(bod, recipes)
+            if smallBod is not None:
+                if smallBod.isComplete():
+                    reports[bod.Color].incrementNumCompleteSmallBods()
+                    reports[bod.Color].incrementNumInWrongContainer()
+                    print("Warning: This small bod should not be in the incomplete container! {}".format(smallBod))
+                else:
+                    reports[bod.Color].incrementNumIncompleteSmallBods()
+                continue
+            
+            largeBod = parse_large_bod(bod)
+            if largeBod is not None:
+                if largeBod.isComplete():
+                    reports[bod.Color].incrementNumCompleteLargeBods()
+                    reports[bod.Color].incrementNumInWrongContainer()
+                    print("Warning: This large bod should not be in the incomplete container! {}".format(largeBod))
+                else:
+                    reports[bod.Color].incrementNumIncompleteLargeBods()
+                continue
+
+            reports[bod.Color].incrementNumMissingRecipe()
+                    
+    for completeSmallBodContainer in completeSmallBodContainers:
+        bods = Items.FindAllByID(BOD_STATIC_ID, -1, completeSmallBodContainer, 1)
+        for bod in bods:
+            smallBod = parse_small_bod(bod, recipes)
+            if smallBod is not None:
+                if smallBod.isComplete():
+                    reports[bod.Color].incrementNumCompleteSmallBods()
+                else:
+                    reports[bod.Color].incrementNumIncompleteSmallBods()
+                    reports[bod.Color].incrementNumInWrongContainer()
+                    print("Warning: This small bod should not be in the complete small bod container! {}".format(smallBod))
+                continue
+            
+            largeBod = parse_large_bod(bod)
+            if largeBod is not None:
+                if largeBod.isComplete():
+                    reports[bod.Color].incrementNumCompleteLargeBods()
+                    reports[bod.Color].incrementNumInWrongContainer()
+                    print("Warning: This large bod should not be in the complete small bod container! {}".format(largeBod))
+                else:
+                    reports[bod.Color].incrementNumIncompleteLargeBods()                    
+                    reports[bod.Color].incrementNumInWrongContainer()
+                    print("Warning: This large bod should not be in the complete small bod container! {}".format(largeBod))
+                continue
+
+            reports[bod.Color].incrementNumMissingRecipe()
+                    
+    bods = Items.FindAllByID(BOD_STATIC_ID, -1, completeLargeBodContainer, 1)
+    for bod in bods:
+        smallBod = parse_small_bod(bod, recipes)
+        if smallBod is not None:
+            if smallBod.isComplete():
+                reports[bod.Color].incrementNumCompleteSmallBods()
+                reports[bod.Color].incrementNumInWrongContainer()
+                print("Warning: This small bod should not be in the complete large bod container! {}".format(smallBod))
+            else:
+                reports[bod.Color].incrementNumIncompleteSmallBods()
+                reports[bod.Color].incrementNumInWrongContainer()
+                print("Warning: This small bod should not be in the complete large bod container! {}".format(smallBod))
+            continue
+        
+        largeBod = parse_large_bod(bod)
+        if largeBod is not None:
+            if largeBod.isComplete():
+                reports[bod.Color].incrementNumCompleteLargeBods()
+            else:
+                reports[bod.Color].incrementNumIncompleteLargeBods()                    
+                reports[bod.Color].incrementNumInWrongContainer()                    
+                print("Warning: This large bod should not be in the complete large bod container! {}".format(largeBod))
+            continue
+                            
+        reports[bod.Color].incrementNumMissingRecipe()                
+        
+    print("****** Final Report ******")        
+    for k in reports:
+        print(reports[k])
+        
+# Internal: Need this to stort when filling large bods so we complete those with the most progress first
+def sort_large_bods(incompleteBodContainers):
+    largeBods = []
+    for incompleteBodContainer in incompleteBodContainers:
+        bods = Items.FindAllByID(BOD_STATIC_ID, -1, incompleteBodContainer, 1)
+        for bod in bods:
+            largeBod = parse_large_bod(bod)
+            if largeBod is not None: 
+                largeBods.append(largeBod)
+    
+    largeBods = sorted(largeBods, key = lambda largeBod: (largeBod.getId(), -ord(str(largeBod.numComplete()))))
+    for largeBod in largeBods:
+        print(largeBod.getId(), " (", largeBod.numComplete(), ")")
+    return largeBods
                 
 # Automate bod building (both small and large). You just dump all your bods into the starting
 # container and it will sort them, craft items, fill small bods, combine large bods, etc. 
+#
+# WARNING: OPERATES IN BACKPACK AND WILL SALVAGE BLACKSMITH AND TAILORING ITEMS. DO NOT HAVE
+# ANYTHING GOOD IN YOUR BACKPACK WHILE YOU RUN THIS SCRIPT YOU RISK LOSING IT.
 #
 # Requirements:
 #   - You need a container of resources (ingots, etc.)
@@ -1052,7 +1279,7 @@ def search_complete_small_bod_db(db, largeBod):
 #
 # 2. Large Bods
 #   - Creates a database of all small bods
-#   - Gets large bods from the incompleBodContainer
+#   - Gets large bods from the incompleBodContainer, sorts them by "most complete"
 #   - Looks up small bods in db, transfers to backpack, attempts to combine
 #   - If complete, moves to completeLargeBodContainer, otherwise back to incompleBodContainer
 #
@@ -1092,20 +1319,24 @@ def run_bod_builder(
     # This is just an array of color ids. I have constants for them (see imports)
     allowedResourceHues = [RESOURCE_HUE_DEFAULT],
     
+    # Time to wait between item moves. Adjust with caution. Reducing this will increase speed
+    # of the script, but you risk disconnects and other issues maintaining state
+    itemMoveDelayMs = 1000,
+    
     # (Optional) God save the queen
     gumpDelayMs = 250
 ):
     # Open containers because we may not have that item data yet.
     for incompleteBodContainer in incompleteBodContainers:
         Items.UseItem(incompleteBodContainer)
-        Misc.Pause(1000)
+        Misc.Pause(itemMoveDelayMs)
     for completeSmallBodContainer in completeSmallBodContainers:
         Items.UseItem(completeSmallBodContainer)
-        Misc.Pause(1000)
+        Misc.Pause(itemMoveDelayMs)
     Items.UseItem(toolContainer)
-    Misc.Pause(1000)
+    Misc.Pause(itemMoveDelayMs)
     Items.UseItem(resourceContainer)
-    Misc.Pause(1000)    
+    Misc.Pause(itemMoveDelayMs)    
     
     CRAFTING_GUMP_ID = 0x38920abd
     SMALL_BOD_GUMP_ID = 0x5afbd742
@@ -1118,6 +1349,16 @@ def run_bod_builder(
     for recipe in recipes:
         x[recipe.itemName] = recipe
     recipes = x
+    
+    # Just for tracking, can remove this crap.
+    reports = {
+        HUE_BLACKSMITHY:    BodReport("Blacksmithy"),
+        HUE_TAILORING:      BodReport("Tailoring  "),
+        HUE_CARPENTRY:      BodReport("Carpentry  "),
+        HUE_ALCHEMY:        BodReport("Alchemy    "),
+        HUE_INSCRIPTION:    BodReport("Inscription"),
+        HUE_TINKERING:      BodReport("Tinkering  ")
+    }    
         
     print("****** Start Small BOD ******")
     for incompleteBodContainer in incompleteBodContainers:
@@ -1126,7 +1367,7 @@ def run_bod_builder(
             while True:
                 # Get fresh version of bod
                 freshBod = Items.FindBySerial(bod.Serial)
-                smallBod = parse_small_bod(freshBod, recipes)
+                smallBod = parse_small_bod(freshBod, recipes, True)
                 
                 if smallBod is not None:
                     if smallBod.specialMaterialHue not in allowedResourceHues:
@@ -1135,7 +1376,7 @@ def run_bod_builder(
                         
                     if freshBod.Container != Player.Backpack.Serial:
                         Items.Move(freshBod, Player.Backpack.Serial, freshBod.Amount)
-                        Misc.Pause(1000)                
+                        Misc.Pause(itemMoveDelayMs)                
                         
                     if smallBod.isComplete():
                         print("Filled small BOD!")
@@ -1144,7 +1385,7 @@ def run_bod_builder(
                             container = Items.FindBySerial(completeSmallBodContainer)
                             if container.Contains.Count < 125:
                                 Items.Move(freshBod, completeSmallBodContainer, freshBod.Amount)
-                                Misc.Pause(1000)                
+                                Misc.Pause(itemMoveDelayMs)                
                                 break
                         break
                     else:
@@ -1159,7 +1400,8 @@ def run_bod_builder(
                         if not check_resources(smallBod, resourceContainer):
                             print("Warning: Out of resources, skipping {}".format(smallBod.craftedItemName))
                             Items.Move(freshBod, incompleteBodContainer, freshBod.Amount)
-                            Misc.Pause(1000)
+                            Misc.Pause(itemMoveDelayMs)
+                            reports[freshBod.Color].incrementNumMissingResources()
                             break
 
                         Items.UseItem(tool)
@@ -1225,52 +1467,53 @@ def run_bod_builder(
     db = build_complete_small_bod_db(completeSmallBodContainers, recipes)
     
     print("****** Start Large BOD ******")
-    totalLargeBods = 0
-    completeLargeBods = 0
-    for incompleteBodContainer in incompleteBodContainers:
-        bods = Items.FindAllByID(BOD_STATIC_ID, -1, incompleteBodContainer, 1)
-        for bod in bods:
-            # Get fresh version of bod
-            freshBod = Items.FindBySerial(bod.Serial)
-            largeBod = parse_large_bod(freshBod)
-            if largeBod is not None:  
-                totalLargeBods = totalLargeBods + 1
-                entries = search_complete_small_bod_db(db, largeBod)
-                if len(entries) > 0:
-                    print(largeBod)
-                    Items.Move(bod, Player.Backpack.Serial, bod.Amount)
-                    Misc.Pause(800)
-                    for entry in entries:
-                        Items.Move(entry["Serial"], Player.Backpack.Serial, 1)
-                        Misc.Pause(1000)
-                       
-                    # Open Large bod gump
-                    Target.Cancel()
-                    Items.UseItem(bod)
-                    Gumps.WaitForGump(LARGE_BOD_GUMP_ID, 3000)
-                    Target.Cancel()
-                    Misc.Pause(800)
-                    
-                    # Combine with contained items (backpack)
-                    Gumps.SendAction(LARGE_BOD_GUMP_ID, 4) 
-                    Target.WaitForTarget(5000)
-                    Target.TargetExecute(Player.Backpack.Serial)
-                    Gumps.WaitForGump(LARGE_BOD_GUMP_ID, 3000)
-                    Misc.Pause(1000)
-                    Target.Cancel()
-                    Gumps.CloseGump(LARGE_BOD_GUMP_ID)
-                    
-                    freshBod = Items.FindBySerial(bod.Serial)
-                    largeBod = parse_large_bod(freshBod)
-                    
-                    if largeBod.isComplete():
-                        completeLargeBods = completeLargeBods + 1
-                        print("Large BOD filled! :)")
-                        Items.Move(bod, completeLargeBodContainer, bod.Amount)
-                        Misc.Pause(800)
-                    else:
-                        print("Large Bod back to incompleteBodContainer :(")
-                        Items.Move(bod, incompleteBodContainer, bod.Amount)
-                        Misc.Pause(800)
-                        
-    print("Finished: {}/{} large bods filled.".format(completeLargeBods, totalLargeBods))
+    largeBods = sort_large_bods(incompleteBodContainers)
+    for largeBod in largeBods:
+        if largeBod is not None: 
+           
+            bod = Items.FindBySerial(largeBod.itemSerial)
+            if largeBod.isComplete() and bod.Container in incompleteBodContainers:
+                print("Found a misplaced (but complete) large bod, moving to right container! :))")
+                Items.Move(largeBod.itemSerial, completeLargeBodContainer, 1)
+                Misc.Pause(itemMoveDelayMs)
+                continue
+            
+            entries = search_complete_small_bod_db(db, largeBod)
+            
+            if len(entries) > 0:
+                print("Found matches for a small bod, attempting to complete...")
+                Items.Move(largeBod.itemSerial, Player.Backpack.Serial, 1)
+                Misc.Pause(itemMoveDelayMs)
+                for entry in entries:
+                    Items.Move(entry["Serial"], Player.Backpack.Serial, 1)
+                    Misc.Pause(itemMoveDelayMs)
+                   
+                # Open Large bod gump
+                Target.Cancel()
+                Items.UseItem(largeBod.itemSerial)
+                Gumps.WaitForGump(LARGE_BOD_GUMP_ID, 3000)
+                Target.Cancel()
+                Misc.Pause(1000)
+                
+                # Combine with contained items (backpack)
+                Gumps.SendAction(LARGE_BOD_GUMP_ID, 4) 
+                Target.WaitForTarget(5000)
+                Target.TargetExecute(Player.Backpack.Serial)
+                Gumps.WaitForGump(LARGE_BOD_GUMP_ID, 3000)
+                Misc.Pause(1500)
+                Target.Cancel()
+                Gumps.CloseGump(LARGE_BOD_GUMP_ID)
+                
+                bod = Items.FindBySerial(largeBod.itemSerial)
+                freshLargeBod = parse_large_bod(bod)
+                
+                if freshLargeBod.isComplete():
+                    print("\t...large BOD filled! :)")
+                    Items.Move(largeBod.itemSerial, completeLargeBodContainer, 1)
+                    Misc.Pause(itemMoveDelayMs)
+                else:
+                    print("\t...large BOD back to incompleteBodContainer :(")
+                    Items.Move(largeBod.itemSerial, incompleteBodContainer, 1)
+                    Misc.Pause(itemMoveDelayMs)
+                   
+    report_final_metrics(reports, recipes, incompleteBodContainers, completeSmallBodContainers, completeLargeBodContainer)

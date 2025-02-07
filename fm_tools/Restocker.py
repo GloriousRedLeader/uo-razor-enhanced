@@ -118,6 +118,10 @@ run_restocker(
     # Page is the page on the gump menu.
     resources,
     
+    # Time to wait between item moves. Adjust with caution. Reducing this will increase speed
+    # of the script, but you risk disconnects and other issues maintaining state
+    itemMoveDelayMs = 1000, 
+    
     # (Optional) Timeout between  gump button presses. Configure based on server latency.
     gumpDelayMs = 250
 )
