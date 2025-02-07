@@ -147,6 +147,7 @@ def get_amount_in_container(resource, containerSerial):
 # This is useful for use in conjunction with the BODBuilder.
 # InsaneUO specific.
 def run_restocker(
+
     # Green commodity deed box. Can be any container that can hold weight though.
     commodityBoxSerial,
     
@@ -187,7 +188,6 @@ def run_restocker(
             Misc.Pause(gumpDelayMs)
             
         while True:
-            
             amountInBox = get_amount_in_container(resource, commodityBoxSerial)
             if amountInBox >= resource.amount:
                 break
@@ -261,7 +261,7 @@ CAT_INSCRIPTION_NECRO = 29
 CAT_INSCRIPTION_OTHER = 36
 CAT_INSCRIPTION_MYSTICISM = 43
 
-# Internal data structure of storing ingredients for a recipe.
+# Internal data structure for storing ingredients for a recipe.
 class SmallBodResource:
     def __init__(self, resourceId, amount = 100):
         self.resourceId = resourceId
@@ -386,10 +386,9 @@ class BodReport:
         totalSmall = self.numIncompleteSmallBods + self.numCompleteSmallBods + self.numMissingRecipe
         totalLarge = self.numIncompleteLargeBods + self.numCompleteLargeBods
         #incompleteSmall = self.numIncompleteSmallBods - self.numMissingRecipe
-        return "{}:\t\tSmall ({}/{})\t\tLarge ({}/{})\tWrong Container ({})\tMissing Recipe ({})\tMissing Resources ({})".format(self.name, self.numCompleteSmallBods, totalSmall, self.numCompleteLargeBods, totalLarge, self.numInWrongContainer, self.numMissingRecipe, self.numMissingResources)
+        return "{}:\t\tSmall ({}/{})\t\tLarge ({}/{})\tWrong Container ({})\tNo Recipe ({})\tNo Resources ({})".format(self.name, self.numCompleteSmallBods, totalSmall, self.numCompleteLargeBods, totalLarge, self.numInWrongContainer, self.numMissingRecipe, self.numMissingResources)
 
 # Default list of recipes. See SmallBodRecipe. You can use these, edit these, or just define your own.
-# TBD: Other professions like tailoring, alchemy, etc.
 RECIPES = [
     
     ############################ Tailoring ############################
@@ -548,7 +547,6 @@ RECIPES = [
     #SmallBodRecipe("00000000", CAT_ALCHEMY_TOXIC, 44, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(00000000000000, 1) ] ),
     #SmallBodRecipe("00000000", CAT_ALCHEMY_TOXIC, 51, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(00000000000000, 1) ] ),
     #SmallBodRecipe("00000000", CAT_ALCHEMY_TOXIC, 58, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(00000000000000, 1) ] ),
-
   
     SmallBodRecipe("Lesser Explosion potion", CAT_ALCHEMY_EXPLOSIVE, 2, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(SULPHUROUSASH, 3) ] ),
     SmallBodRecipe("Explosion potion", CAT_ALCHEMY_EXPLOSIVE, 9, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(SULPHUROUSASH, 5) ] ),
@@ -559,7 +557,6 @@ RECIPES = [
     SmallBodRecipe("Greater Confusion Blast potion", CAT_ALCHEMY_EXPLOSIVE, 44, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(PIGIRON, 10) ] ),
     #SmallBodRecipe("00000000", CAT_ALCHEMY_EXPLOSIVE, 51, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(00000000000000, 1) ] ),
     #SmallBodRecipe("00000000", CAT_ALCHEMY_EXPLOSIVE, 58, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(00000000000000, 1) ] ),
-    
     
     #CAT_INSCRIPTION_FIRST_SECOND = 1
     #CAT_INSCRIPTION_THIRD_FOURTH = 8
@@ -582,7 +579,6 @@ RECIPES = [
     #SmallBodResource(NOXCRYSTAL, 10)
     #SmallBodResource(DAEMONBLOOD, 10)
     #SmallBodResource(GRAVEDUST, 10)
-    
     
     ############################ Inscription ############################
     
@@ -608,8 +604,6 @@ RECIPES = [
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 142, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 149, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_FIRST_SECOND, 156, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),  
-  
-
     
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
@@ -633,7 +627,6 @@ RECIPES = [
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 142, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 149, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_THIRD_FOURTH, 156, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ), 
-
     
     #SmallBodResource(MANDRAKEROOT, 10)
     #SmallBodResource(BLOODMOSS, 10)
@@ -695,7 +688,6 @@ RECIPES = [
     SmallBodRecipe("00000000", CAT_INSCRIPTION_SEVENTH_EIGTH, 149, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_SEVENTH_EIGTH, 156, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ), 
 
-
     #SmallBodResource(MANDRAKEROOT, 10)
     #SmallBodResource(BLOODMOSS, 10)
     #SmallBodResource(SULPHUROUSASH, 10)
@@ -720,11 +712,11 @@ RECIPES = [
     SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 51, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("Pain Spike", CAT_INSCRIPTION_NECRO, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(PIGIRON, 1) ] ),
     SmallBodRecipe("Poison Strike", CAT_INSCRIPTION_NECRO, 65, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NOXCRYSTAL, 1) ] ),
-    SmallBodRecipe("Summon Familiar", CAT_INSCRIPTION_NECRO, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(PIGIRON, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 79, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+    SmallBodRecipe("Summon Familiar", CAT_INSCRIPTION_NECRO, 79, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(PIGIRON, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 86, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 93, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
-    SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 100, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
+    SmallBodRecipe("Wither", CAT_INSCRIPTION_NECRO, 100, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(NOXCRYSTAL, 1), SmallBodResource(PIGIRON, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 114, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
     SmallBodRecipe("00000000", CAT_INSCRIPTION_NECRO, 121, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(00000000000000, 1) ] ),
@@ -1008,7 +1000,7 @@ def parse_large_bod(bod):
             amountToMake = int(prop.Args)
         if prop.Number in SPECIAL_PROP_MATERIAL_MAP:
             specialMaterialPropId = prop.Number
-        if prop.Number in range(PROP_ID_ITEM_TEXT, PROP_ID_ITEM_TEXT + 5):    
+        if prop.Number in range(PROP_ID_ITEM_TEXT, PROP_ID_ITEM_TEXT + 6):    
             propList = prop.ToString().split(": ")
             itemName = propList[0].strip() # buckler looks like "buckler : <amount>" instead of "buckler: <amount>"
             amountMade = int(propList[1])
@@ -1070,9 +1062,6 @@ def check_resources(smallBod, resourceContainer):
             if not keep:
                 Items.Move(item, resourceContainer, item.Amount)    
                 Misc.Pause(800)
-                #if not (item.ItemID == resource.resourceId and item.Color == hue):
-                #    Items.Move(item, resourceContainer, item.Amount)    
-                #    Misc.Pause(800)
     return True
     
 # Internal: Helper method to salvage stuff.
@@ -1109,7 +1098,8 @@ def build_complete_small_bod_db(completeSmallBodContainers, recipes):
             if smallBod is not None and smallBod.isComplete():
                 if smallBod.recipe.itemName not in db:
                     db[smallBod.recipe.itemName] = []
-                db[smallBod.recipe.itemName].append({ "Serial": bod.Serial, "smallBod": smallBod })
+                #db[smallBod.recipe.itemName].append({ "Serial": bod.Serial, "smallBod": smallBod })
+                db[smallBod.recipe.itemName].append(smallBod)
                 itemsInDb = itemsInDb + 1    
                     
     print("Database built with {} complete small bods".format(itemsInDb))
@@ -1125,9 +1115,10 @@ def search_complete_small_bod_db(db, largeBod):
         if smallBodItem["name"] in db:
             index = 0
             found = False
-            for entry in db[smallBodItem["name"]]:
-                if entry["smallBod"].isExceptional == largeBod.isExceptional and entry["smallBod"].amountMade == largeBod.amountToMake and entry["smallBod"].specialMaterialPropId == largeBod.specialMaterialPropId:
-                    entries.append(entry)
+            for smallBod in db[smallBodItem["name"]]:
+                #if entry["smallBod"].isExceptional == largeBod.isExceptional and entry["smallBod"].amountMade == largeBod.amountToMake and entry["smallBod"].specialMaterialPropId == largeBod.specialMaterialPropId:
+                if smallBod.isExceptional == largeBod.isExceptional and smallBod.amountMade == largeBod.amountToMake and smallBod.specialMaterialPropId == largeBod.specialMaterialPropId:
+                    entries.append(smallBod)
                     found = True
                     break
                 index = index + 1
@@ -1135,19 +1126,8 @@ def search_complete_small_bod_db(db, largeBod):
                 del db[smallBodItem["name"]][index]
     return entries
 
-
-#from Scripts.fm_core.core_items import HUE_BLACKSMITHY
-#from Scripts.fm_core.core_items import HUE_TAILORING
-#from Scripts.fm_core.core_items import HUE_CARPENTRY
-#from Scripts.fm_core.core_items import HUE_ALCHEMY
-#from Scripts.fm_core.core_items import HUE_INSCRIPTION
-#from Scripts.fm_core.core_items import HUE_TINKERING    
-
-
 # Internal: Helper that summarizes final state of bods
 def report_final_metrics(reports, recipes, incompleteBodContainers, completeSmallBodContainers, completeLargeBodContainer):
-
-    
     for incompleteBodContainer in incompleteBodContainers:
         bods = Items.FindAllByID(BOD_STATIC_ID, -1, incompleteBodContainer, 1)
         for bod in bods:
@@ -1226,7 +1206,7 @@ def report_final_metrics(reports, recipes, incompleteBodContainers, completeSmal
                             
         reports[bod.Color].incrementNumMissingRecipe()                
         
-    print("****** Final Report ******")        
+    print("\n**************** Final Report ***************")        
     for k in reports:
         print(reports[k])
         
@@ -1478,14 +1458,19 @@ def run_bod_builder(
                 Misc.Pause(itemMoveDelayMs)
                 continue
             
-            entries = search_complete_small_bod_db(db, largeBod)
+            smallBods = search_complete_small_bod_db(db, largeBod)
             
-            if len(entries) > 0:
+            if len(smallBods) > 0:
                 print("Found matches for a small bod, attempting to complete...")
+                for smallBodItem in largeBod.smallBodItems:
+                    print("\tsmallBodItem: {} - ({})".format(smallBodItem["name"], smallBodItem["amountMade"]))
+                    
                 Items.Move(largeBod.itemSerial, Player.Backpack.Serial, 1)
                 Misc.Pause(itemMoveDelayMs)
-                for entry in entries:
-                    Items.Move(entry["Serial"], Player.Backpack.Serial, 1)
+                for smallBod in smallBods:
+                    #Items.Move(entry["Serial"], Player.Backpack.Serial, 1)
+                    print("\tso moving {}".format(smallBod))
+                    Items.Move(smallBod.itemSerial, Player.Backpack.Serial, 1)
                     Misc.Pause(itemMoveDelayMs)
                    
                 # Open Large bod gump
