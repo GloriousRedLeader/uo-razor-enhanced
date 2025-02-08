@@ -95,6 +95,7 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 #       5. attempt cleanup: salvage or dump waste into a container (trash bin recommended)
 #   - Puts completed small bod in either completeSmallBodContainer or smallBodWaitingForLargeBodContainer
 #   - (the above depends on whether this is a solo small bod or is part of a large bod)
+#   - Note: Will attempt to meditate if mana is low for inscription
 #
 # 2. Large Bods
 #   - Creates a database of all small bods

@@ -507,22 +507,35 @@ RECIPES = [
     
     ############################ Inscription ############################
     
+
+    
     SmallBodRecipe(True, "Clumsy", CAT_INSCRIPTION_FIRST_SECOND, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(NIGHTSHADE, 1) ] ),
     SmallBodRecipe(True, "Feeblemind", CAT_INSCRIPTION_FIRST_SECOND, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(GINSENG, 1) ] ),
     SmallBodRecipe(True, "Heal", CAT_INSCRIPTION_FIRST_SECOND, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(GINSENG, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     SmallBodRecipe(True, "Weaken", CAT_INSCRIPTION_FIRST_SECOND, 51, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(GARLIC, 1) ] ),
     SmallBodRecipe(True, "Agility", CAT_INSCRIPTION_FIRST_SECOND, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     SmallBodRecipe(True, "Cunning", CAT_INSCRIPTION_FIRST_SECOND, 65, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
-    SmallBodRecipe(True, "Cure", CAT_INSCRIPTION_FIRST_SECOND, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(GARLIC, 1) ] ),
+    SmallBodRecipe(True, "Cure", CAT_INSCRIPTION_FIRST_SECOND, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(GINSENG, 1) ] ),
+    SmallBodRecipe(False, "Magic Untrap", CAT_INSCRIPTION_FIRST_SECOND, 93, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Strength", CAT_INSCRIPTION_FIRST_SECOND, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     
     SmallBodRecipe(True, "Curse", CAT_INSCRIPTION_THIRD_FOURTH, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Greater Heal", CAT_INSCRIPTION_THIRD_FOURTH, 86, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(GINSENG, 1) ] ),
     SmallBodRecipe(True, "Recall", CAT_INSCRIPTION_THIRD_FOURTH, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     
+#    from Scripts.fm_core.core_items import MANDRAKEROOT
+#from Scripts.fm_core.core_items import BLOODMOSS
+#from Scripts.fm_core.core_items import SULPHUROUSASH
+#from Scripts.fm_core.core_items import NIGHTSHADE
+#from Scripts.fm_core.core_items import BLACKPEARL
+#from Scripts.fm_core.core_items import SPIDERSILK
+#from Scripts.fm_core.core_items import GINSENG
+#from Scripts.fm_core.core_items import GARLIC    
+    
     SmallBodRecipe(True, "Blade Spirits", CAT_INSCRIPTION_FIFTH_SIXTH, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     SmallBodRecipe(True, "Dispel Field", CAT_INSCRIPTION_FIFTH_SIXTH, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Magic Reflection", CAT_INSCRIPTION_FIFTH_SIXTH, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
+    SmallBodRecipe(False, "Mind Blast", CAT_INSCRIPTION_FIFTH_SIXTH, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Paralyze", CAT_INSCRIPTION_FIFTH_SIXTH, 37, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     SmallBodRecipe(True, "Summon Creature", CAT_INSCRIPTION_FIFTH_SIXTH, 51, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     
@@ -785,50 +798,106 @@ def get_tool(smallBod, toolContainer):
         return tool
     
 # Helper method to get resources from the resourceContainer. Ignore me.
-def check_resources(smallBod, resourceContainer):
+def check_resources(smallBod, resourceContainer, itemMoveDelayMs):
+    itemsToMove = []
+    
     for resource in smallBod.recipe.resources:
-        while True:
-            hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
-            items = Items.FindAllByID(resource.resourceId, hue, Player.Backpack.Serial, 0)
+        hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
+        items = Items.FindAllByID(resource.resourceId, hue, Player.Backpack.Serial, 0)
+        amountBackpack = sum(item.Amount for item in items)
+        amountNeeded = max(0, resource.amount - amountBackpack)
+        
+        items = Items.FindAllByID(resource.resourceId, hue, resourceContainer, -1)
+        for item in items:
+        #while True:
+            #hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
+            #items = Items.FindAllByID(resource.resourceId, hue, Player.Backpack.Serial, 0)
 
-            amount = 0
-            for item in items:
-                amount = amount + item.Amount
+            #amount = 0
+            #for item in items:
+            #    amount = amount + item.Amount
             
-            if amount >= resource.amount:
+            #if amount >= resource.amount:
+            #    break
+            if amountNeeded == 0:
                 break
         
+            amountRequested = item.Amount if item.Amount <= amountNeeded else amountNeeded
+            itemsToMove.append({ "Serial": item.Serial, "Amount": amountRequested })
+            amountNeeded = max(0, amountNeeded - amountRequested)                
+            
             #print("Resources: {}/{}, getting more...".format(amount, resource.amount))
-            item = Items.FindByID(resource.resourceId, hue, resourceContainer, -1)
-            if item is not None:
-                amountNeeded = resource.amount - amount
-                amountRequested = item.Amount if item.Amount <= amountNeeded else amountNeeded
-                Items.Move(item, Player.Backpack.Serial, amountRequested)
-                Misc.Pause(1000)
-            else:
-                return False
+            #item = Items.FindByID(resource.resourceId, hue, resourceContainer, -1)
+            #if item is not None:
+                #amountNeeded = resource.amount - amount
+             #   amountRequested = item.Amount if item.Amount <= amountNeeded else amountNeeded
+                #itemsToMove.append({ "Serial": item.Serial, "Amount": amountRequested })
+                #amountNeeded = max(0, amountNeeded - amountRequested)
+                #Items.Move(item, Player.Backpack.Serial, amountRequested)
+                #Misc.Pause(1000)
+            #else:
+            #    return False
+        if amountNeeded > 0:
+            return False
+        
+    # Only move resources if we have enough (did not return early above)
+    for itemToMove in itemsToMove:
+        Items.Move(itemToMove["Serial"], Player.Backpack.Serial, itemToMove["Amount"])
+        Misc.Pause(itemMoveDelayMs)
 
     return True
     
+    # Original
+    #for resource in smallBod.recipe.resources:
+    #    while True:
+    #        hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
+    #        items = Items.FindAllByID(resource.resourceId, hue, Player.Backpack.Serial, 0)#
+    #
+    #        amount = 0
+    #        for item in items:
+    #            amount = amount + item.Amount
+    #        
+    #        if amount >= resource.amount:
+    #            break
+    #    
+    #        #print("Resources: {}/{}, getting more...".format(amount, resource.amount))
+    #        item = Items.FindByID(resource.resourceId, hue, resourceContainer, -1)
+    #        if item is not None:
+    #            amountNeeded = resource.amount - amount
+    #            amountRequested = item.Amount if item.Amount <= amountNeeded else amountNeeded
+    #            itemsToMove.append({ "Serial": item.Serial, "Amount": amountRequested })
+    #            Items.Move(item, Player.Backpack.Serial, amountRequested)
+    #            Misc.Pause(1000)
+    #        else:
+    #            return False
+    #    
+    #return True    
+    
 # Internal: Helper method to salvage stuff.
 def cleanup(salvageBag, trashContainer, resourceContainer, smallBod = None):
-    if salvageBag is not None and smallBod is not None and smallBod.recipe.canSalvage():
-        found = False        
-        while True:
-            item = Items.FindByName(smallBod.craftedItemName, -1, Player.Backpack.Serial, 0)
-            if item is None:
-                break
-            found = True
-            Items.Move(item, salvageBag, item.Amount)
-            Misc.Pause(800)
+    if smallBod is not None:
+        if salvageBag is not None and smallBod.recipe.canSalvage():
+            found = False        
+            while True:
+                item = Items.FindByName(smallBod.craftedItemName, -1, Player.Backpack.Serial, 0)
+                if item is None:
+                    break
+                found = True
+                Items.Move(item, salvageBag, item.Amount)
+                Misc.Pause(800)
 
-        if found:
-            Misc.WaitForContext(salvageBag, 10000)
-            Misc.ContextReply(salvageBag, 2)   
-            Misc.Pause(1000)
-    elif trashContainer is not None:
-        pass
-        
+            if found:
+                Misc.WaitForContext(salvageBag, 10000)
+                Misc.ContextReply(salvageBag, 2)   
+                Misc.Pause(1000)
+        elif trashContainer is not None:
+            while True:
+                item = Items.FindByName(smallBod.craftedItemName, -1, Player.Backpack.Serial, 0)
+                if item is None:
+                    break
+                Items.Move(item, trashContainer, item.Amount)
+                Misc.Pause(800)
+            
     ALL_RESOURCES = [INGOT_STATIC_ID, BOARD_STATIC_ID, CLOTH_STATIC_ID, LEATHER_STATIC_ID, MANDRAKEROOT, BLOODMOSS, SULPHUROUSASH, NIGHTSHADE, BLACKPEARL, SPIDERSILK, GINSENG, GARLIC, PIGIRON, BATWING, NOXCRYSTAL, DAEMONBLOOD, GRAVEDUST, EMPTY_BOTTLE_STATIC_ID, BONE, UNMARKED_RUNE, GATE_SCROLL, RECALL_SCROLL, BLANK_SCROLL, PARASITIC_PLANT, LUMINESCENT_FUNGI, WHITE_PEARL, FIRE_RUBY, PERFECT_EMERALD, TURQUOISE, MANDRAKEROOT, BLOODMOSS ]
 
     # Cleanup nonessentials, move to resource crate. If a smallBod is present, dont clean up the resources we are workign with
@@ -1010,8 +1079,8 @@ def sort_large_bods(incompleteBodContainers):
                 largeBods.append(largeBod)
     
     largeBods = sorted(largeBods, key = lambda largeBod: (largeBod.getId(), -ord(str(largeBod.numComplete()))))
-    for largeBod in largeBods:
-        print(largeBod.getId(), " (", largeBod.numComplete(), ")")
+    #for largeBod in largeBods:
+    #    print(largeBod.getId(), " (", largeBod.numComplete(), ")")
     return largeBods
                 
 # Automate bod building (both small and large). You just dump all your bods into the starting
@@ -1048,6 +1117,7 @@ def sort_large_bods(incompleteBodContainers):
 #       5. attempt cleanup: salvage or dump waste into a container (trash bin recommended)
 #   - Puts completed small bod in either completeSmallBodContainer or smallBodWaitingForLargeBodContainer
 #   - (the above depends on whether this is a solo small bod or is part of a large bod)
+#   - Note: Will attempt to meditate if mana is low for inscription
 #
 # 2. Large Bods
 #   - Creates a database of all small bods
@@ -1113,6 +1183,7 @@ def run_bod_builder(
     # (Optional) God save the queen
     gumpDelayMs = 250
 ):
+    print("Opening containers, this may take a moment...")
     # Open containers because we may not have that item data yet. Sorry for the spam,
     # but these containers will show 0 items unless theyre loaded.
     for incompleteBodContainer in incompleteBodContainers:
@@ -1137,10 +1208,11 @@ def run_bod_builder(
     # Turn this array into a dictionary keyed on item name. Its just easier that way.
     # So instead of [SmallBodRecipe, SmallBodRecipe...] we get:
     # { "cutlass": SmallBodRecipe, "platemail helm": SmallBodRecipe...
-    x = {}
-    for recipe in recipes:
-        x[recipe.itemName] = recipe
-    recipes = x
+    recipes = {recipes[i].itemName: recipes[i] for i in range(len(recipes))}
+    #x = {}
+    #for recipe in recipes:
+    #    x[recipe.itemName] = recipe
+    #recipes = x
     
     # Just for tracking, can remove this crap.
     reports = {
@@ -1152,7 +1224,7 @@ def run_bod_builder(
         HUE_TINKERING:      BodReport("Tinkering  ")
     }    
         
-    print("****** Start Small BOD ******")
+    print("****************************************** Start Small BOD ******************************************")
     for incompleteBodContainer in incompleteBodContainers:
         bods = Items.FindAllByID(BOD_STATIC_ID, -1, incompleteBodContainer, 1)
         for bod in bods:
@@ -1166,9 +1238,9 @@ def run_bod_builder(
                         print("Warning: Skipping because material is not in allowed list: {}".format(smallBod.craftedItemName))
                         break
                         
-                    if freshBod.Container != Player.Backpack.Serial:
-                        Items.Move(freshBod, Player.Backpack.Serial, freshBod.Amount)
-                        Misc.Pause(itemMoveDelayMs)                
+                    #if freshBod.Container != Player.Backpack.Serial:
+                    #    Items.Move(freshBod, Player.Backpack.Serial, freshBod.Amount)
+                    #    Misc.Pause(itemMoveDelayMs)                
                         
                     if smallBod.isComplete():
                         print("Filled small BOD!")
@@ -1191,12 +1263,17 @@ def run_bod_builder(
                             print("Error: Cannot find tool")
                             sys.exit()
                             
-                        if not check_resources(smallBod, resourceContainer):
+                        if not check_resources(smallBod, resourceContainer, itemMoveDelayMs):
                             print("Warning: Out of resources, skipping {}".format(smallBod.craftedItemName))
-                            Items.Move(freshBod, incompleteBodContainer, freshBod.Amount)
-                            Misc.Pause(itemMoveDelayMs)
                             reports[freshBod.Color].incrementNumMissingResources()
+                            if freshBod.Container != incompleteBodContainer:
+                                Items.Move(freshBod, incompleteBodContainer, freshBod.Amount)
+                                Misc.Pause(itemMoveDelayMs)
                             break
+                            
+                        if freshBod.Container != Player.Backpack.Serial:
+                            Items.Move(freshBod, Player.Backpack.Serial, freshBod.Amount)
+                            Misc.Pause(itemMoveDelayMs)                                            
 
                         Items.UseItem(tool)
                         Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
@@ -1218,7 +1295,16 @@ def run_bod_builder(
                             Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
                             Misc.Pause(gumpDelayMs)
                             if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                                continue     
+                                continue   
+                              
+                        if freshBod.Color == HUE_INSCRIPTION and Player.Mana < 25:
+                            #Timer.Create("meditationTimer", 1)  
+                            while Player.Mana < Player.MaxMana:
+                                if Timer.Check("meditationTimer") == False:
+                                    print("Mana is low, attempting meditation")
+                                    Player.UseSkill("Meditation")
+                                    Timer.Create("meditationTimer", 10000)
+                                Misc.Pause(500)
                         
                         # Sets category
                         Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpCategory)
@@ -1256,13 +1342,13 @@ def run_bod_builder(
                 else:
                     break
                     
-                Misc.Pause(1000)
-                #recycle(salvageBag, smallBod)
+                Misc.Pause(250)
+                
             cleanup(salvageBag, trashContainer, resourceContainer)
 
     db = build_complete_small_bod_db(smallBodWaitingForLargeBodContainers, recipes)
     
-    print("****** Start Large BOD ******")
+    print("****************************************** Start Large BOD ******************************************")
     largeBods = sort_large_bods(incompleteBodContainers)
     for largeBod in largeBods:
         if largeBod is not None: 
