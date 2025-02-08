@@ -118,7 +118,7 @@ run_bod_builder(
     
     # Serial of container to put completed SOLO small bods. These
     # are small bods that do not have a corresponding large bod. They are ready
-    # for turn-in. This is where they go until they can be combined with a large bod.
+    # for turn-in.
     completeSmallBodContainer = 0x405DE401,
     
     # Serial of container for completed LBODs. This is where you can pick them
