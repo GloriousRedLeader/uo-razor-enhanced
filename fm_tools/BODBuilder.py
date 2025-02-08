@@ -71,15 +71,17 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 #   - You need a container of resources (ingots, etc.)
 #   - You need a container of tools
 #   - You need a forge and anvil nearby
-#   - You need containers for incomplete (unsorted or not started bods), if you arent sure, dump here
-#   - You need a container for filled small bods
-#   - You need a container for filled large bods
+#   - You need containers for incomplete (unsorted or not started bods), dump all bods here (large and small)
+#   - You need a container for complete small bods (solo)
+#   - You need containers for complete small bods (part of larger bods)
+#   - You need a container for complete large bods
 #
 # You just need to specify a few containers, have a resource container fully stocked, 
-# have a container of tools, and you are good to go. Supports all crafting skills (allegedly), 
-# but currently only has recipes for Blacksmithy. Some other features include: 
-#   - automatically adds items to small bod
-#   - salvages wasted (non exceptional items) with a salvage bag
+# have a container of tools, and you are good to go. Supports: Blacksmithing, Tailoring,
+# Alchemy, Inscription, Carpentry. Has these features:
+#   - auto crafts items
+#   - cleans up crafted items that dont meet requirements (non exceptional)
+#   - puts completed large bods and solo small bods in containers for easy access and turn-in
 #   
 # General flow:
 # 1. Small Bods
@@ -90,12 +92,14 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 #       2. getting / using tool, setting resource in gump, setting category in gump
 #       3. attempting craft
 #       4. attempting to add crafted item to small bod
-#       5. recycle all items in bag that remain (everything in list of recipes)
-#   - Puts completed small bod in either incompleteBodContainer or completeSmallBodContainer
+#       5. attempt cleanup: salvage or dump waste into a container (trash bin recommended)
+#   - Puts completed small bod in either completeSmallBodContainer or smallBodWaitingForLargeBodContainer
+#   - (the above depends on whether this is a solo small bod or is part of a large bod)
 #
 # 2. Large Bods
 #   - Creates a database of all small bods
 #   - Gets large bods from the incompleBodContainer, sorts them by "most complete"
+#   - (the above happens so we focus on completion and dont spread too thin)
 #   - Looks up small bods in db, transfers to backpack, attempts to combine
 #   - If complete, moves to completeLargeBodContainer, otherwise back to incompleBodContainer
 #
