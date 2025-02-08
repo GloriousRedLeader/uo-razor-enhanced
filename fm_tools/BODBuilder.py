@@ -102,14 +102,20 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 # Based on:
 # https://github.com/matsamilla/Razor-Enhanced/blob/master/NoxBodFiles/Smithbodgod.py
 run_bod_builder(
-    
+
     # Array of serials for containers to put your bods in to start things off (both small and large).
     # You put your bods in here.
     incompleteBodContainers = [0x40251A02, 0x402519AE, 0x4025193E],
     
-    # Array of serials of containers to put completed small bods.
-    # The script will store completed small bods in these.
-    completeSmallBodContainers = [0x40251A68, 0x4042D758, 0x4042D779],
+    # Array of serials for containers to store completed small bods
+    # that are part of a large bod. This can take time. So store them here
+    # until the can be combined.
+    smallBodWaitingForLargeBodContainers = [0x40251A68, 0x4042D758, 0x4042D779],
+    
+    # Serial of container to put completed SOLO small bods. These
+    # are small bods that do not have a corresponding large bod. They are ready
+    # for turn-in. This is where they go until they can be combined with a large bod.
+    completeSmallBodContainer = 0x405DE401,
     
     # Serial of container for completed LBODs. This is where you can pick them
     # up and then go turn them in. 
@@ -122,8 +128,16 @@ run_bod_builder(
     # Fill this with ingots, reagents, etc. Use the run_restocker() function to help fill it up.
     resourceContainer = 0x408CC21E,
     
-    # (Optional) Your salvage bag
+    # (Optional) Your salvage bag which is used for tailoring and blacksmithy rejects.
+    # You get a little resource refund.
     salvageBag = 0x400E972D,
+    
+    # (Optional) Serial of a container to dump trash in that cant be salvaged. 
+    # For non blacksmith/tailoring professions, dumps non-exceptional items here,
+    # e.g. if you need exceptional footlockers and only get ordinary ones. Dont need that junk.
+    # I think you can use a trash bin. Maybe place on next to you.
+    # "I wish to place a trash barrel"
+    trashContainer = None,
     
     # (Optional) Array of SmallBodRecipe. If not in this list, the bod will be skipped.
     # Only build bods that want these items. Can be of any profession.
@@ -137,8 +151,8 @@ run_bod_builder(
     
     # Time to wait between item moves. Adjust with caution. Reducing this will increase speed
     # of the script, but you risk disconnects and other issues maintaining state
-    itemMoveDelayMs = 1000,    
-
+    itemMoveDelayMs = 1000,
+    
     # (Optional) God save the queen
     gumpDelayMs = 250
 )

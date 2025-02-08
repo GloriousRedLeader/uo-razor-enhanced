@@ -1,4 +1,10 @@
 
+# Razor Enhanced Scripts for Ultima Online by
+#   GRL  
+#   https://github.com/GloriousRedLeader/uo-razor-enhanced
+#   2025-02-07
+# Use at your own risk. 
+
 from Scripts.fm_core.core_mobiles import get_enemies
 from Scripts.fm_core.core_player import move_all_items_from_container
 from Scripts.fm_core.core_items import AXE_STATIC_IDS, LOG_STATIC_IDS, TREE_STATIC_IDS
@@ -6,11 +12,13 @@ from Scripts.fm_core.core_player import find_in_container_by_id
 from Scripts.fm_core.core_player import move_item_to_container
 from Scripts.fm_core.core_spells import get_fc_delay
 from Scripts.fm_core.core_rails import get_tile_in_front
-
 from System.Collections.Generic import List
 import sys
 from System import Byte, Int32
 import time
+
+# Drops everything in the list below to the ground so it doesnt clutter your bags.
+# Its like and inverse auto looter.
 
 TRASH_NAMES = [
     "Helm of Swiftness",
@@ -49,6 +57,12 @@ TRASH_NAMES = [
     "a map of the known world",
     "10th Anniversary Sculpture",
     "Katrina's Crook", #'
+    "Pixie Swatter",
+    "Dragon's End", #'
+    "Heart of the Lion",
+    "Luna Lance",
+    "Breastplate of Justice (Virtue Armor Set)",
+    "Gorget of Honesty (Virtue Armor Set)",
 ]
 
 Timer.Create( 'pingTimer', 1 )
@@ -65,11 +79,5 @@ while True:
             x, y, z = get_tile_in_front(distance = 1)
             Items.MoveOnGround(item.Serial, item.Amount,x,y,z)
             Misc.Pause(750)
-            
-#    items = Items.FindAllByID(itemids = TRASH_ITEMS, color = -1, container = Player.Backpack.Serial, range = 1)
-#    for item in items:
-#        print("Drop item {}".format(item.Name))
-#        x, y, z = get_tile_in_front(distance = 1)
-#        Items.MoveOnGround(item.Serial, item.Amount,x,y,z)
-#        Misc.Pause(750)
+
     Misc.Pause(1000)        
