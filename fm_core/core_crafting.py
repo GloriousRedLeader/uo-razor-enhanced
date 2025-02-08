@@ -807,26 +807,7 @@ def check_resources(smallBod, resourceContainer):
                 Misc.Pause(1000)
             else:
                 return False
-                
-    # Probably a better way to move all this junk back to the resource container
-    # Intent is to keep backpack lightweight and clean. This is sort of a nuclear
-    # explosion and doesnt account for people doing other bods that I dont
-    # have predefined in RECIPES template above.
-    #ALL_RESOURCES = [INGOT_STATIC_ID, BOARD_STATIC_ID, CLOTH_STATIC_ID, LEATHER_STATIC_ID, MANDRAKEROOT, BLOODMOSS, SULPHUROUSASH, NIGHTSHADE, BLACKPEARL, SPIDERSILK, GINSENG, GARLIC, PIGIRON, BATWING, NOXCRYSTAL, DAEMONBLOOD, GRAVEDUST ]
-    
-    # Cleanup nonessentials, move to resource crate
-    #for resourceId in ALL_RESOURCES:
-    #    items = Items.FindAllByID(resourceId, -1, Player.Backpack.Serial, 0)
-    #    for item in items:
-    #        keep = False
-    #        for resource in smallBod.recipe.resources:
-    #            hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
-    #            if item.ItemID == resource.resourceId and item.Color == hue:
-    #                keep = True
-    #                break
-    #        if not keep:
-    #            Items.Move(item, resourceContainer, item.Amount)    
-    #            Misc.Pause(800)
+
     return True
     
 # Internal: Helper method to salvage stuff.
@@ -847,8 +828,8 @@ def cleanup(salvageBag, trashContainer, resourceContainer, smallBod = None):
             Misc.Pause(1000)
     elif trashContainer is not None:
         pass
-            
-    ALL_RESOURCES = [INGOT_STATIC_ID, BOARD_STATIC_ID, CLOTH_STATIC_ID, LEATHER_STATIC_ID, MANDRAKEROOT, BLOODMOSS, SULPHUROUSASH, NIGHTSHADE, BLACKPEARL, SPIDERSILK, GINSENG, GARLIC, PIGIRON, BATWING, NOXCRYSTAL, DAEMONBLOOD, GRAVEDUST ]
+        
+    ALL_RESOURCES = [INGOT_STATIC_ID, BOARD_STATIC_ID, CLOTH_STATIC_ID, LEATHER_STATIC_ID, MANDRAKEROOT, BLOODMOSS, SULPHUROUSASH, NIGHTSHADE, BLACKPEARL, SPIDERSILK, GINSENG, GARLIC, PIGIRON, BATWING, NOXCRYSTAL, DAEMONBLOOD, GRAVEDUST, EMPTY_BOTTLE_STATIC_ID, BONE, UNMARKED_RUNE, GATE_SCROLL, RECALL_SCROLL, BLANK_SCROLL, PARASITIC_PLANT, LUMINESCENT_FUNGI, WHITE_PEARL, FIRE_RUBY, PERFECT_EMERALD, TURQUOISE, MANDRAKEROOT, BLOODMOSS ]
 
     # Cleanup nonessentials, move to resource crate. If a smallBod is present, dont clean up the resources we are workign with
     for resourceId in ALL_RESOURCES:
@@ -1008,11 +989,15 @@ def report_final_metrics(reports, recipes, incompleteBodContainers, smallBodWait
                 print("Warning: This large bod should not be in the complete large bod container! {}".format(largeBod))
             continue
                             
-        reports[bod.Color].incrementNumMissingRecipe()                
+        reports[bod.Color].incrementNumMissingRecipe()     
+
+    largeBodsReadyForTurnIn = Items.FindBySerial(completeLargeBodContainer).Contains.Count
+    smallBodsReadyForTurnIn = Items.FindBySerial(completeSmallBodContainer).Contains.Count
         
-    print("\n**************** Final Report ***************")        
+    print("\n****************************************** Final Report *****************************************")        
     for k in reports:
         print(reports[k])
+    print("\nReady for turn in:\n\n\t* Small:\t{}\n\t* Large:\t{}".format(smallBodsReadyForTurnIn, largeBodsReadyForTurnIn))
         
 # Internal: Need this to stort when filling large bods so we complete those with the most progress first
 def sort_large_bods(incompleteBodContainers):
