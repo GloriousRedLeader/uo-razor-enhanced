@@ -142,7 +142,7 @@ run_bod_builder(
     # e.g. if you need exceptional footlockers and only get ordinary ones. Dont need that junk.
     # I think you can use a trash bin. Maybe place on next to you.
     # "I wish to place a trash barrel"
-    trashContainer = None,
+    trashContainer = 0x406766F3,
     
     # (Optional) Array of SmallBodRecipe. If not in this list, the bod will be skipped.
     # Only build bods that want these items. Can be of any profession.
@@ -153,6 +153,12 @@ run_bod_builder(
     # to add others like copper, spined leather, etc. then you need to explicitly add them here.
     # This is just an array of color ids. I have constants for them (see imports)
     allowedResourceHues = [RESOURCE_HUE_DEFAULT, RESOURCE_HUE_COPPER, RESOURCE_HUE_SHADOW_IRON, RESOURCE_HUE_DULL_COPPER, RESOURCE_HUE_BRONZE, RESOURCE_HUE_GOLD, RESOURCE_HUE_AGAPITE, RESOURCE_HUE_VERITE, RESOURCE_HUE_VALORITE, RESOURCE_HUE_BARBED, RESOURCE_HUE_SPINED, RESOURCE_HUE_HORNED, RESOURCE_HUE_OAK, RESOURCE_HUE_ASH, RESOURCE_HUE_YEW, RESOURCE_HUE_HEARTWOOD, RESOURCE_HUE_BLOODWOOD, RESOURCE_HUE_FROSTWOOD ],
+    
+    # (Optional) Flag governs whether an exceptional small bod can be used to fill
+    # a normal (non-exceptional) large bod. Its a real hassle trying to match these.
+    # Default value is true which means exceptional small bods are incldued. Set to 
+    # False to disable this.
+    fillNormalLargeBodsWithExceptionalSmallBods = True,
     
     # Time to wait between item moves. Adjust with caution. Reducing this will increase speed
     # of the script, but you risk disconnects and other issues maintaining state

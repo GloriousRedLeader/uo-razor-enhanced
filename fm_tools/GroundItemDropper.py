@@ -63,6 +63,8 @@ TRASH_NAMES = [
     "Luna Lance",
     "Breastplate of Justice (Virtue Armor Set)",
     "Gorget of Honesty (Virtue Armor Set)",
+    "Legs of Honor (Virtue Armor Set)",
+    "Helm of Spirituality (Virtue Armor Set)",
 ]
 
 Timer.Create( 'pingTimer', 1 )

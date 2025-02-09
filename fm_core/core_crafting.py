@@ -698,7 +698,7 @@ PROP_ID_AMOUNT_TO_MAKE = 1060656
 PROP_ID_EXCEPTIONAL = 1045141
 PROP_ID_ITEM_TEXT = 1060658
 
-# This goes prop.Number -> { gump button id, special resource hue }
+# This goes prop.Number -> { gump button id, special resource hue, item name }
 # ServUO\Scripts\Services\BulkOrders\SmallBODs\SmallBODGump.cs
 # Tried doing a regex by special material name, e.g. All items must be made
 # with Dull Copper Ingots, but it didnt follow that convetion for carpenty.
@@ -801,6 +801,7 @@ def get_tool(smallBod, toolContainer):
 def check_resources(smallBod, resourceContainer, itemMoveDelayMs):
     itemsToMove = []
     
+    # Optimized
     for resource in smallBod.recipe.resources:
         hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
         items = Items.FindAllByID(resource.resourceId, hue, Player.Backpack.Serial, 0)
@@ -809,34 +810,13 @@ def check_resources(smallBod, resourceContainer, itemMoveDelayMs):
         
         items = Items.FindAllByID(resource.resourceId, hue, resourceContainer, -1)
         for item in items:
-        #while True:
-            #hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
-            #items = Items.FindAllByID(resource.resourceId, hue, Player.Backpack.Serial, 0)
-
-            #amount = 0
-            #for item in items:
-            #    amount = amount + item.Amount
-            
-            #if amount >= resource.amount:
-            #    break
             if amountNeeded == 0:
                 break
         
             amountRequested = item.Amount if item.Amount <= amountNeeded else amountNeeded
             itemsToMove.append({ "Serial": item.Serial, "Amount": amountRequested })
             amountNeeded = max(0, amountNeeded - amountRequested)                
-            
-            #print("Resources: {}/{}, getting more...".format(amount, resource.amount))
-            #item = Items.FindByID(resource.resourceId, hue, resourceContainer, -1)
-            #if item is not None:
-                #amountNeeded = resource.amount - amount
-             #   amountRequested = item.Amount if item.Amount <= amountNeeded else amountNeeded
-                #itemsToMove.append({ "Serial": item.Serial, "Amount": amountRequested })
-                #amountNeeded = max(0, amountNeeded - amountRequested)
-                #Items.Move(item, Player.Backpack.Serial, amountRequested)
-                #Misc.Pause(1000)
-            #else:
-            #    return False
+
         if amountNeeded > 0:
             return False
         
@@ -936,7 +916,7 @@ def build_complete_small_bod_db(smallBodWaitingForLargeBodContainers, recipes):
     return db
 
 # Internal: Search our DB for a completed small bod
-def search_complete_small_bod_db(db, largeBod):
+def search_complete_small_bod_db(db, largeBod, fillNormalLargeBodsWithExceptionalSmallBods):
     entries = []
     for smallBodItem in largeBod.smallBodItems:
         if smallBodItem["amountMade"] == largeBod.amountToMake:
@@ -945,7 +925,11 @@ def search_complete_small_bod_db(db, largeBod):
             index = 0
             found = False
             for smallBod in db[smallBodItem["name"]]:
-                if smallBod.isExceptional == largeBod.isExceptional and smallBod.amountMade == largeBod.amountToMake and smallBod.specialMaterialPropId == largeBod.specialMaterialPropId:
+                if fillNormalLargeBodsWithExceptionalSmallBods and (largeBod.isExceptional == False or smallBod.isExceptional == largeBod.isExceptional) and smallBod.amountMade == largeBod.amountToMake and smallBod.specialMaterialPropId == largeBod.specialMaterialPropId:                    
+                    entries.append(smallBod)
+                    found = True
+                    break
+                if smallBod.isExceptional == largeBod.isExceptional and smallBod.amountMade == largeBod.amountToMake and smallBod.specialMaterialPropId == largeBod.specialMaterialPropId:                    
                     entries.append(smallBod)
                     found = True
                     break
@@ -1068,7 +1052,9 @@ def report_final_metrics(reports, recipes, incompleteBodContainers, smallBodWait
         print(reports[k])
     print("\nReady for turn in:\n\n\t* Small:\t{}\n\t* Large:\t{}".format(smallBodsReadyForTurnIn, largeBodsReadyForTurnIn))
         
-# Internal: Need this to stort when filling large bods so we complete those with the most progress first
+# Internal: Need this to stort when filling large bods so we complete those with the most progress first.
+# Makes a key that matche all bods based on exceptional, material, and type of items needed. Arranges them
+# so the ones that have the most number of complete items are first.
 def sort_large_bods(incompleteBodContainers):
     largeBods = []
     for incompleteBodContainer in incompleteBodContainers:
@@ -1079,8 +1065,6 @@ def sort_large_bods(incompleteBodContainers):
                 largeBods.append(largeBod)
     
     largeBods = sorted(largeBods, key = lambda largeBod: (largeBod.getId(), -ord(str(largeBod.numComplete()))))
-    #for largeBod in largeBods:
-    #    print(largeBod.getId(), " (", largeBod.numComplete(), ")")
     return largeBods
                 
 # Automate bod building (both small and large). You just dump all your bods into the starting
@@ -1176,11 +1160,17 @@ def run_bod_builder(
     # This is just an array of color ids. I have constants for them (see imports)
     allowedResourceHues = [RESOURCE_HUE_DEFAULT],
     
-    # Time to wait between item moves. Adjust with caution. Reducing this will increase speed
-    # of the script, but you risk disconnects and other issues maintaining state
+    # (Optional) Flag governs whether an exceptional small bod can be used to fill
+    # a normal (non-exceptional) large bod. Its a real hassle trying to match these.
+    # Default value is true which means exceptional small bods are incldued. Set to 
+    # False to disable this.
+    fillNormalLargeBodsWithExceptionalSmallBods = True,
+    
+    # (Optional)Time to wait between item moves. Adjust with caution. Reducing this will increase speed
+    # of the script, but you risk disconnects and other issues maintaining state. Defaults to 1000ms
     itemMoveDelayMs = 1000,
     
-    # (Optional) God save the queen
+    # (Optional) God save the queen.
     gumpDelayMs = 250
 ):
     print("Opening containers, this may take a moment...")
@@ -1209,10 +1199,6 @@ def run_bod_builder(
     # So instead of [SmallBodRecipe, SmallBodRecipe...] we get:
     # { "cutlass": SmallBodRecipe, "platemail helm": SmallBodRecipe...
     recipes = {recipes[i].itemName: recipes[i] for i in range(len(recipes))}
-    #x = {}
-    #for recipe in recipes:
-    #    x[recipe.itemName] = recipe
-    #recipes = x
     
     # Just for tracking, can remove this crap.
     reports = {
@@ -1298,7 +1284,6 @@ def run_bod_builder(
                                 continue   
                               
                         if freshBod.Color == HUE_INSCRIPTION and Player.Mana < 25:
-                            #Timer.Create("meditationTimer", 1)  
                             while Player.Mana < Player.MaxMana:
                                 if Timer.Check("meditationTimer") == False:
                                     print("Mana is low, attempting meditation")
@@ -1359,17 +1344,14 @@ def run_bod_builder(
                 Misc.Pause(itemMoveDelayMs)
                 continue
             
-            smallBods = search_complete_small_bod_db(db, largeBod)
+            smallBods = search_complete_small_bod_db(db, largeBod, fillNormalLargeBodsWithExceptionalSmallBods)
             
             if len(smallBods) > 0:
                 print("Found matches for a large bod, attempting to complete...")
-                #for smallBodItem in largeBod.smallBodItems:
-                #    print("\tsmallBodItem: {} - ({})".format(smallBodItem["name"], smallBodItem["amountMade"]))
                     
                 Items.Move(largeBod.itemSerial, Player.Backpack.Serial, 1)
                 Misc.Pause(itemMoveDelayMs)
                 for smallBod in smallBods:
-                    #print("\tso moving {}".format(smallBod))
                     Items.Move(smallBod.itemSerial, Player.Backpack.Serial, 1)
                     Misc.Pause(itemMoveDelayMs)
                    
