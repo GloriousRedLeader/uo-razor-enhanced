@@ -67,6 +67,13 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 # WARNING: OPERATES IN BACKPACK AND WILL SALVAGE BLACKSMITH AND TAILORING ITEMS. DO NOT HAVE
 # ANYTHING GOOD IN YOUR BACKPACK WHILE YOU RUN THIS SCRIPT YOU RISK LOSING IT.
 #
+# Known quirks:
+#   - For inscription, scrolls are stacked after crafting. The auto-add-to-sbod part may fail
+#       if the stack has more than one. So, you'll have to stop the script and separate the items
+#       into individual stacks of one and restart the script. Normally the item is added to the sbod
+#       deed immediately. But internet fuzz and crashing in the middle of an inscription scroll sbod
+#       may leave it in this state. Be aware.
+#
 # Requirements:
 #   - You need a container of resources (ingots, etc.)
 #   - You need a container of tools

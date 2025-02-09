@@ -273,15 +273,32 @@ CAT_INSCRIPTION_MYSTICISM = 43
 
 # Internal data structure for storing ingredients for a recipe.
 class SmallBodResource:
-    def __init__(self, resourceId, amount = 100):
+    def __init__(self, resourceId, amount = 35):
         self.resourceId = resourceId
         self.amount = amount
         
-    def can_override_hue(self):
+    def canOverrideHue(self):
         return self.resourceId in [INGOT_STATIC_ID, BOARD_STATIC_ID, LEATHER_STATIC_ID ]
         
+    # So we can pull extra from the resourceContainer in one pass instead of on each
+    # craft attempt. This is an optimization.
+    def getOptimizedAmout(self):
+        # Heavy stuff and you need a lot typically, 1 stone each
+        if self.resourceId in [BOARD_STATIC_ID, LEATHER_STATIC_ID, BONE]:
+            return self.amount * 5
+            
+        # Heavy stuff but you only need 1 or 2 mostly, 1 stone each
+        if self.resourceId in [UNMARKED_RUNE, GATE_SCROLL, RECALL_SCROLL, BLANK_SCROLL, PARASITIC_PLANT, LUMINESCENT_FUNGI, WHITE_PEARL, FIRE_RUBY, PERFECT_EMERALD, TURQUOISE]:
+            return self.amount * 25            
+            
+        # Light things like reagents < 1 stone
+        if self.resourceId in [MANDRAKEROOT, BLOODMOSS, SULPHUROUSASH, NIGHTSHADE, BLACKPEARL, SPIDERSILK, GINSENG, GARLIC, PIGIRON, BATWING, NOXCRYSTAL, DAEMONBLOOD, GRAVEDUST]:
+            return self.amount * 50
+            
+        return self.amount
+        
     def __str__(self):
-        return f"SmallBodResource(resourceId='{self.resourceId}', amount={self.amount}, canOverrideHue='{self.can_override_hue()}')"        
+        return f"SmallBodResource(resourceId='{self.resourceId}', amount={self.amount}, canOverrideHue='{self.canOverrideHue()}')"        
 
 # Recipe template. Pass an array of these to the run_bod_builder function.
 # hasLargeBod: (NOT IMPLEMENTED) This small bod can be part of a large bod (several cannot)
@@ -519,8 +536,23 @@ RECIPES = [
     SmallBodRecipe(False, "Magic Untrap", CAT_INSCRIPTION_FIRST_SECOND, 93, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Strength", CAT_INSCRIPTION_FIRST_SECOND, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     
+#    from Scripts.fm_core.core_items import MANDRAKEROOT
+#from Scripts.fm_core.core_items import BLOODMOSS
+#from Scripts.fm_core.core_items import SULPHUROUSASH
+#from Scripts.fm_core.core_items import NIGHTSHADE
+#from Scripts.fm_core.core_items import BLACKPEARL
+#from Scripts.fm_core.core_items import SPIDERSILK
+#from Scripts.fm_core.core_items import GINSENG
+#from Scripts.fm_core.core_items import GARLIC        
+    
+    SmallBodRecipe(False, "Bless", CAT_INSCRIPTION_THIRD_FOURTH, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
+    SmallBodRecipe(False, "Fireball", CAT_INSCRIPTION_THIRD_FOURTH, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1) ] ),
+    SmallBodRecipe(False, "Unlock", CAT_INSCRIPTION_THIRD_FOURTH, 44, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
+    SmallBodRecipe(False, "Arch Cure", CAT_INSCRIPTION_THIRD_FOURTH, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(GINSENG, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
+    SmallBodRecipe(False, "Arch Protection", CAT_INSCRIPTION_THIRD_FOURTH, 65, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(GINSENG, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Curse", CAT_INSCRIPTION_THIRD_FOURTH, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Greater Heal", CAT_INSCRIPTION_THIRD_FOURTH, 86, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(GINSENG, 1) ] ),
+    SmallBodRecipe(False, "Lightning", CAT_INSCRIPTION_THIRD_FOURTH, 93, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Recall", CAT_INSCRIPTION_THIRD_FOURTH, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     
 #    from Scripts.fm_core.core_items import MANDRAKEROOT
@@ -537,10 +569,25 @@ RECIPES = [
     SmallBodRecipe(True, "Magic Reflection", CAT_INSCRIPTION_FIFTH_SIXTH, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     SmallBodRecipe(False, "Mind Blast", CAT_INSCRIPTION_FIFTH_SIXTH, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Paralyze", CAT_INSCRIPTION_FIFTH_SIXTH, 37, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
+    SmallBodRecipe(False, "Poison Field", CAT_INSCRIPTION_FIFTH_SIXTH, 44, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     SmallBodRecipe(True, "Summon Creature", CAT_INSCRIPTION_FIFTH_SIXTH, 51, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
+    SmallBodRecipe(False, "Dispel", CAT_INSCRIPTION_FIFTH_SIXTH, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
+    SmallBodRecipe(False, "Reveal", CAT_INSCRIPTION_FIFTH_SIXTH, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
+    
+    
+#    from Scripts.fm_core.core_items import MANDRAKEROOT
+#from Scripts.fm_core.core_items import BLOODMOSS
+#from Scripts.fm_core.core_items import SULPHUROUSASH
+#from Scripts.fm_core.core_items import NIGHTSHADE
+#from Scripts.fm_core.core_items import BLACKPEARL
+#from Scripts.fm_core.core_items import SPIDERSILK
+#from Scripts.fm_core.core_items import GINSENG
+#from Scripts.fm_core.core_items import GARLIC        
+    
     
     SmallBodRecipe(True, "Chain Lightning", CAT_INSCRIPTION_SEVENTH_EIGTH, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Flamestrike", CAT_INSCRIPTION_SEVENTH_EIGTH, 16, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
+    SmallBodRecipe(False, "Gate Travel", CAT_INSCRIPTION_SEVENTH_EIGTH, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Mana Vampire", CAT_INSCRIPTION_SEVENTH_EIGTH, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     SmallBodRecipe(True, "Meteor Swarm", CAT_INSCRIPTION_SEVENTH_EIGTH, 44, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SULPHUROUSASH, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     SmallBodRecipe(True, "Polymorph", CAT_INSCRIPTION_SEVENTH_EIGTH, 51, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
@@ -550,18 +597,29 @@ RECIPES = [
     SmallBodRecipe(True, "Summon Fire Elemental", CAT_INSCRIPTION_SEVENTH_EIGTH, 100, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Summon Water Elemental", CAT_INSCRIPTION_SEVENTH_EIGTH, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     
-    SmallBodRecipe(True, "Animate Dead", CAT_INSCRIPTION_NECRO, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(DAEMONBLOOD, 1) ] ),
-    SmallBodRecipe(True, "Blood Oath", CAT_INSCRIPTION_NECRO, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(DAEMONBLOOD, 1) ] ),
-    SmallBodRecipe(True, "Corpse Skin", CAT_INSCRIPTION_NECRO, 16, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(GRAVEDUST, 1) ] ),
-    SmallBodRecipe(True, "Curse Weapon", CAT_INSCRIPTION_NECRO, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(PIGIRON, 1) ] ),
-    SmallBodRecipe(True, "Evil Omen", CAT_INSCRIPTION_NECRO, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(NOXCRYSTAL, 1) ] ),
-    SmallBodRecipe(True, "Horrific Beast", CAT_INSCRIPTION_NECRO, 37, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(DAEMONBLOOD, 3) ] ),
-    SmallBodRecipe(True, "Mind Rot", CAT_INSCRIPTION_NECRO, 44, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(DAEMONBLOOD, 1), SmallBodResource(PIGIRON, 1) ] ),
-    SmallBodRecipe(True, "Pain Spike", CAT_INSCRIPTION_NECRO, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(PIGIRON, 1) ] ),
-    SmallBodRecipe(True, "Poison Strike", CAT_INSCRIPTION_NECRO, 65, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NOXCRYSTAL, 1) ] ),
-    SmallBodRecipe(True, "Strangle", CAT_INSCRIPTION_NECRO, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(DAEMONBLOOD, 1), SmallBodResource(NOXCRYSTAL, 1) ] ),
-    SmallBodRecipe(True, "Summon Familiar", CAT_INSCRIPTION_NECRO, 79, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(PIGIRON, 1) ] ),
-    SmallBodRecipe(True, "Wither", CAT_INSCRIPTION_NECRO, 100, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(NOXCRYSTAL, 1), SmallBodResource(PIGIRON, 1) ] ),
+    
+    
+#    from Scripts.fm_core.core_items import MANDRAKEROOT
+#from Scripts.fm_core.core_items import BLOODMOSS
+#from Scripts.fm_core.core_items import SULPHUROUSASH
+#from Scripts.fm_core.core_items import NIGHTSHADE
+#from Scripts.fm_core.core_items import BLACKPEARL
+#from Scripts.fm_core.core_items import SPIDERSILK
+#from Scripts.fm_core.core_items import GINSENG
+#from Scripts.fm_core.core_items import GARLIC        
+    
+    SmallBodRecipe(True, "animate dead", CAT_INSCRIPTION_NECRO, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(DAEMONBLOOD, 1) ] ),
+    SmallBodRecipe(True, "blood oath", CAT_INSCRIPTION_NECRO, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(DAEMONBLOOD, 1) ] ),
+    SmallBodRecipe(True, "corpse skin", CAT_INSCRIPTION_NECRO, 16, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(GRAVEDUST, 1) ] ),
+    SmallBodRecipe(True, "curse weapon", CAT_INSCRIPTION_NECRO, 23, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(PIGIRON, 1) ] ),
+    SmallBodRecipe(True, "evil omen", CAT_INSCRIPTION_NECRO, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(NOXCRYSTAL, 1) ] ),
+    SmallBodRecipe(True, "horrific beast", CAT_INSCRIPTION_NECRO, 37, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(DAEMONBLOOD, 3) ] ),
+    SmallBodRecipe(True, "mind rot", CAT_INSCRIPTION_NECRO, 44, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(DAEMONBLOOD, 1), SmallBodResource(PIGIRON, 1) ] ),
+    SmallBodRecipe(True, "pain spike", CAT_INSCRIPTION_NECRO, 58, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(PIGIRON, 1) ] ),
+    SmallBodRecipe(True, "poison strike", CAT_INSCRIPTION_NECRO, 65, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NOXCRYSTAL, 1) ] ),
+    SmallBodRecipe(True, "strangle", CAT_INSCRIPTION_NECRO, 72, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(DAEMONBLOOD, 1), SmallBodResource(NOXCRYSTAL, 1) ] ),
+    SmallBodRecipe(True, "summon familiar", CAT_INSCRIPTION_NECRO, 79, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BATWING, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(PIGIRON, 1) ] ),
+    SmallBodRecipe(True, "wither", CAT_INSCRIPTION_NECRO, 100, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(NOXCRYSTAL, 1), SmallBodResource(PIGIRON, 1) ] ),
 
     SmallBodRecipe(True, "Runebook", CAT_INSCRIPTION_OTHER, 16, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 8), SmallBodResource(UNMARKED_RUNE, 1), SmallBodResource(RECALL_SCROLL, 1), SmallBodResource(GATE_SCROLL, 1) ] ),
     SmallBodRecipe(True, "Spellbook", CAT_INSCRIPTION_OTHER, 30, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 10) ] ),
@@ -803,10 +861,15 @@ def check_resources(smallBod, resourceContainer, itemMoveDelayMs):
     
     # Optimized
     for resource in smallBod.recipe.resources:
-        hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
+        hue = smallBod.specialMaterialHue if resource.canOverrideHue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
         items = Items.FindAllByID(resource.resourceId, hue, Player.Backpack.Serial, 0)
         amountBackpack = sum(item.Amount for item in items)
-        amountNeeded = max(0, resource.amount - amountBackpack)
+        
+        if amountBackpack > resource.amount:
+            continue
+            
+        #amountNeeded = max(0, resource.amount - amountBackpack)
+        amountNeeded = max(0, resource.getOptimizedAmout() - amountBackpack)
         
         items = Items.FindAllByID(resource.resourceId, hue, resourceContainer, -1)
         for item in items:
@@ -878,7 +941,7 @@ def cleanup(salvageBag, trashContainer, resourceContainer, smallBod = None):
                 Items.Move(item, trashContainer, item.Amount)
                 Misc.Pause(800)
             
-    ALL_RESOURCES = [INGOT_STATIC_ID, BOARD_STATIC_ID, CLOTH_STATIC_ID, LEATHER_STATIC_ID, MANDRAKEROOT, BLOODMOSS, SULPHUROUSASH, NIGHTSHADE, BLACKPEARL, SPIDERSILK, GINSENG, GARLIC, PIGIRON, BATWING, NOXCRYSTAL, DAEMONBLOOD, GRAVEDUST, EMPTY_BOTTLE_STATIC_ID, BONE, UNMARKED_RUNE, GATE_SCROLL, RECALL_SCROLL, BLANK_SCROLL, PARASITIC_PLANT, LUMINESCENT_FUNGI, WHITE_PEARL, FIRE_RUBY, PERFECT_EMERALD, TURQUOISE, MANDRAKEROOT, BLOODMOSS ]
+    ALL_RESOURCES = [INGOT_STATIC_ID, BOARD_STATIC_ID, CLOTH_STATIC_ID, LEATHER_STATIC_ID, MANDRAKEROOT, BLOODMOSS, SULPHUROUSASH, NIGHTSHADE, BLACKPEARL, SPIDERSILK, GINSENG, GARLIC, PIGIRON, BATWING, NOXCRYSTAL, DAEMONBLOOD, GRAVEDUST, EMPTY_BOTTLE_STATIC_ID, BONE, UNMARKED_RUNE, GATE_SCROLL, RECALL_SCROLL, BLANK_SCROLL, PARASITIC_PLANT, LUMINESCENT_FUNGI, WHITE_PEARL, FIRE_RUBY, PERFECT_EMERALD, TURQUOISE ]
 
     # Cleanup nonessentials, move to resource crate. If a smallBod is present, dont clean up the resources we are workign with
     for resourceId in ALL_RESOURCES:
@@ -887,7 +950,7 @@ def cleanup(salvageBag, trashContainer, resourceContainer, smallBod = None):
             keep = False
             if smallBod is not None:
                 for resource in smallBod.recipe.resources:
-                    hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
+                    hue = smallBod.specialMaterialHue if resource.canOverrideHue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
                     if item.ItemID == resource.resourceId and item.Color == hue:
                         keep = True
                         break
@@ -1072,6 +1135,13 @@ def sort_large_bods(incompleteBodContainers):
 #
 # WARNING: OPERATES IN BACKPACK AND WILL SALVAGE BLACKSMITH AND TAILORING ITEMS. DO NOT HAVE
 # ANYTHING GOOD IN YOUR BACKPACK WHILE YOU RUN THIS SCRIPT YOU RISK LOSING IT.
+#
+# Known quirks:
+#   - For inscription, scrolls are stacked after crafting. The auto-add-to-sbod part may fail
+#       if the stack has more than one. So, you'll have to stop the script and separate the items
+#       into individual stacks of one and restart the script. Normally the item is added to the sbod
+#       deed immediately. But internet fuzz and crashing in the middle of an inscription scroll sbod
+#       may leave it in this state. Be aware.
 #
 # Requirements:
 #   - You need a container of resources (ingots, etc.)
@@ -1258,7 +1328,7 @@ def run_bod_builder(
                             break
                             
                         if freshBod.Container != Player.Backpack.Serial:
-                            Items.Move(freshBod, Player.Backpack.Serial, freshBod.Amount)
+                            Items.Move(freshBod, Player.Backpack.Serial, 1)
                             Misc.Pause(itemMoveDelayMs)                                            
 
                         Items.UseItem(tool)
@@ -1283,9 +1353,9 @@ def run_bod_builder(
                             if not Gumps.HasGump(CRAFTING_GUMP_ID):
                                 continue   
                               
-                        if freshBod.Color == HUE_INSCRIPTION and Player.Mana < 25:
-                            while Player.Mana < Player.MaxMana:
-                                if Timer.Check("meditationTimer") == False:
+                        if freshBod.Color == HUE_INSCRIPTION and Player.Mana < 40:
+                            while Player.Mana < Player.ManaMax:
+                                if Timer.Check("meditationTimer") == False and not Player.BuffsExist("Meditation"):
                                     print("Mana is low, attempting meditation")
                                     Player.UseSkill("Meditation")
                                     Timer.Create("meditationTimer", 10000)
