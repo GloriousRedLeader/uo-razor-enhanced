@@ -156,9 +156,9 @@ run_bod_builder(
     # Defaults to all the recipes I know about and was willing to implement.
     recipes = RECIPES,
     
-    # (Optional) By default only regular materials are allowed (Iron, Leather). If you want
-    # to add others like copper, spined leather, etc. then you need to explicitly add them here.
-    # This is just an array of color ids. I have constants for them (see imports)
+    # (Optional) Array of colors that governs whether bods that require special materials are 
+    # allowed (e.g. shadow iron, # frostwood, spined leather, etc.). Only this on this list will 
+    # be crafted, otherwise those bods will be skipped. By default all special materials are allowed. 
     allowedResourceHues = [RESOURCE_HUE_DEFAULT, RESOURCE_HUE_COPPER, RESOURCE_HUE_SHADOW_IRON, RESOURCE_HUE_DULL_COPPER, RESOURCE_HUE_BRONZE, RESOURCE_HUE_GOLD, RESOURCE_HUE_AGAPITE, RESOURCE_HUE_VERITE, RESOURCE_HUE_VALORITE, RESOURCE_HUE_BARBED, RESOURCE_HUE_SPINED, RESOURCE_HUE_HORNED, RESOURCE_HUE_OAK, RESOURCE_HUE_ASH, RESOURCE_HUE_YEW, RESOURCE_HUE_HEARTWOOD, RESOURCE_HUE_BLOODWOOD, RESOURCE_HUE_FROSTWOOD ],
     
     # (Optional) Flag governs whether an exceptional small bod can be used to fill
