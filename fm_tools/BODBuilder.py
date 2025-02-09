@@ -4,33 +4,6 @@
 #   2025-02-04
 # Use at your own risk. 
 
-from Scripts.fm_core.core_items import BOD_STATIC_ID
-from Scripts.fm_core.core_items import BOD_BOOK_STATIC_ID
-from Scripts.fm_core.core_items import BLACKSMITHY_TOOL_STATIC_ID
-from Scripts.fm_core.core_items import TINKERING_TOOL_STATIC_ID
-from Scripts.fm_core.core_items import ALCHEMY_TOOL_STATIC_ID
-from Scripts.fm_core.core_items import TAILORING_TOOL_STATIC_ID
-from Scripts.fm_core.core_items import CARPENTRY_TOOL_STATIC_ID
-from Scripts.fm_core.core_items import INSCRIPTION_TOOL_STATIC_ID
-from Scripts.fm_core.core_items import INGOT_STATIC_ID 
-from Scripts.fm_core.core_items import BOARD_STATIC_ID 
-from Scripts.fm_core.core_items import CLOTH_STATIC_ID 
-from Scripts.fm_core.core_items import LEATHER_STATIC_ID 
-from Scripts.fm_core.core_items import EMPTY_BOTTLE_STATIC_ID
-from Scripts.fm_core.core_items import BLANK_SCROLL
-from Scripts.fm_core.core_items import MANDRAKEROOT
-from Scripts.fm_core.core_items import BLOODMOSS
-from Scripts.fm_core.core_items import SULPHUROUSASH
-from Scripts.fm_core.core_items import NIGHTSHADE
-from Scripts.fm_core.core_items import BLACKPEARL
-from Scripts.fm_core.core_items import SPIDERSILK
-from Scripts.fm_core.core_items import GINSENG
-from Scripts.fm_core.core_items import GARLIC
-from Scripts.fm_core.core_items import PIGIRON
-from Scripts.fm_core.core_items import BATWING
-from Scripts.fm_core.core_items import NOXCRYSTAL
-from Scripts.fm_core.core_items import DAEMONBLOOD
-from Scripts.fm_core.core_items import GRAVEDUST
 from Scripts.fm_core.core_items import RESOURCE_HUE_DEFAULT
 from Scripts.fm_core.core_items import RESOURCE_HUE_DULL_COPPER
 from Scripts.fm_core.core_items import RESOURCE_HUE_SHADOW_IRON
@@ -49,15 +22,6 @@ from Scripts.fm_core.core_items import RESOURCE_HUE_YEW
 from Scripts.fm_core.core_items import RESOURCE_HUE_HEARTWOOD
 from Scripts.fm_core.core_items import RESOURCE_HUE_BLOODWOOD
 from Scripts.fm_core.core_items import RESOURCE_HUE_FROSTWOOD
-from Scripts.fm_core.core_crafting import CAT_BLACKSMITHY_METAL_ARMOR
-from Scripts.fm_core.core_crafting import CAT_BLACKSMITHY_HELMETS
-from Scripts.fm_core.core_crafting import CAT_BLACKSMITHY_SHIELDS
-from Scripts.fm_core.core_crafting import CAT_BLACKSMITHY_BLADED
-from Scripts.fm_core.core_crafting import CAT_BLACKSMITHY_AXES
-from Scripts.fm_core.core_crafting import CAT_BLACKSMITHY_POLEARMS
-from Scripts.fm_core.core_crafting import CAT_BLACKSMITHY_BASHING
-from Scripts.fm_core.core_crafting import SmallBodResource
-from Scripts.fm_core.core_crafting import SmallBodRecipe
 from Scripts.fm_core.core_crafting import RECIPES
 from Scripts.fm_core.core_crafting import run_bod_builder
 
