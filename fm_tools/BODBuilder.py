@@ -53,6 +53,7 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 #   - auto crafts items
 #   - cleans up crafted items that dont meet requirements (non exceptional)
 #   - puts completed large bods and solo small bods in containers for easy access and turn-in
+#   - If you only want inscription bods to be complete, just put inscription bods in the incompleteBodsContainer.
 #   
 # General flow:
 # 1. Small Bods
