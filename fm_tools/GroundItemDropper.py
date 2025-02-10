@@ -76,7 +76,7 @@ while True:
         Timer.Create( 'pingTimer', 25000)   
         
     for trashName in TRASH_NAMES:
-        item = Items.FindByName(trashName, -1, Player.Backpack.Serial,range = 1)
+        item = Items.FindByName(trashName, -1, Player.Backpack.Serial, range = 0)
         if item is not None:
             print("Drop item {}".format(item.Name))
             x, y, z = get_tile_in_front(distance = 1)

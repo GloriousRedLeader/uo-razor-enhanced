@@ -39,6 +39,7 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 #       may leave it in this state. Be aware.
 #
 # Requirements:
+#   - You need a container to do work in (put a bag in your backpack)
 #   - You need a container of resources (ingots, etc.)
 #   - You need a container of tools
 #   - You need a forge and anvil nearby
@@ -57,8 +58,9 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 #   
 # General flow:
 # 1. Small Bods
-#   - selects small bods from incompleBodContainer
+#   - selects small bods from incompleBodContainer and craftContainer
 #   - filters for only those that match your list of recipes (see recipes param below)
+#   - filters for only those bods that have allowed resources (e.g. normal iron ingot bods only)
 #   - One craft cycle includes:
 #       1. getting resources from resourceContainer
 #       2. getting / using tool, setting resource in gump, setting category in gump
@@ -80,8 +82,14 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 # https://github.com/matsamilla/Razor-Enhanced/blob/master/NoxBodFiles/Smithbodgod.py
 run_bod_builder(
 
+    # Serial of container to do work in. This container must be placed in your backpack. 
+    # Get its serial and fill it in here. You *could* use your backpack, but you risk losing
+    # things when combining items into large bods (your spellbook for example when crafting spellbooks). 
+    # The script will move all tools, bods, and materials to this container. Crafted items will appear here.
+    craftContainer = 0x406766F0,
+
     # Array of serials for containers to put your bods in to start things off (both small and large).
-    # You put your bods in here.
+    # You put your brand new or partially complete bods in here.
     incompleteBodContainers = [0x40251A02, 0x402519AE, 0x4025193E],
     
     # Array of serials for containers to store completed small bods
@@ -132,8 +140,8 @@ run_bod_builder(
     # False to disable this.
     fillNormalLargeBodsWithExceptionalSmallBods = True,
     
-    # Time to wait between item moves. Adjust with caution. Reducing this will increase speed
-    # of the script, but you risk disconnects and other issues maintaining state
+    # (Optional)Time to wait between item moves. Adjust with caution. Reducing this will increase speed
+    # of the script, but you risk disconnects and other issues maintaining state. Defaults to 1000ms
     itemMoveDelayMs = 1000,
     
     # (Optional) God save the queen
