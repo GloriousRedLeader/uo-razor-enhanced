@@ -334,6 +334,9 @@ class SmallBod:
         self.specialMaterialPropId = specialMaterialPropId
         self.recipe = recipe
         self.bodSerial = bodSerial
+        
+    #def getAmountNeeded(self):
+    #    return self.amountToMake - self.amountMade
 
     def isComplete(self):
         return self.amountToMake == self.amountMade
@@ -520,7 +523,7 @@ RECIPES = [
     SmallBodRecipe(True, "Conflagaration potion", CAT_ALCHEMY_EXPLOSIVE, 23, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GRAVEDUST, 5) ] ),
     SmallBodRecipe(True, "Greater Conflagaration potion", CAT_ALCHEMY_EXPLOSIVE, 30, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GRAVEDUST, 10) ] ),
     SmallBodRecipe(True, "confusion blast", CAT_ALCHEMY_EXPLOSIVE, 37, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(PIGIRON, 5) ] ),
-    SmallBodRecipe(True, "Greater Confusion Blast potion", CAT_ALCHEMY_EXPLOSIVE, 44, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(PIGIRON, 10) ] ),
+    SmallBodRecipe(True, "greater confusion blast", CAT_ALCHEMY_EXPLOSIVE, 44, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(PIGIRON, 10) ] ),
     
     ############################ Inscription ############################
     
@@ -1334,69 +1337,8 @@ def run_bod_builder(
                             Misc.Pause(itemMoveDelayMs)                
                         break
                     else:
-                        print("Bod progress: {} {}/{}".format(smallBod.craftedItemName, smallBod.amountMade, smallBod.amountToMake))
                         
-                        tool = get_tool(craftContainer, smallBod, toolContainer)
-                        if tool is None:
-                            print("Error: Cannot find tool")
-                            sys.exit()
-                            
-                        if not check_resources(craftContainer, smallBod, resourceContainer, itemMoveDelayMs):
-                            print("Warning: Out of resources, skipping {}".format(smallBod.craftedItemName))
-                            reports[freshBod.Color].incrementNumMissingResources()
-                            if freshBod.Container != incompleteBodContainer:
-                                Items.Move(freshBod, incompleteBodContainer, 1)
-                                Misc.Pause(itemMoveDelayMs)
-                            break
-                            
-                        if freshBod.Container != craftContainer:
-                            Items.Move(freshBod, craftContainer, 1)
-                            Misc.Pause(itemMoveDelayMs)                                            
-
-                        Items.UseItem(tool)
-                        Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
-                        Misc.Pause(gumpDelayMs)
-                        if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                            continue
-                            
-                        # Set material (not every profession has it, e.g. alchemy)
-                        if smallBod.specialMaterialButton > 0:
-                            # The menu button to select material
-                            Gumps.SendAction(CRAFTING_GUMP_ID, 7)
-                            Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
-                            Misc.Pause(gumpDelayMs)
-                            if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                                continue                    
-                                
-                            # The actual special material button
-                            Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.specialMaterialButton)
-                            Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
-                            Misc.Pause(gumpDelayMs)
-                            if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                                continue   
-                              
-                        if freshBod.Color == HUE_INSCRIPTION and Player.Mana < 40:
-                            while Player.Mana < Player.ManaMax:
-                                if Timer.Check("meditationTimer") == False and not Player.BuffsExist("Meditation"):
-                                    print("Mana is low, attempting meditation")
-                                    Player.UseSkill("Meditation")
-                                    Timer.Create("meditationTimer", 10000)
-                                Misc.Pause(500)
                         
-                        # Sets category
-                        Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpCategory)
-                        Gumps.WaitForGump(CRAFTING_GUMP_ID, 10000)
-                        Misc.Pause(gumpDelayMs)
-                        if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                            continue
-                                
-                        # Actually does crafting
-                        Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpSelection)                    
-                        Gumps.WaitForGump(CRAFTING_GUMP_ID, 10000)
-                        Misc.Pause(1000)
-                        if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                            continue
-        
                         # All sorts of drama if crafted items can be stacked. The BOD
                         # will not be able to combine them if they are instacks that are
                         # greater than the number requested. E.g. you need 10 poison potions
@@ -1406,10 +1348,12 @@ def run_bod_builder(
                         # by item name as best we can. This doesnt work for stacks of potions where the Item
                         # name chages to <stack amount> <item name>. So, we have the for construct below that
                         # checks each item for a substring. There may be misses
+                        foundCraftedItem = False
                         craftedItem = Items.FindByName(smallBod.craftedItemName, smallBod.specialMaterialHue, craftContainer, 0)
-                        if craftedItem is None or craftedItem.Amount > 1:
+                        if craftedItem is None: #or craftedItem.Amount > 1:
                             for craftedItem in Items.FindBySerial(craftContainer).Contains:
                                 if smallBod.craftedItemName.lower() in craftedItem.Name.lower():
+                                    foundCraftedItem = True
                                     if craftedItem.Amount > 1:
                                         # Have to provide x, y coordinates inside bag or else it will just stack on itself
                                         # and we will be right back where we started, praise mao.
@@ -1418,25 +1362,93 @@ def run_bod_builder(
                                         # This needs extra time apparently when you split stacks as it generates a new item.
                                         Misc.Pause(itemMoveDelayMs + 1000)
                                         break
-       
-                        # Open small bod gump
-                        Items.UseItem(freshBod)
-                        Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 10000)
-                        Misc.Pause(gumpDelayMs)
-                        Target.Cancel()
-                        
-                        # Combine with contained items (backpack)
-                        Gumps.SendAction(SMALL_BOD_GUMP_ID, 4) 
-                        Target.WaitForTarget(10000)
-                        Target.TargetExecute(craftContainer)
-                        Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 10000)
-                        Misc.Pause(1000)
-                        Target.Cancel()
-                        Gumps.CloseGump(SMALL_BOD_GUMP_ID)
-                    
-                    #if Player.MaxWeight - Player.Weight < 100:
-                    #    recycle(salvageBag, smallBod)         
-                    cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, smallBod)
+                        elif craftedItem is not None:
+                            foundCraftedItem = True
+                            
+                        if foundCraftedItem:
+                            # Open small bod gump
+                            Items.UseItem(freshBod)
+                            Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 10000)
+                            Misc.Pause(gumpDelayMs)
+                            Target.Cancel()
+                            
+                            # Combine with contained items (backpack)
+                            Gumps.SendAction(SMALL_BOD_GUMP_ID, 4) 
+                            Target.WaitForTarget(10000)
+                            Target.TargetExecute(craftContainer)
+                            Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 10000)
+                            Misc.Pause(1000)
+                            Target.Cancel()
+                            Gumps.CloseGump(SMALL_BOD_GUMP_ID)                        
+                            
+                        else:
+                            
+                            print("Bod progress: {} {}/{}".format(smallBod.craftedItemName, smallBod.amountMade, smallBod.amountToMake))
+                            
+                            cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, smallBod)
+                            
+                            tool = get_tool(craftContainer, smallBod, toolContainer)
+                            if tool is None:
+                                print("Error: Cannot find tool")
+                                sys.exit()
+                                
+                            if not check_resources(craftContainer, smallBod, resourceContainer, itemMoveDelayMs):
+                                print("Warning: Out of resources, skipping {}".format(smallBod.craftedItemName))
+                                reports[freshBod.Color].incrementNumMissingResources()
+                                if freshBod.Container != incompleteBodContainer:
+                                    Items.Move(freshBod, incompleteBodContainer, 1)
+                                    Misc.Pause(itemMoveDelayMs)
+                                break
+                                
+                            if freshBod.Container != craftContainer:
+                                Items.Move(freshBod, craftContainer, 1)
+                                Misc.Pause(itemMoveDelayMs)                                            
+
+                            Items.UseItem(tool)
+                            Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                            Misc.Pause(gumpDelayMs)
+                            if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                                continue
+                                
+                            # Set material (not every profession has it, e.g. alchemy)
+                            if smallBod.specialMaterialButton > 0:
+                                # The menu button to select material
+                                Gumps.SendAction(CRAFTING_GUMP_ID, 7)
+                                Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                                Misc.Pause(gumpDelayMs)
+                                if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                                    continue                    
+                                    
+                                # The actual special material button
+                                Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.specialMaterialButton)
+                                Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                                Misc.Pause(gumpDelayMs)
+                                if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                                    continue   
+                                  
+                            if freshBod.Color == HUE_INSCRIPTION and Player.Mana < 40:
+                                while Player.Mana < Player.ManaMax:
+                                    if Timer.Check("meditationTimer") == False and not Player.BuffsExist("Meditation"):
+                                        print("Mana is low, attempting meditation")
+                                        Player.UseSkill("Meditation")
+                                        Timer.Create("meditationTimer", 10000)
+                                    Misc.Pause(500)
+                            
+                            # Sets category
+                            Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpCategory)
+                            Gumps.WaitForGump(CRAFTING_GUMP_ID, 10000)
+                            Misc.Pause(gumpDelayMs)
+                            if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                                continue
+                                    
+                            # Actually does crafting
+                            Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpSelection)                    
+                            Gumps.WaitForGump(CRAFTING_GUMP_ID, 10000)
+                            Misc.Pause(1000)
+                            if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                                continue
+        
+                    #cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, smallBod)
 
                 else:
                     break
