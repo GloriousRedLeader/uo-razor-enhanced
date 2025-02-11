@@ -302,7 +302,7 @@ class SmallBodResource:
 
 # Recipe template. Pass an array of these to the run_bod_builder function.
 # hasLargeBod: (NOT IMPLEMENTED) This small bod can be part of a large bod (several cannot)
-# itemName: Lower case as it appears in the small bod (very bottom last line), e.g. mace
+# itemName: Name of crafted item as it appears in the small bod (very bottom last line), e.g. mace
 # gumpCategory: Represents a gump category button id. Use one of the constants above.
 # gumpSelection: The create now button specific to an item. Goes in increments of 7.
 # toolId: The tool item id you want to craft with to open the gump. See constants like BLACKSMITHY_TOOL_STATIC_ID
@@ -324,7 +324,7 @@ class SmallBodRecipe:
         
 # Internal data structure used in our main method. Represents a bod and its recipe. 
 class SmallBod:
-    def __init__(self, itemSerial, craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, recipe):
+    def __init__(self, bodSerial, craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, recipe):
         self.craftedItemName = craftedItemName
         self.amountMade = amountMade
         self.isExceptional = isExceptional
@@ -333,8 +333,8 @@ class SmallBod:
         self.specialMaterialHue = specialMaterialHue
         self.specialMaterialPropId = specialMaterialPropId
         self.recipe = recipe
-        self.itemSerial = itemSerial
-        
+        self.bodSerial = bodSerial
+
     def isComplete(self):
         return self.amountToMake == self.amountMade
 
@@ -343,12 +343,12 @@ class SmallBod:
         
 # Internal data structure used for filling LBODS.
 class LargeBod:
-    def __init__(self, itemSerial, isExceptional, amountToMake, specialMaterialPropId, smallBodItems):
+    def __init__(self, bodSerial, isExceptional, amountToMake, specialMaterialPropId, smallBodItems):
         self.isExceptional = isExceptional
         self.amountToMake = amountToMake
         self.specialMaterialPropId = specialMaterialPropId
         self.smallBodItems = smallBodItems
-        self.itemSerial = itemSerial
+        self.bodSerial = bodSerial
 
     # Use this to identify similar bods (material, exceptional, and items required)
     # Need this to stort when filling large bods so we complete those with the most progress first
@@ -496,7 +496,7 @@ RECIPES = [
     SmallBodRecipe(True, "Lesser Heal potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 16, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GINSENG, 1) ] ),
     SmallBodRecipe(True, "Heal potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 23, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GINSENG, 3) ] ),
     SmallBodRecipe(False, "Greater Heal potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 30, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GINSENG, 7) ] ),
-    SmallBodRecipe(True, "Lesser Cure ", CAT_ALCHEMY_HEALING_AND_CURATIVE, 37, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GARLIC, 1) ] ),
+    SmallBodRecipe(True, "Lesser Cure potion ", CAT_ALCHEMY_HEALING_AND_CURATIVE, 37, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GARLIC, 1) ] ),
     SmallBodRecipe(True, "Cure potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 44, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GARLIC, 3) ] ),
     SmallBodRecipe(False, "Greater Cure potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 51, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GARLIC, 6) ] ),
 
@@ -1156,15 +1156,7 @@ def sort_large_bods(incompleteBodContainers):
 # Automate bod building (both small and large). You just dump all your bods into the starting
 # container and it will sort them, craft items, fill small bods, combine large bods, etc. 
 #
-# WARNING: OPERATES IN BACKPACK AND WILL SALVAGE BLACKSMITH AND TAILORING ITEMS. DO NOT HAVE
-# ANYTHING GOOD IN YOUR BACKPACK WHILE YOU RUN THIS SCRIPT YOU RISK LOSING IT.
-#
-# Known quirks:
-#   - For inscription, scrolls are stacked after crafting. The auto-add-to-sbod part may fail
-#       if the stack has more than one. So, you'll have to stop the script and separate the items
-#       into individual stacks of one and restart the script. Normally the item is added to the sbod
-#       deed immediately. But internet fuzz and crashing in the middle of an inscription scroll sbod
-#       may leave it in this state. Be aware.
+# WARNING: IF  YOU SET craftContainer AS YOUR BACKPACK IT YOU RISK LOSING ITEMS.
 #
 # Requirements:
 #   - You need a container to do work in (put a bag in your backpack)
@@ -1332,7 +1324,7 @@ def run_bod_builder(
                         print("Filled small BOD!")
                         if smallBod.recipe.hasLargeBod:
                             for smallBodWaitingForLargeBodContainer in smallBodWaitingForLargeBodContainers:
-                                container = Items.FindBySerial(completeSmallBodContainer)
+                                container = Items.FindBySerial(smallBodWaitingForLargeBodContainer)
                                 if container.Contains.Count < 125:
                                     Items.Move(freshBod, smallBodWaitingForLargeBodContainer, 1)
                                     Misc.Pause(itemMoveDelayMs)                
@@ -1393,29 +1385,51 @@ def run_bod_builder(
                         
                         # Sets category
                         Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpCategory)
-                        Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                        Gumps.WaitForGump(CRAFTING_GUMP_ID, 10000)
                         Misc.Pause(gumpDelayMs)
                         if not Gumps.HasGump(CRAFTING_GUMP_ID):
                             continue
                                 
                         # Actually does crafting
                         Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpSelection)                    
-                        Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                        Gumps.WaitForGump(CRAFTING_GUMP_ID, 10000)
                         Misc.Pause(1000)
                         if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                            continue                    
+                            continue
+        
+                        # All sorts of drama if crafted items can be stacked. The BOD
+                        # will not be able to combine them if they are instacks that are
+                        # greater than the number requested. E.g. you need 10 poison potions
+                        # but only have a stack of 65... So, we will do our best to separate
+                        # large stacks of items (when appropriate) into smaller ones.
+                        # Note: Short of storing all the crafted item ids (jesus christ) we can just look up
+                        # by item name as best we can. This doesnt work for stacks of potions where the Item
+                        # name chages to <stack amount> <item name>. So, we have the for construct below that
+                        # checks each item for a substring. There may be misses
+                        craftedItem = Items.FindByName(smallBod.craftedItemName, smallBod.specialMaterialHue, craftContainer, 0)
+                        if craftedItem is None or craftedItem.Amount > 1:
+                            for craftedItem in Items.FindBySerial(craftContainer).Contains:
+                                if smallBod.craftedItemName.lower() in craftedItem.Name.lower():
+                                    if craftedItem.Amount > 1:
+                                        # Have to provide x, y coordinates inside bag or else it will just stack on itself
+                                        # and we will be right back where we started, praise mao.
+                                        print("Splitting stack of {} ({})".format(smallBod.craftedItemName, craftedItem.Amount))
+                                        Items.Move(craftedItem, craftContainer, 1, craftedItem.Position.X, craftedItem.Position.Y)
+                                        # This needs extra time apparently when you split stacks as it generates a new item.
+                                        Misc.Pause(itemMoveDelayMs + 1000)
+                                        break
        
                         # Open small bod gump
                         Items.UseItem(freshBod)
-                        Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 5000)
+                        Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 10000)
                         Misc.Pause(gumpDelayMs)
                         Target.Cancel()
                         
                         # Combine with contained items (backpack)
                         Gumps.SendAction(SMALL_BOD_GUMP_ID, 4) 
-                        Target.WaitForTarget(5000)
+                        Target.WaitForTarget(10000)
                         Target.TargetExecute(craftContainer)
-                        Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 3000)
+                        Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 10000)
                         Misc.Pause(1000)
                         Target.Cancel()
                         Gumps.CloseGump(SMALL_BOD_GUMP_ID)
@@ -1437,10 +1451,10 @@ def run_bod_builder(
     largeBods = sort_large_bods([craftContainer] + incompleteBodContainers)
     for largeBod in largeBods:
         if largeBod is not None: 
-            bod = Items.FindBySerial(largeBod.itemSerial)
-            if largeBod.isComplete() and bod.Container in incompleteBodContainers:
+            bod = Items.FindBySerial(largeBod.bodSerial)
+            if largeBod.isComplete() and bod.Container in [craftContainer] + incompleteBodContainers:
                 print("Found a misplaced (but complete) large bod, moving to right container! :))")
-                Items.Move(largeBod.itemSerial, completeLargeBodContainer, 1)
+                Items.Move(largeBod.bodSerial, completeLargeBodContainer, 1)
                 Misc.Pause(itemMoveDelayMs)
                 continue
             
@@ -1449,15 +1463,15 @@ def run_bod_builder(
             if len(smallBods) > 0:
                 print("Found matches for a large bod, attempting to complete...")
                     
-                Items.Move(largeBod.itemSerial, craftContainer, 1)
+                Items.Move(largeBod.bodSerial, craftContainer, 1)
                 Misc.Pause(itemMoveDelayMs)
                 for smallBod in smallBods:
-                    Items.Move(smallBod.itemSerial, craftContainer, 1)
+                    Items.Move(smallBod.bodSerial, craftContainer, 1)
                     Misc.Pause(itemMoveDelayMs)
                    
                 # Open Large bod gump
                 Target.Cancel()
-                Items.UseItem(largeBod.itemSerial)
+                Items.UseItem(largeBod.bodSerial)
                 Gumps.WaitForGump(LARGE_BOD_GUMP_ID, 3000)
                 Target.Cancel()
                 Misc.Pause(1000)
@@ -1471,16 +1485,16 @@ def run_bod_builder(
                 Target.Cancel()
                 Gumps.CloseGump(LARGE_BOD_GUMP_ID)
                 
-                bod = Items.FindBySerial(largeBod.itemSerial)
+                bod = Items.FindBySerial(largeBod.bodSerial)
                 freshLargeBod = parse_large_bod(bod)
                 
                 if freshLargeBod.isComplete():
                     print("\t...large BOD filled! :)")
-                    Items.Move(largeBod.itemSerial, completeLargeBodContainer, 1)
+                    Items.Move(largeBod.bodSerial, completeLargeBodContainer, 1)
                     Misc.Pause(itemMoveDelayMs)
                 else:
                     print("\t...large BOD back to incompleteBodContainer :(")
-                    Items.Move(largeBod.itemSerial, incompleteBodContainer, 1)
+                    Items.Move(largeBod.bodSerial, incompleteBodContainer, 1)
                     Misc.Pause(itemMoveDelayMs)
 
     report_final_metrics(reports, recipes, incompleteBodContainers, smallBodWaitingForLargeBodContainers, completeSmallBodContainer, completeLargeBodContainer)
