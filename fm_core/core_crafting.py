@@ -496,7 +496,7 @@ RECIPES = [
     SmallBodRecipe(True, "Lesser Heal potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 16, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GINSENG, 1) ] ),
     SmallBodRecipe(True, "Heal potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 23, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GINSENG, 3) ] ),
     SmallBodRecipe(False, "Greater Heal potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 30, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GINSENG, 7) ] ),
-    SmallBodRecipe(True, "Lesser Cure potion ", CAT_ALCHEMY_HEALING_AND_CURATIVE, 37, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GARLIC, 1) ] ),
+    SmallBodRecipe(True, "Lesser Cure potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 37, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GARLIC, 1) ] ),
     SmallBodRecipe(True, "Cure potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 44, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GARLIC, 3) ] ),
     SmallBodRecipe(False, "Greater Cure potion", CAT_ALCHEMY_HEALING_AND_CURATIVE, 51, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GARLIC, 6) ] ),
 
