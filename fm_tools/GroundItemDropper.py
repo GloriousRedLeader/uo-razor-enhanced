@@ -67,6 +67,10 @@ TRASH_NAMES = [
     "Helm of Spirituality (Virtue Armor Set)",
     "Gwenno's Harp", #'
     "Sollerets of Sacrifice (Virtue Armor Set)",
+    "Gauntlets of Valor (Virtue Armor Set)",
+    "Arms of Compassion (Virtue Armor Set)",
+    "Alchemist's Bauble", #'
+    "Night's Kiss", #'
 ]
 
 Timer.Create( 'pingTimer', 1 )

@@ -288,7 +288,7 @@ class SmallBodResource:
             return self.amount * 5
             
         # Heavy stuff but you only need 1 or 2 mostly, 1 stone each
-        if self.resourceId in [CLOTH_STATIC_ID, INGOT_STATIC_ID, UNMARKED_RUNE, GATE_SCROLL, RECALL_SCROLL, BLANK_SCROLL, PARASITIC_PLANT, LUMINESCENT_FUNGI, WHITE_PEARL, FIRE_RUBY, PERFECT_EMERALD, TURQUOISE]:
+        if self.resourceId in [EMPTY_BOTTLE_STATIC_ID, CLOTH_STATIC_ID, INGOT_STATIC_ID, UNMARKED_RUNE, GATE_SCROLL, RECALL_SCROLL, BLANK_SCROLL, PARASITIC_PLANT, LUMINESCENT_FUNGI, WHITE_PEARL, FIRE_RUBY, PERFECT_EMERALD, TURQUOISE]:
             return self.amount * 25            
             
         # Light things like reagents < 1 stone
@@ -302,15 +302,15 @@ class SmallBodResource:
 
 # Recipe template. Pass an array of these to the run_bod_builder function.
 # hasLargeBod: (NOT IMPLEMENTED) This small bod can be part of a large bod (several cannot)
-# itemName: Name of crafted item as it appears in the small bod (very bottom last line), e.g. mace
+# recipeName: Name of crafted item as it appears in the small bod (very bottom last line), e.g. mace
 # gumpCategory: Represents a gump category button id. Use one of the constants above.
 # gumpSelection: The create now button specific to an item. Goes in increments of 7.
 # toolId: The tool item id you want to craft with to open the gump. See constants like BLACKSMITHY_TOOL_STATIC_ID
 # resources: Array of SmallBodResource
 class SmallBodRecipe:
-    def __init__(self, hasLargeBod, itemName, gumpCategory, gumpSelection, toolId, resources):
+    def __init__(self, hasLargeBod, recipeName, gumpCategory, gumpSelection, toolId, resources):
         self.hasLargeBod = hasLargeBod
-        self.itemName = itemName
+        self.recipeName = recipeName
         self.gumpCategory = gumpCategory
         self.gumpSelection = gumpSelection
         self.toolId = toolId
@@ -319,30 +319,41 @@ class SmallBodRecipe:
     def canSalvage(self):
         return self.toolId in [BLACKSMITHY_TOOL_STATIC_ID, TAILORING_TOOL_STATIC_ID]
         
+    
+        
     def __str__(self):
-        return f"SmallBodRecipe(hasLargeBod={self.hasLargeBod},itemName='{self.itemName}', gumpCategory='{self.gumpCategory}', gumpSelection='{self.gumpSelection}', toolId='{self.toolId}', resources='{self.resources}')"        
+        return f"SmallBodRecipe(hasLargeBod={self.hasLargeBod},recipeName='{self.recipeName}', gumpCategory='{self.gumpCategory}', gumpSelection='{self.gumpSelection}', toolId='{self.toolId}', resources='{self.resources}')"        
         
 # Internal data structure used in our main method. Represents a bod and its recipe. 
 class SmallBod:
-    def __init__(self, bodSerial, craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, recipe):
-        self.craftedItemName = craftedItemName
+    def __init__(self, bodSerial, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, specialMaterialName, recipe):
+        #self.craftedItemName = craftedItemName
         self.amountMade = amountMade
         self.isExceptional = isExceptional
         self.amountToMake = amountToMake
         self.specialMaterialButton = specialMaterialButton
         self.specialMaterialHue = specialMaterialHue
         self.specialMaterialPropId = specialMaterialPropId
+        self.specialMaterialName = specialMaterialName
         self.recipe = recipe
         self.bodSerial = bodSerial
-        
-    #def getAmountNeeded(self):
-    #    return self.amountToMake - self.amountMade
+    
+    # So we can find crafted items either to salvage, trash, or combine with deed.
+    # Have to account for special materials, e.g. plate helm becomes shadow iron plate helm
+    # And for carpentry, get this: Large Crate becomes crate, Medium Crate becomes crate, and
+    # Small Crate becomes small crate
+    def getCraftedItemName(self):
+        if self.recipe.toolId in [BLACKSMITHY_TOOL_STATIC_ID, TAILORING_TOOL_STATIC_ID]:
+            return self.specialMaterialName + " " + self.recipe.recipeName if self.specialMaterialName is not None else self.recipe.recipeName
+        if self.recipe.recipeName in ["Large Crate", "Medium Crate"]:
+            return "crate"
+        return self.recipe.recipeName        
 
     def isComplete(self):
         return self.amountToMake == self.amountMade
 
     def __str__(self):
-        return f"SmallBod(craftedItemName='{self.craftedItemName}', amountMade='{self.amountMade}', isExceptional={self.isExceptional}, amountToMake='{self.amountToMake}', specialMaterialButton='{self.specialMaterialButton}', specialMaterialHue='{self.specialMaterialHue}', specialMaterialPropId={self.specialMaterialPropId}, recipe={self.recipe})"        
+        return f"SmallBod(getCraftedItemName()='{self.getCraftedItemName()}',amountMade='{self.amountMade}', isExceptional={self.isExceptional}, amountToMake='{self.amountToMake}', specialMaterialButton='{self.specialMaterialButton}', specialMaterialHue='{self.specialMaterialHue}', specialMaterialPropId={self.specialMaterialPropId}, specialMaterialName={self.specialMaterialName}, recipe={self.recipe})"        
         
 # Internal data structure used for filling LBODS.
 class LargeBod:
@@ -520,8 +531,8 @@ RECIPES = [
     SmallBodRecipe(True, "Lesser Explosion potion", CAT_ALCHEMY_EXPLOSIVE, 2, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(SULPHUROUSASH, 3) ] ),
     SmallBodRecipe(True, "Explosion potion", CAT_ALCHEMY_EXPLOSIVE, 9, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(SULPHUROUSASH, 5) ] ),
     SmallBodRecipe(True, "Greater Explosion potion", CAT_ALCHEMY_EXPLOSIVE, 16, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(SULPHUROUSASH, 10) ] ),
-    SmallBodRecipe(True, "Conflagaration potion", CAT_ALCHEMY_EXPLOSIVE, 23, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GRAVEDUST, 5) ] ),
-    SmallBodRecipe(True, "Greater Conflagaration potion", CAT_ALCHEMY_EXPLOSIVE, 30, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GRAVEDUST, 10) ] ),
+    SmallBodRecipe(True, "conflagration potion", CAT_ALCHEMY_EXPLOSIVE, 23, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GRAVEDUST, 5) ] ),
+    SmallBodRecipe(True, "greater conflagration potion", CAT_ALCHEMY_EXPLOSIVE, 30, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(GRAVEDUST, 10) ] ),
     SmallBodRecipe(True, "confusion blast", CAT_ALCHEMY_EXPLOSIVE, 37, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(PIGIRON, 5) ] ),
     SmallBodRecipe(True, "greater confusion blast", CAT_ALCHEMY_EXPLOSIVE, 44, ALCHEMY_TOOL_STATIC_ID, [SmallBodResource(EMPTY_BOTTLE_STATIC_ID, 1), SmallBodResource(PIGIRON, 10) ] ),
     
@@ -654,6 +665,10 @@ RECIPES = [
     
     ############################ Carpentry ############################
     
+    SmallBodRecipe(False, "barrel staves", CAT_CARPENTRY_OTHER, 2, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "barrel lid", CAT_CARPENTRY_OTHER, 9, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    
+    
     SmallBodRecipe(False, "foot stool", CAT_CARPENTRY_FURNITURE, 2, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "stool", CAT_CARPENTRY_FURNITURE, 9, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "straw chair", CAT_CARPENTRY_FURNITURE, 16, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
@@ -666,7 +681,7 @@ RECIPES = [
     SmallBodRecipe(True, "wooden box", CAT_CARPENTRY_CONTAINERS, 2, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "Small Crate", CAT_CARPENTRY_CONTAINERS, 9, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "medium crate", CAT_CARPENTRY_CONTAINERS, 16, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
-    SmallBodRecipe(False, "large crate", CAT_CARPENTRY_CONTAINERS, 23, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "Large Crate", CAT_CARPENTRY_CONTAINERS, 23, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "wooden chest", CAT_CARPENTRY_CONTAINERS, 30, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True, "wooden shelf", CAT_CARPENTRY_CONTAINERS, 37, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "armoire", CAT_CARPENTRY_CONTAINERS, 51, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
@@ -686,7 +701,7 @@ RECIPES = [
     SmallBodRecipe(True, "quarter staff", CAT_CARPENTRY_WEAPONS, 9, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True, "gnarled staff", CAT_CARPENTRY_WEAPONS, 16, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True, "bokuto", CAT_CARPENTRY_WEAPONS, 23, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
-    SmallBodRecipe(True, "testubo", CAT_CARPENTRY_WEAPONS, 37, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(True, "tetsubo", CAT_CARPENTRY_WEAPONS, 37, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True, "wild staff", CAT_CARPENTRY_WEAPONS, 44, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True, "arcanist's wild staff", CAT_CARPENTRY_WEAPONS, 58, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID), SmallBodResource(WHITE_PEARL, 1)] ), # '
     SmallBodRecipe(True, "ancient wild staff", CAT_CARPENTRY_WEAPONS, 65, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID), SmallBodResource(PERFECT_EMERALD, 1) ] ),
@@ -779,8 +794,9 @@ RECIPES = [
 PROD_ID_LARGE_BULK_ORDER = 1060655
 PROP_ID_SMALL_BULK_ORDER = 1060654 
 PROP_ID_AMOUNT_TO_MAKE = 1060656
-PROP_ID_EXCEPTIONAL = 1045141
+PROP_ID_BOD_EXCEPTIONAL = 1045141
 PROP_ID_ITEM_TEXT = 1060658
+PROP_ID_ITEM_EXCEPTIONAL = 1060636
 
 # This goes prop.Number -> { gump button id, special resource hue, item name }
 # ServUO\Scripts\Services\BulkOrders\SmallBODs\SmallBODGump.cs
@@ -822,7 +838,7 @@ def parse_small_bod(bod, recipes, alertMissingRecipe = False):
     for prop in bod.Properties:
         if prop.Number == PROP_ID_SMALL_BULK_ORDER:
             isSmallBod = True
-        if prop.Number == PROP_ID_EXCEPTIONAL:
+        if prop.Number == PROP_ID_BOD_EXCEPTIONAL:
             isExceptional = True
         if prop.Number == PROP_ID_AMOUNT_TO_MAKE:
             amountToMake = int(prop.Args)
@@ -833,14 +849,14 @@ def parse_small_bod(bod, recipes, alertMissingRecipe = False):
             specialMaterialName = SPECIAL_PROP_MATERIAL_MAP[prop.Number]["name"]
         if prop.Number == PROP_ID_ITEM_TEXT:
             propList = prop.ToString().split(": ")
-            itemName = propList[0].strip() # buckler looks like "buckler : <amount>" instead of "buckler: <amount>"
+            recipeName = propList[0].strip() # buckler looks like "buckler : <amount>" instead of "buckler: <amount>"
             amountMade = int(propList[1])
-            if itemName in recipes:
-                recipe = recipes[itemName]
+            if recipeName in recipes:
+                recipe = recipes[recipeName]
                 
     if recipe is not None and isSmallBod:
-        craftedItemName = specialMaterialName + " " + recipe.itemName if specialMaterialName is not None else recipe.itemName
-        return SmallBod(bod.Serial, craftedItemName, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, recipe)
+        #craftedItemName = specialMaterialName + " " + recipe.itemName if specialMaterialName is not None else recipe.itemName
+        return SmallBod(bod.Serial, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, specialMaterialName, recipe)
     elif isSmallBod == True and alertMissingRecipe:
         print("Warning: Skipping because not in recipe list")
         for prop in bod.Properties:
@@ -856,7 +872,7 @@ def parse_large_bod(bod):
     for prop in bod.Properties:
         if prop.Number == PROD_ID_LARGE_BULK_ORDER:
             isLargeBod = True
-        if prop.Number == PROP_ID_EXCEPTIONAL:
+        if prop.Number == PROP_ID_BOD_EXCEPTIONAL:
             isExceptional = True
         if prop.Number == PROP_ID_AMOUNT_TO_MAKE:
             amountToMake = int(prop.Args)
@@ -864,22 +880,40 @@ def parse_large_bod(bod):
             specialMaterialPropId = prop.Number
         if prop.Number in range(PROP_ID_ITEM_TEXT, PROP_ID_ITEM_TEXT + 6):    
             propList = prop.ToString().split(": ")
-            itemName = propList[0].strip() # buckler looks like "buckler : <amount>" instead of "buckler: <amount>"
+            recipeName = propList[0].strip() # buckler looks like "buckler : <amount>" instead of "buckler: <amount>"
             amountMade = int(propList[1])
-            smallBodItems.append({ "name": itemName, "amountMade": amountMade })
+            smallBodItems.append({ "name": recipeName, "amountMade": amountMade })
     if isLargeBod:
         return LargeBod(bod.Serial, isExceptional, amountToMake, specialMaterialPropId, smallBodItems)
 
 # Helper method to get a tool from the toolContainer. You dont need to worry about this.  
-def get_tool(craftContainer, smallBod, toolContainer):
-    tool = Items.FindByID(smallBod.recipe.toolId, -1, craftContainer, -1)
-    if tool is not None:
-        return tool
-    tool = Items.FindByID(smallBod.recipe.toolId, -1, toolContainer, -1)
-    if tool is not None:
-        Items.Move(tool, craftContainer, tool.Amount)
-        Misc.Pause(1000)
-        return tool
+# Also puts away unused tools.
+def get_tool(craftContainer, smallBod, toolContainer, itemMoveDelayMs):
+    tool = Items.FindByID(smallBod.recipe.toolId, RESOURCE_HUE_DEFAULT, craftContainer, -1)
+    if tool is None:
+        tool = Items.FindByID(smallBod.recipe.toolId, RESOURCE_HUE_DEFAULT, toolContainer, -1)
+        if tool is not None:
+            Items.Move(tool, craftContainer, 1)
+            Misc.Pause(itemMoveDelayMs)
+            
+    for toolId in [BLACKSMITHY_TOOL_STATIC_ID, TINKERING_TOOL_STATIC_ID, ALCHEMY_TOOL_STATIC_ID, TAILORING_TOOL_STATIC_ID, CARPENTRY_TOOL_STATIC_ID, INSCRIPTION_TOOL_STATIC_ID]:
+        toolsToPutAway = Items.FindAllByID(toolId, -1, craftContainer, 0)
+        for toolToPutAway in toolsToPutAway:
+            if tool is None or tool.Serial != toolToPutAway.Serial:
+                Items.Move(toolToPutAway, toolContainer, 1)
+                Misc.Pause(itemMoveDelayMs)
+                
+    return tool
+            
+        
+#    tool = Items.FindByID(smallBod.recipe.toolId, -1, craftContainer, -1)
+#    if tool is not None:
+#        return tool
+#    tool = Items.FindByID(smallBod.recipe.toolId, -1, toolContainer, -1)
+#    if tool is not None:
+#        Items.Move(tool, craftContainer, tool.Amount)
+#        Misc.Pause(1000)
+#        return tool
     
 # Helper method to get resources from the resourceContainer. Ignore me.
 def check_resources(craftContainer, smallBod, resourceContainer, itemMoveDelayMs):
@@ -943,17 +977,17 @@ def check_resources(craftContainer, smallBod, resourceContainer, itemMoveDelayMs
     #return True    
     
 # Internal: Helper method to salvage stuff.
-def cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, smallBod = None):
+def cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, itemMoveDelayMs, smallBod = None):
     if smallBod is not None:
         if salvageBag is not None and smallBod.recipe.canSalvage():
             found = False        
             while True:
-                item = Items.FindByName(smallBod.craftedItemName, -1, craftContainer, 0)
+                item = Items.FindByName(smallBod.getCraftedItemName(), -1, craftContainer, 0)
                 if item is None:
                     break
                 found = True
                 Items.Move(item, salvageBag, item.Amount)
-                Misc.Pause(800)
+                Misc.Pause(itemMoveDelayMs)
 
             if found:
                 Misc.WaitForContext(salvageBag, 10000)
@@ -961,11 +995,11 @@ def cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, small
                 Misc.Pause(1000)
         elif trashContainer is not None:
             while True:
-                item = Items.FindByName(smallBod.craftedItemName, -1, craftContainer, 0)
+                item = Items.FindByName(smallBod.getCraftedItemName(), -1, craftContainer, 0)
                 if item is None:
                     break
                 Items.Move(item, trashContainer, item.Amount)
-                Misc.Pause(800)
+                Misc.Pause(itemMoveDelayMs)
             
     ALL_RESOURCES = [INGOT_STATIC_ID, BOARD_STATIC_ID, CLOTH_STATIC_ID, LEATHER_STATIC_ID, MANDRAKEROOT, BLOODMOSS, SULPHUROUSASH, NIGHTSHADE, BLACKPEARL, SPIDERSILK, GINSENG, GARLIC, PIGIRON, BATWING, NOXCRYSTAL, DAEMONBLOOD, GRAVEDUST, EMPTY_BOTTLE_STATIC_ID, BONE, UNMARKED_RUNE, GATE_SCROLL, RECALL_SCROLL, BLANK_SCROLL, PARASITIC_PLANT, LUMINESCENT_FUNGI, WHITE_PEARL, FIRE_RUBY, PERFECT_EMERALD, TURQUOISE ]
 
@@ -982,9 +1016,9 @@ def cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, small
                         break
             if not keep:
                 Items.Move(item, resourceContainer, item.Amount)    
-                Misc.Pause(800)        
+                Misc.Pause(itemMoveDelayMs)        
     
-# Internal: Build database of small bods using itemName (not craftedItemName as PK)
+# Internal: Build database of small bods using recipeName (not craftedItemName as PK)
 # Data is structed as:
 # "kryss": [ {SmallBod, SmallBod, ... ],
 # "cutlass": [ SmallBod, SmallBod, ... ],
@@ -996,9 +1030,9 @@ def build_complete_small_bod_db(smallBodWaitingForLargeBodContainers, recipes):
         for bod in bods:
             smallBod = parse_small_bod(bod, recipes)
             if smallBod is not None and smallBod.isComplete():
-                if smallBod.recipe.itemName not in db:
-                    db[smallBod.recipe.itemName] = []
-                db[smallBod.recipe.itemName].append(smallBod)
+                if smallBod.recipe.recipeName not in db:
+                    db[smallBod.recipe.recipeName] = []
+                db[smallBod.recipe.recipeName].append(smallBod)
                 itemsInDb = itemsInDb + 1    
                     
     print("Database built with {} complete small bods".format(itemsInDb))
@@ -1161,6 +1195,9 @@ def sort_large_bods(incompleteBodContainers):
 #
 # WARNING: IF  YOU SET craftContainer AS YOUR BACKPACK IT YOU RISK LOSING ITEMS.
 #
+# Quirks:
+#   - If you fail to create an alchemy potion, it drops the bottle in your backpack for some reason. 
+#
 # Requirements:
 #   - You need a container to do work in (put a bag in your backpack)
 #   - You need a container of resources (ingots, etc.)
@@ -1237,7 +1274,9 @@ def run_bod_builder(
     resourceContainer,
     
     # (Optional) Your salvage bag which is used for tailoring and blacksmithy rejects.
-    # You get a little resource refund.
+    # You get a little resource refund. I keep mine in my craftContainer. But you will need a pair
+    # of scissors and a smiths hammer in the root level of your backpack. This is a salvage bag quirk.
+    # Its just how it works. 
     salvageBag = None,
     
     # (Optional) Serial of a container to dump trash in that cant be salvaged. 
@@ -1267,8 +1306,9 @@ def run_bod_builder(
     # of the script, but you risk disconnects and other issues maintaining state. Defaults to 1000ms
     itemMoveDelayMs = 1000,
     
-    # (Optional) God save the queen.
-    gumpDelayMs = 250
+    # (Optional) Reducing this will increase speed of script, but Id advise against it. Gump interactions are 
+    # catastrophic. God save the queen.
+    gumpDelayMs = 1000
 ):
     print("Opening containers, this may take a moment...")
     # Open containers because we may not have that item data yet. Sorry for the spam,
@@ -1297,7 +1337,7 @@ def run_bod_builder(
     # Turn this array into a dictionary keyed on item name. Its just easier that way.
     # So instead of [SmallBodRecipe, SmallBodRecipe...] we get:
     # { "cutlass": SmallBodRecipe, "platemail helm": SmallBodRecipe...
-    recipes = {recipes[i].itemName: recipes[i] for i in range(len(recipes))}
+    recipes = {recipes[i].recipeName: recipes[i] for i in range(len(recipes))}
     
     # Just for tracking, can remove this crap.
     reports = {
@@ -1313,6 +1353,7 @@ def run_bod_builder(
     for incompleteBodContainer in [craftContainer] + incompleteBodContainers:
         bods = Items.FindAllByID(BOD_STATIC_ID, -1, incompleteBodContainer, 1)
         for bod in bods:
+            craftGumpSet = False
             while True:
                 # Get fresh version of bod
                 freshBod = Items.FindBySerial(bod.Serial)
@@ -1320,9 +1361,10 @@ def run_bod_builder(
                 
                 if smallBod is not None:
                     if smallBod.specialMaterialHue not in allowedResourceHues:
-                        print("Warning: Skipping because material is not in allowed list: {}".format(smallBod.craftedItemName))
+                        print("Warning: Skipping because material is not in allowed list: {}".format(smallBod.getCraftedItemName()))
                         break
-                        
+                    
+                    
                     if smallBod.isComplete():
                         print("Filled small BOD!")
                         if smallBod.recipe.hasLargeBod:
@@ -1338,38 +1380,46 @@ def run_bod_builder(
                         break
                     else:
                         
-                        
-                        # All sorts of drama if crafted items can be stacked. The BOD
-                        # will not be able to combine them if they are instacks that are
-                        # greater than the number requested. E.g. you need 10 poison potions
-                        # but only have a stack of 65... So, we will do our best to separate
-                        # large stacks of items (when appropriate) into smaller ones.
-                        # Note: Short of storing all the crafted item ids (jesus christ) we can just look up
-                        # by item name as best we can. This doesnt work for stacks of potions where the Item
-                        # name chages to <stack amount> <item name>. So, we have the for construct below that
-                        # checks each item for a substring. There may be misses
                         foundCraftedItem = False
-                        craftedItem = Items.FindByName(smallBod.craftedItemName, smallBod.specialMaterialHue, craftContainer, 0)
-                        if craftedItem is None: #or craftedItem.Amount > 1:
-                            for craftedItem in Items.FindBySerial(craftContainer).Contains:
-                                if smallBod.craftedItemName.lower() in craftedItem.Name.lower():
-                                    foundCraftedItem = True
-                                    if craftedItem.Amount > 1:
-                                        # Have to provide x, y coordinates inside bag or else it will just stack on itself
-                                        # and we will be right back where we started, praise mao.
-                                        print("Splitting stack of {} ({})".format(smallBod.craftedItemName, craftedItem.Amount))
-                                        Items.Move(craftedItem, craftContainer, 1, craftedItem.Position.X, craftedItem.Position.Y)
-                                        # This needs extra time apparently when you split stacks as it generates a new item.
-                                        Misc.Pause(itemMoveDelayMs + 1000)
-                                        break
-                        elif craftedItem is not None:
-                            foundCraftedItem = True
-                            
+                        for craftedItem in Items.FindBySerial(craftContainer).Contains:
+                            if smallBod.getCraftedItemName().lower() in craftedItem.Name.lower():
+                                if smallBod.isExceptional and not any(prop.Number == PROP_ID_ITEM_EXCEPTIONAL for prop in craftedItem.Properties):
+                                    continue
+                                    
+                                if smallBod.specialMaterialHue != craftedItem.Color:
+                                    continue
+                                    
+                                foundCraftedItem = True
+                                
+                                # All sorts of drama if crafted items can be stacked. The BOD
+                                # will not be able to combine them if they are instacks that are
+                                # greater than the number requested. E.g. you need 10 poison potions
+                                # but only have a stack of 65... So, we will do our best to separate
+                                # large stacks of items (when appropriate) into smaller ones.
+                                # Note: Short of storing all the crafted item ids (jesus christ) we can just look up
+                                # by item name as best we can. This doesnt work for stacks of potions where the Item
+                                # name chages to <stack amount> <item name>. So, we have the for construct below that
+                                # checks each item for a substring. There may be misses
+                                if craftedItem.Amount > 1:
+                                    # Have to provide x, y coordinates inside bag or else it will just stack on itself
+                                    # and we will be right back where we started, praise mao.
+                                    print("Splitting stack of {} ({})".format(smallBod.getCraftedItemName(), craftedItem.Amount))
+                                    Items.Move(craftedItem, craftContainer, 1, craftedItem.Position.X, craftedItem.Position.Y)
+                                    # This needs extra time apparently when you split stacks as it generates a new item.
+                                    Misc.Pause(itemMoveDelayMs + 1000)
+                                    break
+
                         if foundCraftedItem:
+                            # The bod might already be in the craftContainer, but check anyway. We dont really need it for crafting
+                            # only above when combining the deed with items. But I like to know which bod Im working on.
+                            if freshBod.Container != craftContainer:
+                                Items.Move(freshBod, craftContainer, 1)
+                                Misc.Pause(itemMoveDelayMs) 
+                                
                             # Open small bod gump
                             Items.UseItem(freshBod)
                             Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 10000)
-                            Misc.Pause(gumpDelayMs)
+                            Misc.Pause(int(gumpDelayMs/2))#250 before
                             Target.Cancel()
                             
                             # Combine with contained items (backpack)
@@ -1377,54 +1427,66 @@ def run_bod_builder(
                             Target.WaitForTarget(10000)
                             Target.TargetExecute(craftContainer)
                             Gumps.WaitForGump(SMALL_BOD_GUMP_ID, 10000)
-                            Misc.Pause(1000)
+                            Misc.Pause(gumpDelayMs)#1000 before
                             Target.Cancel()
                             Gumps.CloseGump(SMALL_BOD_GUMP_ID)                        
                             
                         else:
                             
-                            print("Bod progress: {} {}/{}".format(smallBod.craftedItemName, smallBod.amountMade, smallBod.amountToMake))
+                            print("Bod progress: craftedItemName={}, recipeName={} {}/{}".format(smallBod.getCraftedItemName(), smallBod.recipe.recipeName, smallBod.amountMade, smallBod.amountToMake))
                             
-                            cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, smallBod)
+                            cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, itemMoveDelayMs, smallBod)
                             
-                            tool = get_tool(craftContainer, smallBod, toolContainer)
-                            if tool is None:
-                                print("Error: Cannot find tool")
-                                sys.exit()
-                                
                             if not check_resources(craftContainer, smallBod, resourceContainer, itemMoveDelayMs):
-                                print("Warning: Out of resources, skipping {}".format(smallBod.craftedItemName))
+                                print("Warning: Out of resources, skipping {}".format(smallBod.getCraftedItemName()))
                                 reports[freshBod.Color].incrementNumMissingResources()
                                 if freshBod.Container != incompleteBodContainer:
                                     Items.Move(freshBod, incompleteBodContainer, 1)
                                     Misc.Pause(itemMoveDelayMs)
                                 break
+                            
+                            tool = get_tool(craftContainer, smallBod, toolContainer, itemMoveDelayMs)
+                            if tool is None:
+                                print("Error: Cannot find tool")
+                                sys.exit()
                                 
                             if freshBod.Container != craftContainer:
                                 Items.Move(freshBod, craftContainer, 1)
-                                Misc.Pause(itemMoveDelayMs)                                            
+                                Misc.Pause(itemMoveDelayMs)
 
                             Items.UseItem(tool)
                             Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
-                            Misc.Pause(gumpDelayMs)
+                            Misc.Pause(int(gumpDelayMs / 2)) #always gump delay (250)
                             if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                                Misc.Pause(gumpDelayMs * 2)
                                 continue
                                 
                             # Set material (not every profession has it, e.g. alchemy)
-                            if smallBod.specialMaterialButton > 0:
-                                # The menu button to select material
-                                Gumps.SendAction(CRAFTING_GUMP_ID, 7)
-                                Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                            if not craftGumpSet:
+                                
+                                if smallBod.specialMaterialButton > 0:
+                                    # The menu button to select material
+                                    Gumps.SendAction(CRAFTING_GUMP_ID, 7)
+                                    Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                                    Misc.Pause(gumpDelayMs)#1000 before
+                                    if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                                        continue                    
+                                        
+                                    # The actual special material button
+                                    Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.specialMaterialButton)
+                                    Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
+                                    Misc.Pause(gumpDelayMs)#1000 before
+                                    if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                                        continue 
+                                      
+                                # Sets category
+                                Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpCategory)
+                                Gumps.WaitForGump(CRAFTING_GUMP_ID, 10000)
                                 Misc.Pause(gumpDelayMs)
                                 if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                                    continue                    
+                                    continue                                        
                                     
-                                # The actual special material button
-                                Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.specialMaterialButton)
-                                Gumps.WaitForGump(CRAFTING_GUMP_ID, 5000)
-                                Misc.Pause(gumpDelayMs)
-                                if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                                    continue   
+                                craftGumpSet = True
                                   
                             if freshBod.Color == HUE_INSCRIPTION and Player.Mana < 40:
                                 while Player.Mana < Player.ManaMax:
@@ -1433,29 +1495,20 @@ def run_bod_builder(
                                         Player.UseSkill("Meditation")
                                         Timer.Create("meditationTimer", 10000)
                                     Misc.Pause(500)
-                            
-                            # Sets category
-                            Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpCategory)
-                            Gumps.WaitForGump(CRAFTING_GUMP_ID, 10000)
-                            Misc.Pause(gumpDelayMs)
-                            if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                                continue
                                     
                             # Actually does crafting
                             Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpSelection)                    
                             Gumps.WaitForGump(CRAFTING_GUMP_ID, 10000)
-                            Misc.Pause(1000)
-                            if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                                continue
-        
-                    #cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, smallBod)
+                            Misc.Pause(gumpDelayMs) #1000 before
+                            #if not Gumps.HasGump(CRAFTING_GUMP_ID):
+                            #    continue
 
                 else:
                     break
                     
                 Misc.Pause(250)
                 
-            cleanup(craftContainer, salvageBag, trashContainer, resourceContainer)
+            cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, itemMoveDelayMs, smallBod)
 
     db = build_complete_small_bod_db(smallBodWaitingForLargeBodContainers, recipes)
     
@@ -1486,14 +1539,14 @@ def run_bod_builder(
                 Items.UseItem(largeBod.bodSerial)
                 Gumps.WaitForGump(LARGE_BOD_GUMP_ID, 3000)
                 Target.Cancel()
-                Misc.Pause(1000)
+                Misc.Pause(gumpDelayMs) #1000 before
                 
                 # Combine with contained items (backpack)
                 Gumps.SendAction(LARGE_BOD_GUMP_ID, 4) 
                 Target.WaitForTarget(5000)
                 Target.TargetExecute(craftContainer)
                 Gumps.WaitForGump(LARGE_BOD_GUMP_ID, 3000)
-                Misc.Pause(1500)
+                Misc.Pause(gumpDelayMs * 2) # 1500 before
                 Target.Cancel()
                 Gumps.CloseGump(LARGE_BOD_GUMP_ID)
                 

@@ -114,7 +114,9 @@ run_bod_builder(
     resourceContainer = 0x408CC21E,
     
     # (Optional) Your salvage bag which is used for tailoring and blacksmithy rejects.
-    # You get a little resource refund.
+    # You get a little resource refund. I keep mine in my craftContainer. But you will need a pair
+    # of scissors and a smiths hammer in the root level of your backpack. This is a salvage bag quirk.
+    # Its just how it works. 
     salvageBag = 0x400E972D,
     
     # (Optional) Serial of a container to dump trash in that cant be salvaged. 
@@ -144,6 +146,7 @@ run_bod_builder(
     # of the script, but you risk disconnects and other issues maintaining state. Defaults to 1000ms
     itemMoveDelayMs = 1000,
     
-    # (Optional) God save the queen
-    gumpDelayMs = 250
+    # (Optional) Reducing this will increase speed of script, but Id advise against it. Gump interactions are 
+    # catastrophic. God save the queen.
+    gumpDelayMs = 1000
 )
