@@ -48,7 +48,7 @@ A rather inefficient **Caster Attack Loop**. Good for mage tamer and InsaneUO sp
 
 A couple of **resource gathering** scripts. Use with caution. Don't break any rules. Includes fishing on a boat (also crab fishing), lumberjacking, and mining.
 
-**BOD Builder** script to automate crafting and filling small bods. Highly configurable. Should support all crafting professions (currently just blacksmithy).
+**BOD Builder** script to automate crafting and filling small bods. Highly configurable. Current support for Alchemy, Tailoring, Inscription, and Blacksmithy.
 
 **Move Items** scripts to put things in various containers. I bind about 3 of these to the M key (shift + M,alt + M) lots of use cases.
 
