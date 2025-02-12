@@ -1552,14 +1552,23 @@ def run_bod_builder(
                 
                 bod = Items.FindBySerial(largeBod.bodSerial)
                 freshLargeBod = parse_large_bod(bod)
-                
+                    
                 if freshLargeBod.isComplete():
                     print("\t...large BOD filled! :)")
                     Items.Move(largeBod.bodSerial, completeLargeBodContainer, 1)
                     Misc.Pause(itemMoveDelayMs)
                 else:
                     print("\t...large BOD back to incompleteBodContainer :(")
-                    Items.Move(largeBod.bodSerial, incompleteBodContainer, 1)
-                    Misc.Pause(itemMoveDelayMs)
+                    for incompleteBodContainer in incompleteBodContainers:
+                        container = Items.FindBySerial(incompleteBodContainer)
+                        if container.Contains.Count < 125:
+                            Items.Move(bod, incompleteBodContainer, 1)
+                            Misc.Pause(itemMoveDelayMs)                
+                            break                    
+            
+                    
+                    
+                    #Items.Move(largeBod.bodSerial, incompleteBodContainer, 1)
+                    #Misc.Pause(itemMoveDelayMs)
 
     report_final_metrics(reports, recipes, incompleteBodContainers, smallBodWaitingForLargeBodContainers, completeSmallBodContainer, completeLargeBodContainer)
