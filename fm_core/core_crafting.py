@@ -318,9 +318,6 @@ class SmallBodRecipe:
         
     def canSalvage(self):
         return self.toolId in [BLACKSMITHY_TOOL_STATIC_ID, TAILORING_TOOL_STATIC_ID]
-        
-    
-        
     def __str__(self):
         return f"SmallBodRecipe(hasLargeBod={self.hasLargeBod},recipeName='{self.recipeName}', gumpCategory='{self.gumpCategory}', gumpSelection='{self.gumpSelection}', toolId='{self.toolId}', resources='{self.resources}')"        
         
@@ -341,12 +338,27 @@ class SmallBod:
     # So we can find crafted items either to salvage, trash, or combine with deed.
     # Have to account for special materials, e.g. plate helm becomes shadow iron plate helm
     # And for carpentry, get this: Large Crate becomes crate, Medium Crate becomes crate, and
-    # Small Crate becomes small crate
+    # Small Crate becomes small crate.
+    # Most of the time, this matches the recipe name. But caps get weird. Sometimes they use them,
+    # sometimes they dont, e.g. the recipe for "Wooden Throne" is caps and others are lower.
     def getCraftedItemName(self):
+        # Blacksmithy weapons all turn into "plate helm" (normal iron ingots) or "dull copper plate helm" (dull copper)
         if self.recipe.toolId in [BLACKSMITHY_TOOL_STATIC_ID, TAILORING_TOOL_STATIC_ID]:
             return self.specialMaterialName + " " + self.recipe.recipeName if self.specialMaterialName is not None else self.recipe.recipeName
+            
+        # Carpentry weapons and armo will turn into "oak gnarled staff" - but not furniture or containers or instruments, praise be
+        if self.recipe.toolId == CARPENTRY_TOOL_STATIC_ID and self.recipe.gumpCategory in [CAT_CARPENTRY_WEAPONS, CAT_CARPENTRY_ARMOR]:
+            return self.specialMaterialName + " " + self.recipe.recipeName if self.specialMaterialName is not None else self.recipe.recipeName            
+            
+        # Carpentry strikes again
+        if self.recipe.recipeName == "wooden shelf":
+            return "empty bookcase"
+            
+        # Large and Small crates turn into "crate"
         if self.recipe.recipeName in ["Large Crate", "Medium Crate"]:
             return "crate"
+
+        # Default is to just use the exact recipe name that matches crafted item, e.g. "Deadly Poison potion"
         return self.recipe.recipeName        
 
     def isComplete(self):
@@ -674,13 +686,13 @@ RECIPES = [
     SmallBodRecipe(False, "straw chair", CAT_CARPENTRY_FURNITURE, 16, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "wooden chair", CAT_CARPENTRY_FURNITURE, 23, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True, "wooden bench", CAT_CARPENTRY_FURNITURE, 44, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
-    SmallBodRecipe(True, "wooden throne", CAT_CARPENTRY_FURNITURE, 51, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(True, "Wooden Throne", CAT_CARPENTRY_FURNITURE, 51, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "smal table", CAT_CARPENTRY_FURNITURE, 65, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "large table", CAT_CARPENTRY_FURNITURE, 86, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     
     SmallBodRecipe(True, "wooden box", CAT_CARPENTRY_CONTAINERS, 2, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "Small Crate", CAT_CARPENTRY_CONTAINERS, 9, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
-    SmallBodRecipe(False, "medium crate", CAT_CARPENTRY_CONTAINERS, 16, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "Medium Crate", CAT_CARPENTRY_CONTAINERS, 16, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "Large Crate", CAT_CARPENTRY_CONTAINERS, 23, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "wooden chest", CAT_CARPENTRY_CONTAINERS, 30, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True, "wooden shelf", CAT_CARPENTRY_CONTAINERS, 37, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
@@ -692,12 +704,12 @@ RECIPES = [
     SmallBodRecipe(True, "finished wooden chest", CAT_CARPENTRY_CONTAINERS, 86, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True,"tall cabinet", CAT_CARPENTRY_CONTAINERS, 93, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True,"short cabinet", CAT_CARPENTRY_CONTAINERS, 100, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
-    SmallBodRecipe(True,"red armoire", CAT_CARPENTRY_CONTAINERS, 107, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(True,"red armoire", CAT_CARPENTRY_CONTAINERS, 107, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID, 40)] ),
     SmallBodRecipe(True,"elegant armoire", CAT_CARPENTRY_CONTAINERS, 114, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True,"maple armoire", CAT_CARPENTRY_CONTAINERS, 121, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True,"cherry armoire", CAT_CARPENTRY_CONTAINERS, 128, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     
-    SmallBodRecipe(True, "shelpherd's crook", CAT_CARPENTRY_WEAPONS, 2, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ), #'
+    SmallBodRecipe(True, "shepherd's crook", CAT_CARPENTRY_WEAPONS, 2, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ), #'
     SmallBodRecipe(True, "quarter staff", CAT_CARPENTRY_WEAPONS, 9, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True, "gnarled staff", CAT_CARPENTRY_WEAPONS, 16, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(True, "bokuto", CAT_CARPENTRY_WEAPONS, 23, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
@@ -816,12 +828,12 @@ SPECIAL_PROP_MATERIAL_MAP = {
     1049348: { "button": 13, "hue": RESOURCE_HUE_SPINED,        "name": "spined" },         # Spined
     1049349: { "button": 20, "hue": RESOURCE_HUE_HORNED,        "name": "horned" },         # Horned
     1049350: { "button": 27, "hue": RESOURCE_HUE_BARBED,        "name": "barbed" },         # Barbed
-    1071428: { "button": 13, "hue": RESOURCE_HUE_OAK,           "name": None },             # Oak
-    1071429: { "button": 20, "hue": RESOURCE_HUE_ASH,           "name": None },             # Ash
-    1071430: { "button": 27, "hue": RESOURCE_HUE_YEW,           "name": None },             # Yew
-    1071431: { "button": 34, "hue": RESOURCE_HUE_HEARTWOOD,     "name": None },       # Heartwood
-    1071432: { "button": 41, "hue": RESOURCE_HUE_BLOODWOOD,     "name": None },       # Bloodwood
-    1071433: { "button": 48, "hue": RESOURCE_HUE_FROSTWOOD,     "name": None },       # Frostwood
+    1071428: { "button": 13, "hue": RESOURCE_HUE_OAK,           "name": "oak" },             # Oak
+    1071429: { "button": 20, "hue": RESOURCE_HUE_ASH,           "name": "ash"},             # Ash
+    1071430: { "button": 27, "hue": RESOURCE_HUE_YEW,           "name": "yew" },             # Yew
+    1071432: { "button": 34, "hue": RESOURCE_HUE_HEARTWOOD,     "name": "heartwood" },       # Heartwood
+    1071431: { "button": 41, "hue": RESOURCE_HUE_BLOODWOOD,     "name": "bloodwood" },       # Bloodwood
+    1071433: { "button": 48, "hue": RESOURCE_HUE_FROSTWOOD,     "name": "frostwood" },       # Frostwood
 }
     
 # Internal: Helper method to generate a small bod data structure.
@@ -982,7 +994,7 @@ def cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, itemM
         if salvageBag is not None and smallBod.recipe.canSalvage():
             found = False        
             while True:
-                item = Items.FindByName(smallBod.getCraftedItemName(), -1, craftContainer, 0)
+                item = Items.FindByName(smallBod.getCraftedItemName(), smallBod.specialMaterialHue, craftContainer, 0)
                 if item is None:
                     break
                 found = True
@@ -995,7 +1007,7 @@ def cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, itemM
                 Misc.Pause(1000)
         elif trashContainer is not None:
             while True:
-                item = Items.FindByName(smallBod.getCraftedItemName(), -1, craftContainer, 0)
+                item = Items.FindByName(smallBod.getCraftedItemName(), smallBod.specialMaterialHue, craftContainer, 0)
                 if item is None:
                     break
                 Items.Move(item, trashContainer, item.Amount)
@@ -1422,7 +1434,7 @@ def run_bod_builder(
                             Misc.Pause(int(gumpDelayMs/2))#250 before
                             Target.Cancel()
                             
-                            # Combine with contained items (backpack)
+                            # Combine with contained items (craftContainer)
                             Gumps.SendAction(SMALL_BOD_GUMP_ID, 4) 
                             Target.WaitForTarget(10000)
                             Target.TargetExecute(craftContainer)
@@ -1510,9 +1522,8 @@ def run_bod_builder(
                 
             cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, itemMoveDelayMs, smallBod)
 
-    db = build_complete_small_bod_db(smallBodWaitingForLargeBodContainers, recipes)
-    
     print("****************************************** Start Large BOD ******************************************")
+    db = build_complete_small_bod_db(smallBodWaitingForLargeBodContainers, recipes)
     largeBods = sort_large_bods([craftContainer] + incompleteBodContainers)
     for largeBod in largeBods:
         if largeBod is not None: 
@@ -1557,7 +1568,7 @@ def run_bod_builder(
                     print("\t...large BOD filled! :)")
                     Items.Move(largeBod.bodSerial, completeLargeBodContainer, 1)
                     Misc.Pause(itemMoveDelayMs)
-                else:
+                elif bod.Container == craftContainer:
                     print("\t...large BOD back to incompleteBodContainer :(")
                     for incompleteBodContainer in incompleteBodContainers:
                         container = Items.FindBySerial(incompleteBodContainer)
@@ -1566,7 +1577,7 @@ def run_bod_builder(
                             Misc.Pause(itemMoveDelayMs)                
                             break                    
             
-                    
+    print("Checked {} Large Bods".format(len(largeBods)))                
                     
                     #Items.Move(largeBod.bodSerial, incompleteBodContainer, 1)
                     #Misc.Pause(itemMoveDelayMs)

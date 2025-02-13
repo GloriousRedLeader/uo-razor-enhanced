@@ -8,6 +8,9 @@ from System.Collections.Generic import List
 from System import Byte, Int32
 #from builtins import Mobile
 
+FIRE_BEETLE_MOBILE_ID = 0x00A9
+BLUE_BEETLE_MOBILE_ID = 0x0317
+
 ANIMATE_DEAD_MOBILE_NAMES = [
     "a gore fiend",
     "a lich",
@@ -178,7 +181,7 @@ def get_enemies(range = 10, serialsToExclude = []):
     return mobs
 
 # Gets your pets as mobiles    
-def get_pets(range = 10, checkLineOfSight = True):
+def get_pets(range = 10, checkLineOfSight = True, mobileId = None):
     pets = []
     fil = Mobiles.Filter()
     fil.Enabled = True
@@ -187,6 +190,10 @@ def get_pets(range = 10, checkLineOfSight = True):
     fil.IsGhost = False
     fil.Friend = False
     fil.CheckLineOfSight = checkLineOfSight
+    
+    if mobileId is not None:
+        fil.Bodies = List[Int32]([mobileId])
+    
     blues = Mobiles.ApplyFilter(fil)    
     for blue in blues:
         if blue.CanRename:

@@ -74,6 +74,35 @@ def get_tile_in_front(distance = 1):
         tileZ = playerZ
     return tileX, tileY, tileZ
 
+# Get tile behind player
+def get_tile_behind(distance = 1):
+    direction = Player.Direction
+    tileX = Player.Position.X
+    tileY = Player.Position.Y
+    
+    if Player.Direction == 'Up':
+        tileX = Player.Position.X + distance
+        tileY = Player.Position.Y + distance
+    elif Player.Direction == 'North':
+        tileY = Player.Position.Y + distance
+    elif Player.Direction == 'Right':
+        tileX = Player.Position.X - distance
+        tileY = Player.Position.Y + distance
+    elif Player.Direction == 'East':
+        tileX = Player.Position.X - distance
+    elif Player.Direction == 'Down':
+        tileX = Player.Position.X - distance
+        tileY = Player.Position.Y - distance
+    elif Player.Direction == 'South':
+        tileY = Player.Position.Y - distance
+    elif Player.Direction == 'Left':
+        tileX = Player.Position.X + distance
+        tileY = Player.Position.Y - distance
+    elif Player.Direction == 'West':
+        tileX = Player.Position.X + distance
+
+    return tileX, tileY, Player.Position.Z
+    
 # Runs this many tiles forward according to player direction
 # Not super useful, but helps with mining script or if you just
 # want to go in a straight line.

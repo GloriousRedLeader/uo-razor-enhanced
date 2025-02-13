@@ -4,7 +4,6 @@
 #   2024-03-26
 # Use at your own risk. 
 
-
 from System.Collections.Generic import List
 import sys
 from System import Byte, Int32
@@ -18,10 +17,10 @@ from Scripts.fm_core.core_player import find_first_in_container_by_name
 from Scripts.fm_core.core_player import find_all_in_container_by_id
 from Scripts.fm_core.core_player import find_all_in_container_by_ids
 from Scripts.fm_core.core_player import equip_weapon
-from Scripts.fm_core.core_mobiles import get_friends_by_names
 from Scripts.fm_core.core_rails import move
 from Scripts.fm_core.core_rails import go_to_tile
 from Scripts.fm_core.core_rails import get_tile_in_front
+from Scripts.fm_core.core_rails import get_tile_behind
 from Scripts.fm_core.core_items import get_corpses
 from Scripts.fm_core.core_items import AXE_STATIC_IDS
 from Scripts.fm_core.core_items import LOG_STATIC_IDS
@@ -37,388 +36,360 @@ from Scripts.fm_core.core_items import FISH_STATIC_IDS
 from Scripts.fm_core.core_items import LOBSTER_TRAP_STATIC_IDS
 from Scripts.fm_core.core_items import DEPLOYED_LOBSTER_TRAP_STATIC_ID
 from Scripts.fm_core.core_items import FISHING_POLE_STATIC_IDS
+from Scripts.fm_core.core_items import RESOURCE_HUE_DEFAULT
+from Scripts.fm_core.core_items import RESOURCE_HUE_OAK
+from Scripts.fm_core.core_items import RESOURCE_HUE_ASH
+from Scripts.fm_core.core_items import RESOURCE_HUE_YEW
+from Scripts.fm_core.core_items import RESOURCE_HUE_HEARTWOOD
+from Scripts.fm_core.core_items import RESOURCE_HUE_BLOODWOOD
+from Scripts.fm_core.core_items import RESOURCE_HUE_FROSTWOOD
+from Scripts.fm_core.core_items import RESOURCE_HUE_DULL_COPPER
+from Scripts.fm_core.core_items import RESOURCE_HUE_SHADOW_IRON
+from Scripts.fm_core.core_items import RESOURCE_HUE_COPPER
+from Scripts.fm_core.core_items import RESOURCE_HUE_BRONZE
+from Scripts.fm_core.core_items import RESOURCE_HUE_GOLD
+from Scripts.fm_core.core_items import RESOURCE_HUE_AGAPITE
+from Scripts.fm_core.core_items import RESOURCE_HUE_VERITE
+from Scripts.fm_core.core_items import RESOURCE_HUE_VALORITE
+from Scripts.fm_core.core_mobiles import FIRE_BEETLE_MOBILE_ID
+from Scripts.fm_core.core_mobiles import BLUE_BEETLE_MOBILE_ID
+from Scripts.fm_core.core_mobiles import get_friends_by_names
+from Scripts.fm_core.core_mobiles import get_pets
 
+# This contains three main gathering loops:
+# 1. run_lumberjacking_loop
+# 2. run_mining_loop
+# 3. run_fishing_loop
+#
+# Use with caution. Dont be rude.
+#
 # Lumberjacking original author: https://github.com/hampgoodwin/razorenhancedscripts/blob/master/LumberjackingScanTile.py
 # Mining original author: https://github.com/getoldgaming/razor-enhanced-/blob/master/autoMiner.py
 # Note I did modify these and make them much worse. Use the one linked above.
 
-# Pastrami
-CHOP_DELAY = 2000
-PAUSE_DELAY_MS = 650
 
-# Variabili Sistema
-tileinfo = List[Statics.TileInfo]
-treeposx = []
-treeposy = []
-treeposz = []
-treegfx = []
-treenumber = 0
-blockcount = 0
+################## ################## ################## ##################
+#
+#   Lumberjacking
+#
+################## ################## ################## ##################
 
-def RangeTree( spotnumber ):
-    global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
-    if (Player.Position.X - 1) == treeposx[spotnumber] and (Player.Position.Y + 1) == treeposy[spotnumber]:
-        return True
-    elif (Player.Position.X - 1) == treeposx[spotnumber] and (Player.Position.Y - 1) == treeposy[spotnumber]:
-        return True
-    elif (Player.Position.X + 1) == treeposx[spotnumber] and (Player.Position.Y + 1) == treeposy[spotnumber]:
-        return True
-    elif (Player.Position.X + 1) == treeposx[spotnumber] and (Player.Position.Y - 1) == treeposy[spotnumber]:
-        return True
-    elif Player.Position.X == treeposx[spotnumber] and (Player.Position.Y - 1) == treeposy[spotnumber]:
-        return True    
-    elif Player.Position.X == treeposx[spotnumber] and (Player.Position.Y + 1) == treeposy[spotnumber]:   
-        return True     
-    elif Player.Position.Y == treeposy[spotnumber] and (Player.Position.X - 1) == treeposx[spotnumber]:
-        return True    
-    elif Player.Position.Y == treeposy[spotnumber] and (Player.Position.X + 1) == treeposx[spotnumber]:   
-        return True    
-    else:
-        return False
-    
-def ScanStatic(tileRange): 
-    global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
-    
-    treeposx.Clear()
-    treeposy.Clear()
-    treeposz.Clear()
-    treegfx.Clear()
-    
-    Misc.SendMessage("--> Inizio Scansione Tile", 77)
+# Represents a tree to cut
+class Tree:
+    def __init__(self, x, y, z, staticId):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.staticId = staticId
+        self.tooFarAwayAttempts = 0
+        
+    def __str__(self):
+        return f"Tree(x='{self.x}', y='{self.y}', z='{self.z}', staticId={self.staticId})"                        
+
+# Internal helper to generate a list of Tree        
+def scan_trees(tileRange, treeStaticIds):
     minx = Player.Position.X - tileRange
     maxx = Player.Position.X + tileRange
     miny = Player.Position.Y - tileRange
     maxy = Player.Position.Y + tileRange
 
+    trees = []
     while miny <= maxy:
         while minx <= maxx:
             tileinfo = Statics.GetStaticsTileInfo(minx, miny, Player.Map)
             if tileinfo.Count > 0:
                 for tile in tileinfo:
-                    for staticid in TREE_STATIC_IDS:
+                    for staticid in treeStaticIds:
                         if staticid == tile.StaticID:
-                            Misc.SendMessage('--> Albero X: %i - Y: %i - Z: %i - GFX: %i' % (minx, miny, tile.StaticZ, tile.StaticID), 66)
-                            treeposx.Add(minx)
-                            treeposy.Add(miny)
-                            treeposz.Add(tile.StaticZ)
-                            treegfx.Add(tile.StaticID)
-            else:
-                Misc.NoOperation()
+                            tree = Tree(minx, miny, tile.StaticZ, tile.StaticID)
+                            trees.append(tree)
+                            print("Tree Registered: {}".format(tree))
+
             minx = minx + 1
         minx = Player.Position.X - tileRange            
         miny = miny + 1
-    treenumber = treeposx.Count    
-    Misc.SendMessage('--> Totale Alberi: %i' % (treenumber), 77)
+
+    Misc.SendMessage('Total Trees: %i' % (len(trees)), 66) 
+    return trees
     
-def CutTree( spotnumber, axe, weightLimit ):
-    global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
+# Internal helper method that cuts a tree with either axe (logs) or dagger (kindling)
+def cut_tree(tree, tool, cutDelayMs):
     Target.Cancel()
-    Misc.Pause(1000)
-    
-    if Target.HasTarget():
-        Misc.SendMessage("--> Blocco rilevato target residuo, cancello!", 77)
-        Target.Cancel()
-        Misc.Pause(500)
-    else:
-        Misc.NoOperation()    
-    if (Player.Weight >= weightLimit):
-        Misc.Pause(1500)
-        Misc.SendMessage("You are too heavy!", 38)
-        sys.exit()
-    else:
-        Misc.NoOperation()
-    Journal.Clear()
-    Items.UseItem(axe)
-    Target.WaitForTarget(4000)
-    print(spotnumber, treeposx[spotnumber], treeposy[spotnumber], treeposz[spotnumber], treegfx[spotnumber])
-    Target.TargetExecute(treeposx[spotnumber], treeposy[spotnumber], treeposz[spotnumber], treegfx[spotnumber])
-    
-    Misc.Pause(CHOP_DELAY)
-    
-#    cut_drop_and_move_boards(axe, cutLogsToBoards = False, dropOnGround = False, packAnimalNames = []):
-    
-    
-    #if Journal.Search("not enough wood"):
-    if Journal.Search("There's not enough wood here to harvest."):
-        # '
-        Misc.SendMessage("--> Cambio albero", 77)
-    elif Journal.Search("That is too far away"):
-        blockcount = blockcount + 1
-        Journal.Clear()
-        if (blockcount > 15):
-            blockcount = 0
-            Misc.SendMessage("--> Possibile blocco rilevato cambio albero", 77)
-        else:
-            CutTree(spotnumber, axe, weightLimit)
-    else:
-        Misc.SendMessage("Recursive Call on this tree")
-        CutTree(spotnumber, axe, weightLimit)
+    Misc.Pause(int(cutDelayMs / 2))
         
-# Too heavy. Turn to boards. Praise Be.
-def logs_to_boards(container, axe):
-    global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
-    #logs = find_first_item_by_id(LOG_STATIC_IDS, Player.Backpack)
-    log = find_in_container_by_id(LOG_STATIC_IDS, Player.Backpack.Serial)
-    if log != None:
-        Items.UseItem(axe)
-        Target.WaitForTarget(4000)
-        Target.WaitForTarget(10000, False)
-        Target.TargetExecute(log.Serial)
+    if Player.MaxWeight - Player.Weight < 50:
+        print("You are too heavy!")
+        sys.exit()
+    
+    Journal.Clear()
+    Items.UseItem(tool)
+    Target.WaitForTarget(4000)
+    print("Cutting tree {}".format(tree), 66)
+    Target.TargetExecute(tree.x, tree.y, tree.z, tree.staticId)
+    Misc.Pause(cutDelayMs)
+    
+    if Journal.Search("There's not enough wood here to harvest."):# '
+        print("(no more wood) Moving on")
+    elif Journal.Search("That is too far away"):
+        tree.tooFarAwayAttempts = tree.tooFarAwayAttempts + 1
+        Journal.Clear()
+        if (tree.tooFarAwayAttempts < 5):
+            cut_tree(tree, tool, cutDelayMs)
+        else:
+            print("(cant reach tree) Moving on")
+    else:
+        cut_tree(tree, tool, cutDelayMs)
+    
+# Internal helper  method to discard logs or cut logs into boards
+def cut_or_drop_logs(axe, keepItemHues, cutLogsToBoards, itemMoveDelayMs):    
+    for logStaticID in LOG_STATIC_IDS:
+        logs = find_all_in_container_by_id(logStaticID, containerSerial = Player.Backpack.Serial)
+        for log in logs:
+            if log.Color not in keepItemHues:
+                print("Dropping Logs on ground")
+                tileX, tileY, tileZ = get_tile_behind(1)
+                Items.MoveOnGround(log, log.Amount, tileX, tileY, tileZ)
+                Misc.Pause(itemMoveDelayMs)
+            elif cutLogsToBoards:
+                Items.UseItem(axe)
+                Target.WaitForTarget(10000, False)
+                Target.TargetExecute(log.Serial)
+                Misc.Pause(itemMoveDelayMs)    
             
 # Makes a box around where player is standing and chops trees inside. The
 # size of the box is determined by tileRange.
 # You will need an axe equipped I believe.
 def run_lumberjacking_loop(
+
     # Makes a square tileRange * tileRange and will search for trees inside of it. So,
     # all you have to do is place yourself near a bunch of trees and hit the hotkey that
     # runs this function.
     tileRange = 10, 
     
     # If this limit is reached, the script just stops apparently.
-    weightLimit = 350, 
+    #weightLimit = 500, 
     
     # Flag that will convert the logs into boards. I think you need an axe.
-    cutLogsToBoards = False, 
+    cutLogsToBoards = True, 
+
+    # Only keep logs and boards that match these hues. By default that is all hues. Remove the ones
+    # you wish to discard. It will drop them at your feet. It is a common case where you may not care
+    # about the basic wood board (RESOURCE_HUE_DEFAULT), so remove that from the list if you only
+    # want special woods.
+    keepItemHues = [RESOURCE_HUE_DEFAULT, RESOURCE_HUE_OAK, RESOURCE_HUE_ASH, RESOURCE_HUE_YEW, RESOURCE_HUE_HEARTWOOD, RESOURCE_HUE_BLOODWOOD, RESOURCE_HUE_FROSTWOOD    ],
     
-    # After chopping wood, you can drop the wood on teh ground. Useful i you are just gaining skill.
-    dropOnGround = False,
+    # (Optional) The mobile ID of your pack animal. Defaults to blue beetle.
+    packAnimalMobileId = BLUE_BEETLE_MOBILE_ID,
     
-    # If you have a beetle
-    packAnimalNames = []
+    # Ids of static tile graphics that we consider trees. May vary.
+    # Default is all the trees I know about.
+    treeStaticIds = TREE_STATIC_IDS,
+    
+    # (Optional) Number of miliseconds between item moves typically from one pack to another.
+    itemMoveDelayMs = 1000,
+    
+    # (Optional) Number of miliseconds between chopping attempts. Reducing will make
+    # script go faster.
+    cutDelayMs = 2000
 ):
-        
-    global tileinfo, treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
 
-    Misc.SendMessage("--> Avvio Patramie", 77)  
-    Misc.SendMessage("Eqipping Axe", 123)
-    
-#    originalItemsInHands = [None, None]
     axe = find_first_in_hands_by_ids(AXE_STATIC_IDS)
-    #axe = find_in_container_by_id(AXE_STATIC_IDS, Player.Backpack)
-#    if axe == None:
-#        axe = find_first_item_by_id(AXE_STATIC_IDS, Player.Backpack)
-#        if axe == None:
-#            Misc.SendMessage("You dont have an axe foo", 38)
-#            sys.exit()
-#        originalItemsInHands = swap_weapon(axe)
-
-    ScanStatic(tileRange)
-    i = 0
-    Misc.SendMessage("Total tree number {}".format(treenumber))
-    while i < treenumber:
-        Misc.SendMessage("Moving to a tree")
-        #go_to_tile(treeposx[i] - 1, treeposy[i] - 1, 88.0)
-        cut_drop_and_move_boards(axe, cutLogsToBoards, dropOnGround, packAnimalNames)
-        go_to_tile(treeposx[i] - 1, treeposy[i] - 1, 5.0)
-        CutTree(i, axe, weightLimit)
-        cut_drop_and_move_boards(axe, cutLogsToBoards, dropOnGround, packAnimalNames)
+    if axe is None:
+        print("Equipping axe")
+        axe = find_first_in_container_by_ids(AXE_STATIC_IDS)
+        equip_weapon(axe)
         
-#        logs = find_first_in_container_by_ids(LOG_STATIC_IDS, Player.Backpack)
-#        if logs != None and dropOnGround:
-#            Player.HeadMessage(48, "Dropping Logs on ground")
-#            Items.MoveOnGround(logs,0,Player.Position.X - 1, Player.Position.Y + 1, 0)
-#        elif logs != None and cutLogsToBoards:
-#            Items.UseItem(axe)
-#            Target.WaitForTarget(10000, False)
-#            Target.TargetExecute(logs.Serial)
-#            
-#        packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
-#        if len(packAnimals) > 0:
-#            for packAnimal in packAnimals:
-#                print(packAnimal.Name, packAnimal.Backpack.Weight)
-#                if packAnimal.Backpack.Weight < 1350:
-#                    for boardStaticID in BOARD_STATIC_IDS:
-#                        move_item_to_container_by_id(boardStaticID, Player.Backpack, packAnimal.Backpack.Serial)
-                    
-        i = i + 1
-        Misc.Pause(500)
+    axe = find_first_in_hands_by_ids(AXE_STATIC_IDS)
+    if axe is None:
+        print("Could not find axe!")
+        return
         
-    #treeposx = []
-    #treeposy = []
-    #treeposz = []
-    #treegfx = []
-    #treenumber = 0
-
-#    Misc.SendMessage("Re-qeuipping shitter", 123) 
+    trees = scan_trees(tileRange, treeStaticIds)
+    print("Total tree number {}".format(len(trees)))
     
-#    if originalItemsInHands[0] != None:
-#        Misc.Pause(1000)
-#        swap_weapon(originalItemsInHands[0])
-#        Misc.Pause(4000)
-#        
-#    if originalItemsInHands[1] != None:
-#        Misc.Pause(1000)
-#        swap_weapon(originalItemsInHands[1])
-#        Misc.Pause(4000)
+    for tree in trees:
+        print("Moving to a tree")
+
+        cut_or_drop_logs(axe, keepItemHues, cutLogsToBoards, itemMoveDelayMs)
+        move_items_to_pack_animal(BOARD_STATIC_IDS, packAnimalMobileId, itemMoveDelayMs)
         
-def cut_drop_and_move_boards(axe, cutLogsToBoards = False, dropOnGround = False, packAnimalNames = []):
-    global treenumber, treeposx, treeposy, treeposz, treegfx, blockcount, TREE_STATIC_IDS, AXE_STATIC_IDS, CHOP_DELAY
-    #logs = find_first_in_container_by_ids(LOG_STATIC_IDS, Player.Backpack)
-    
-    for logStaticID in LOG_STATIC_IDS:
-        logs = find_all_in_container_by_id(logStaticID, containerSerial = Player.Backpack.Serial)
-        for log in logs:
-            if dropOnGround:
-                Player.HeadMessage(48, "Dropping Logs on ground")
-                Items.MoveOnGround(log, 0, Player.Position.X - 1, Player.Position.Y + 1, 0)
-            elif cutLogsToBoards:
-                Items.UseItem(axe)
-                Target.WaitForTarget(10000, False)
-                Target.TargetExecute(log.Serial)
-                
-    packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
-    if len(packAnimals) > 0:
-        for packAnimal in packAnimals:
-            print(packAnimal.Name, packAnimal.Backpack.Weight)
-            if packAnimal.Backpack.Weight < 1350:
-                for itemStaticID in BOARD_STATIC_IDS:
-                    move_item_to_container_by_id(itemStaticID , Player.Backpack.Serial, packAnimal.Backpack.Serial)    
-            
+        go_to_tile(tree.x - 1, tree.y - 1, 10.0)
+        
+        cut_tree(tree, axe, cutDelayMs)
+        
+        Misc.Pause(int(itemMoveDelayMs / 3))
+
+    cut_or_drop_logs(axe, keepItemHues, cutLogsToBoards, itemMoveDelayMs)
+    move_items_to_pack_animal(BOARD_STATIC_IDS, packAnimalMobileId, itemMoveDelayMs)        
+    print("All done")
             
 # Variation of above that will get kindling usinga knife
-def get_kindling_in_area(tileRange = 10, weightLimit = 350):
-    global treenumber, treeposx, treeposy, DAGGER_STATIC_IDS
+def run_kindling_loop(
+
+    # Makes a square tileRange * tileRange and will search for trees inside of it. So,
+    # all you have to do is place yourself near a bunch of trees and hit the hotkey that
+    # runs this function.
+    tileRange = 10, 
+    
+    # Ids of static tile graphics that we consider trees. May vary.
+    # Default is all the trees I know about.
+    treeStaticIds = TREE_STATIC_IDS,
+    
+    # (Optional) Number of miliseconds between chopping attempts. Reducing will make
+    # script go faster.
+    cutDelayMs = 2000
+):
     
     Misc.SendMessage("Getting Kindling", 123)
     dagger = find_first_in_container_by_ids(DAGGER_STATIC_IDS, Player.Backpack)
     
-    ScanStatic(tileRange)
-    i = 0
+    if not dagger:
+        print("No dagger found!")
+        sys.exit()
+        
+    trees = scan_trees(tileRange, treeStaticIds)
     Misc.SendMessage("Total tree number {}".format(treenumber))
-    while i < treenumber:
+    
+    for tree in trees:
         Misc.SendMessage("Moving to a tree")
-        go_to_tile(treeposx[i] - 1, treeposy[i] - 1, 88.0)
-        CutTree(i, dagger, weightLimit)
-        
-        i = i + 1
-        Misc.Pause(500)
-        
-    treeposx = []
-    treeposy = []
-    treeposz = []
-    treegfx = []
-    treenumber = 0
+        go_to_tile(tree.x - 1, tree.y - 1, 10.0)
+        cut_tree(tree, dagger, cutDelayMs)
+        Misc.Pause(500)    
 
     Misc.SendMessage("All done", 123) 
     
+# Internal helper to move resource items from backpack to a pack animal
+# Used for both mining and lumberjacking   
+def move_items_to_pack_animal(itemIds, packAnimalMobileId, itemMoveDelayMs):
+    for itemId in itemIds:
+        for item in Items.FindAllByID(itemId, -1, Player.Backpack.Serial, 0):
+            packAnimals = get_pets(range = 2, checkLineOfSight = True, mobileId = packAnimalMobileId)
+            
+            if len(packAnimals) == 0:
+                return
+        
+            for packAnimal in packAnimals:
+                if packAnimal.Backpack.Weight < 1350:
+                    print("Moving {} to {} (Weight: {})".format(item.Name, packAnimal.Name, packAnimal.Backpack.Weight))
+                    Items.Move(item, packAnimal.Backpack.Serial, item.Amount)
+                    Misc.Pause(itemMoveDelayMs)
+
+################## ################## ################## ##################
+#
+#   Mining
+#
+################## ################## ################## ##################    
+    
+def getMinerTool():
+    for minerToolStaticID in MINER_TOOLS_STATIC_IDS:
+        miningTool = find_in_container_by_id(minerToolStaticID, Player.Backpack.Serial)
+        if miningTool is not None:
+            return miningTool    
+
+def smelt_ore(forgeAnimalMobileId, itemMoveDelayMs):
+    forgeAnimals = get_pets(range = 2, checkLineOfSight = True, mobileId = forgeAnimalMobileId)
+    if len(forgeAnimals) > 0:
+        for oreId in ORE_STATIC_IDS:
+            ores = find_all_in_container_by_id(oreId, Player.Backpack.Serial)
+            for ore in ores:
+                Journal.Clear()
+                Items.UseItem(ore)
+                Target.WaitForTarget(5000, True)
+                Target.TargetExecute(forgeAnimals[0])
+                Misc.Pause(itemMoveDelayMs)
+                if Journal.Search("There is not enough metal-bearing ore in this pile to make an ingot."):
+                    print(ore)
+                    print(ore.Serial)
+                    tileX, tileY, tileZ = get_tile_in_front()
+                    Items.MoveOnGround(ore, 0, tileX, tileY , 0)
+                    Misc.Pause(itemMoveDelayMs)
+        Misc.Pause(itemMoveDelayMs)     
+    else:
+        print("No forge animal found")
+                    
+def readJournal():
+    if Journal.Search('no metal') or Journal.Search('t mine that') or Journal.Search('no sand'):
+        Journal.Clear()
+        return True
+    else:
+        Journal.Clear()
+        return False
+        
+# Gets the tile serial. This isnt a trivial task.
+# Searching by cave floor tile id. Then doing an item search.
+# The cave floor tile is apparently an item with a serial. That is
+# how we get the serial.
+# The tile serial is provided to Target execute. We cant just use
+# the x,y coords because it doesnt work. It just says you cant mine there.
+# Also cant use target relative.
+def get_tile_in_front_serial():
+    tileX, tileY, tileZ = get_tile_in_front()
+    #tileinfo = Statics.GetStaticsLandInfo(tileX, tileY, Player.Map)
+
+    filter = Items.Filter()
+    # 0x053B is Cave floor
+    # 0x0018 is Sand
+    filter.Graphics = List[Int32]((0x053B)) 
+    filter.OnGround = True
+    filter.RangeMax = 1
+    items = Items.ApplyFilter(filter)
+    for item in items:
+        if item.Position.X == tileX and item.Position.Y == tileY:
+            return item.Serial, tileX, tileY, tileZ 
+    return None, tileX, tileY, tileZ 
+
 # Mines an area then steps forward to mine again in a straight line.
 # Attempts to smelt ores if you have a fire beetle (provide parameter)
 # Attempts to move smelted ore to pack animal (provide parameter)
 def run_mining_loop(
-    # Required. Your fire beetles name.
-    forgeAnimalName = None,
     
-    # Required. One or more blue beetle names.
-    packAnimalNames = []
+    # Only keep ingots that match these hues. By default that is all hues. Remove the ones
+    # you wish to discard. It will drop them at your feet. It is a common case where you may not care
+    # about the basic iron ingots (RESOURCE_HUE_DEFAULT), so remove that from the list if you only
+    # want special ingots.
+    keepItemHues = [RESOURCE_HUE_DULL_COPPER, RESOURCE_HUE_SHADOW_IRON, RESOURCE_HUE_COPPER, RESOURCE_HUE_BRONZE, RESOURCE_HUE_GOLD, RESOURCE_HUE_AGAPITE, RESOURCE_HUE_VERITE, RESOURCE_HUE_VALORITE],
+
+    # (Optional) The mobile ID of your pack animal. Defaults to blue beetle.
+    packAnimalMobileId = BLUE_BEETLE_MOBILE_ID,       
+    
+    # (Optional) The mobile ID of your forge animal. Defaults to fire beetle.
+    forgeAnimalMobileId = FIRE_BEETLE_MOBILE_ID,
+    
+    # (Optional) Number of miliseconds between item moves typically from one pack to another.
+    itemMoveDelayMs = 1000
 ):
-    
-    def getMinerTool():
-        for minerToolStaticID in MINER_TOOLS_STATIC_IDS:
-            miningTool = find_in_container_by_id(minerToolStaticID, Player.Backpack.Serial)
-            if miningTool is not None:
-                return miningTool    
-
-    def smelt_ore(forgeAnimalName):
-        forgeAnimals = get_friends_by_names(friendNames = [forgeAnimalName], range = 2)
-        if len(forgeAnimals) > 0:
-            for oreId in ORE_STATIC_IDS:
-                ores = find_all_in_container_by_id(oreId, Player.Backpack.Serial)
-                for ore in ores:
-                    Journal.Clear()
-                    Items.UseItem(ore)
-                    Target.WaitForTarget(5000, True)
-                    Target.TargetExecute(forgeAnimals[0])
-                    Misc.Pause(PAUSE_DELAY_MS)
-                    if Journal.Search("There is not enough metal-bearing ore in this pile to make an ingot."):
-                        print(ore)
-                        print(ore.Serial)
-                        #Items.DropItemGroundSelf(ore, ore.Amount)
-                        #Items.MoveOnGround(ore, 0, Player.Position.X - 1, Player.Position.Y + 1, 0)
-                        #Items.MoveOnGround(ore, 0, Player.Position.X -1 , Player.Position.Y , 0)
-                        tileX, tileY, tileZ = get_tile_in_front()
-                        Items.MoveOnGround(ore, 0, tileX, tileY , 0)
-                        Misc.Pause(PAUSE_DELAY_MS)
-            Misc.Pause(PAUSE_DELAY_MS)     
-        else:
-            print("No forge animal found")
-
-
-    def move_ingots_to_pack_animal(packAnimalNames):    
-        packAnimals = get_friends_by_names(friendNames = packAnimalNames, range = 2)
-        if len(packAnimals) > 0:
-            for packAnimal in packAnimals:
-                print(packAnimal.Name, packAnimal.Backpack.Weight)
-                if packAnimal.Backpack.Weight < 1350:
-                    for itemStaticID in INGOT_STATIC_IDS + STONE_STATIC_IDS + SAND_STATIC_IDS:
-                        move_item_to_container_by_id(itemStaticID, Player.Backpack.Serial, packAnimal.Backpack.Serial)                
-                        
-    def readJournal():
-        if Journal.Search('no metal') or Journal.Search('t mine that') or Journal.Search('no sand'):
-            Journal.Clear()
-            return True
-        else:
-            Journal.Clear()
-            return False
-            
-    # Gets the tile serial. This isnt a trivial task.
-    # Searching by cave floor tile id. Then doing an item search.
-    # The cave floor tile is apparently an item with a serial. That is
-    # how we get the serial.
-    # The tile serial is provided to Target execute. We cant just use
-    # the x,y coords because it doesnt work. It just says you cant mine there.
-    # Also cant use target relative.
-    def get_tile_in_front_serial():
-        tileX, tileY, tileZ = get_tile_in_front()
-        #tileinfo = Statics.GetStaticsLandInfo(tileX, tileY, Player.Map)
-
-        filter = Items.Filter()
-        # 0x053B is Cave floor
-        # 0x0018 is Sand
-        filter.Graphics = List[Int32]((0x053B)) 
-        filter.OnGround = True
-        filter.RangeMax = 1
-        items = Items.ApplyFilter(filter)
-        for item in items:
-            if item.Position.X == tileX and item.Position.Y == tileY:
-                return item.Serial, tileX, tileY, tileZ 
-        return None, tileX, tileY, tileZ 
                 
     while True:
-        smelt_ore(forgeAnimalName)
-        #Misc.Pause(250)
-        move_ingots_to_pack_animal(packAnimalNames)
-        #Misc.Pause(250)
-        
+        smelt_ore(forgeAnimalMobileId, itemMoveDelayMs)
+        move_items_to_pack_animal(INGOT_STATIC_IDS + STONE_STATIC_IDS + SAND_STATIC_IDS, packAnimalMobileId, itemMoveDelayMs)
         miningTool = getMinerTool()
+        
         Journal.Clear()
         Items.UseItem(miningTool)
         Target.WaitForTarget(5000, True)
-        #Target.TargetExecuteRelative(Player.Serial, 1)
-    #    tileX, tileY, tileZ = get_tile_in_front()
-    #    tileinfo = Statics.GetStaticsLandInfo(tileX, tileY, Player.Map)
-        #Target.TargetExecute(tileX, tileY, tileZ, tileinfo.StaticID)
         
         tileSerial, tileX, tileY, tileZ  = get_tile_in_front_serial()
         if tileSerial is not None:
             Target.TargetExecute(tileSerial)
         else:
             Target.TargetExecute(tileX, tileY, tileZ)
-        #Target.TargetExecute(tileX, tileY, tileZ)
-        #print("TILE", tileX, tileY, tileZ)
-        #print("PLAYER", Player.Position.X, Player.Position.Y, Player.Position.Z)
         
-        Misc.Pause(PAUSE_DELAY_MS)
-        
-        #smelt_ore()
-        #move_ingots_to_pack_animal()
+        Misc.Pause(itemMoveDelayMs)
         
         boolMove = readJournal()
         if boolMove:
             move(1)
-            
 
-        Misc.Pause(PAUSE_DELAY_MS)
+        Misc.Pause(int(itemMoveDelayMs / 2))
         
+################## ################## ################## ##################
+#
+#   Fishing
+#
+################## ################## ################## ##################
+        
+TRUE_NORTH_DIRECTION_MAP = ["Forward One", "Right One", "Back One", "Left One"]
+
 # Auto fishes in all the lands. Works on a boat. Works on a dock.
 # If you are on a boat, you can use the moveTiles param to move boat after each fishing attempt.
 # It will say forward one X number of times.
@@ -441,7 +412,8 @@ def run_fishing_loop(
     # Will not do any fishHandling operations on this fish. Leaves it in backpack. Useful for fishing quests.
     fishToKeep = None,
     
-    # Optional function to call after each fishing attempt, e.g. auto looter
+    # (Optional) function to call after each fishing attempt, e.g. auto looter (see below)
+    # You can call some misc. logic to do whatever you want after each cast
     callback = None
 ):
     fishingPole = find_first_in_hands_by_ids(FISHING_POLE_STATIC_IDS)
@@ -454,7 +426,6 @@ def run_fishing_loop(
             equip_weapon(fishingPole)
         
     while Player.Weight < Player.MaxWeight - 40:
-        
         # Cut fish they are heavy
         if fishHandling == 1:
             dagger = find_first_in_container_by_ids(DAGGER_STATIC_IDS)
@@ -496,14 +467,10 @@ def run_fishing_loop(
         # So, we will look for something with the "Wet" flag and go from there.
         fished = False
         
-        #print("------------- TILE INFO -----------------")
         tileInfoList = Statics.GetStaticsTileInfo(x, y, Player.Map)
-        #print("TileInfo Len = {}".format(len(tileInfoList)))
         if len(tileInfoList) > 0:
             for tileInfo in tileInfoList:
-                #print("TileInfo 1 StaticID = {}, StaticZ = {}".format(tileInfo.StaticID, tileInfo.StaticZ))
                 val = Statics.GetTileFlag(tileInfo.StaticID,"Wet")
-                #print("Is Wet = {}".format(val))
                 if Statics.GetTileFlag(tileInfo.StaticID,"Wet") == True:
                     print("TargetExecute(x = {}, y = {}, staticZ = {}, staticId = {})".format(x, y, tileInfo.StaticZ, tileInfo.StaticID))
                     Target.TargetExecute(x, y, tileInfo.StaticZ, tileInfo.StaticID)
@@ -512,14 +479,10 @@ def run_fishing_loop(
                     break
 
         if not fished:
-            #print("------------- LAND INFO -----------------")                    
             landInfo = Statics.GetStaticsLandInfo(x,y,Player.Map)
             if landInfo is not None:
-                #print("LandInfo StaticID = {}, StaticZ = {}".format(landInfo.StaticID, landInfo.StaticZ))
                 val = Statics.GetLandFlag(landInfo.StaticID,"Wet")
-                #print("Is Wet = {}".format(val))     
                 if Statics.GetLandFlag(landInfo.StaticID,"Wet"):
-                    #print("TargetExecute(x = {}, y = {}, staticZ = {})".format(x, y, landInfo.StaticZ))
                     Target.TargetExecute(x, y, landInfo.StaticZ)
                     Misc.Pause(fishDelayMs)
                     fished = True
@@ -710,11 +673,8 @@ def run_crab_fishing_loop(
         for i in range(0, moveTiles):
             Player.ChatSay("forward one")
             Misc.Pause(750)    
-            
-            
 
-TRUE_NORTH_DIRECTION_MAP = ["Forward One", "Right One", "Back One", "Left One"]
-
+# Internal helper
 # Essentially returns an array offset for TRUE_NORTH_DIRECTION_MAP
 # Depending on boat direction, shift that array so that forward always
 # means forward. Otherwise youll end up in Peru.
@@ -773,12 +733,15 @@ def sail_to_tile(
             Player.ChatSay(directionMap[0])
         Misc.Pause(1000)
 
-# Global because the function should not forget
+# Global cache for the ocean_looter_callback function
+# so we dont sail to the same corpses repeatadly.
 cacheLooted = []
 
-# Looks for corpses in the ocean, sails to them, pauses for your autolooter
-# then returns to the original spot.
-def run_ocean_looter(
+# Meant to be a callback function provided to run_fishing_loop. This will
+# look for corpses in the ocean, sail to them, pauses for your autolooter
+# then returns to the original spot. Useful if you dont want to miss
+# message in a bottle
+def ocean_looter_callback(
 
     # Time to delay between issuing commands to move boat. This is slow.
     moveCmdLatencyMs = 650,
