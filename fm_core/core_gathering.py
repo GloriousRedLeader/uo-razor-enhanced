@@ -391,25 +391,30 @@ def run_mining_loop(
 TRUE_NORTH_DIRECTION_MAP = ["Forward One", "Right One", "Back One", "Left One"]
 
 # Auto fishes in all the lands. Works on a boat. Works on a dock.
-# If you are on a boat, you can use the moveTiles param to move boat after each fishing attempt.
-# It will say forward one X number of times.
+# Works if youre on a rock. Take advantage of the moveTiles param to move boat after 
+# each fishing attempt. It will say forward one X number of times.
 # Can automatically cut fish. Can automatically store fish in hold.
 def run_fishing_loop(
-    # How many tiles in front of character to fish
+
+    # (Optional) How many tiles in front of character to cast. Defaults to 4 tiles
+    # in front of character.
     fishRange = 4, 
     
-    # If on a boat, tells the tiller to move forward this many times.
+    # (Optional) After each cast move the boat forward this many tiles. Useful if on a boat.
+    # Just tells the tiller forward one this many times. Default is 0 (stay in same spot). 
     moveTiles = 0, 
     
-    # How long to pause between casts
-    fishDelayMs = 10000,
+    # (Optional) How long to pause between casts in ms. Default is 9000ms.
+    fishDelayMs = 9000,
     
-    # 0 = Do nothing, leave in backpack
+    # 0 = Do nothing, leave in backpack (default)
     # 1 = cut fish with dagger to reduce weight, makes lots of fish steaks
     # 2 = place fish in cargo hold of ship, have to be standing near cargo hold
     fishHandling = 0,
     
-    # Will not do any fishHandling operations on this fish. Leaves it in backpack. Useful for fishing quests.
+    # (Optional) String name of fish you want to keep safe. Will not do any fishHandling operations on this fish. 
+    # Leaves it in backpack. Useful for fishing quests. Useful if you are doing fish monger quests. 
+    # Default is none.
     fishToKeep = None,
     
     # (Optional) function to call after each fishing attempt, e.g. auto looter (see below)

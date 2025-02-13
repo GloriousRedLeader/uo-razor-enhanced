@@ -11,17 +11,17 @@ from Scripts.fm_core.core_gathering import run_crab_fishing_loop
 run_crab_fishing_loop(
 
     # Number of times to run the crab loop. Default is 1 then it stops.
-    numLoops = 1,
+    numLoops = 2,
     
     # If on a boat, tells the tiller to move forward this many times.
-    moveTiles = 0, 
+    moveTiles = 4, 
     
     # Number of traps to use. If you dont have this many, will use only what you have.
-    maxTraps = 19,
+    maxTraps = 5,
     
     # How long to pause between casts
-    trapDelayMs = 65000,
+    trapDelayMs = 5000,
     
     # Will not do any fishHandling operations on this fish. Leaves it in backpack. Useful for fishing quests.
-    fishToKeep = None
+    fishToKeep = "blue crab"
 )
