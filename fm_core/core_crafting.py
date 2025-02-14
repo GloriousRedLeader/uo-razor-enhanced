@@ -1598,7 +1598,7 @@ def run_bod_builder(
                         foundCraftedItem = False
                         for craftedItem in Items.FindBySerial(craftContainer).Contains:
                             if smallBod.getCraftedItemName().lower() in craftedItem.Name.lower():
-                                if smallBod.isExceptional and not any(prop.ToString() == "exceptional" for prop in craftedItem.Properties):
+                                if smallBod.isExceptional and not any(prop.ToString().lower() == "exceptional" for prop in craftedItem.Properties):
                                     continue
                                     
                                 if smallBod.specialMaterialHue != craftedItem.Color:
