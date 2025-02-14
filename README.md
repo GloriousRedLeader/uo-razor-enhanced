@@ -48,6 +48,8 @@ A rather inefficient **Caster Attack Loop**. Good for mage tamer and InsaneUO sp
 
 A couple of **resource gathering** scripts. Use with caution. Don't break any rules. Includes fishing on a boat (also crab fishing), lumberjacking, and mining.
 
+**Restocker** is InsaneUO specific. It moves items from resource boxes (miner's storage box, reagent box, etc.) to a real container. No more clicking a million times and letting resources pile up at your feet. Useful in conjunction with bod builder. 
+
 **BOD Builder** script to automate crafting and filling small and large bods. Seriously, this does 100% of the work for you. Highly configurable. Current support for
 * Alchemy
 * Tailoring
@@ -55,7 +57,10 @@ A couple of **resource gathering** scripts. Use with caution. Don't break any ru
 * Blacksmithy
 * Tinkering
 
-**Move Items** scripts to put things in various containers. I bind about 3 of these to the M key (shift + M,alt + M) lots of use cases.
+**Move Items** scripts to put things in various containers. Lots of different flavors and uses. They all present with a target reticle so no need for hard coding anything. Different flavors include:
+* Move x number of items from one container to another (type number of items in chat, target source container, target destination container)
+* Move all items of a type from their current container to another container (target item, target destination container)
+* Move all items from container to another container (target source container, target destination container)
 
 **Automated character movement** script that uses the rails framework. Several default routes already established. You can easily add your own, it's just a list of x, y coordinates. Use this in conjunction with dexer / caster loops for maximum farming. For the love of all that is holy, use while you're at your machine supervising. You will get banned.
 
