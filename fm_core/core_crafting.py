@@ -428,7 +428,7 @@ class SmallBod:
             return self.specialMaterialName + " " + self.recipe.recipeName if self.specialMaterialName is not None else self.recipe.recipeName
 
         # Tinkering only some categories have this prefix
-        if self.recipe.toolId == TINKERING_TOOL_STATIC_ID and self.recipe.gumpCategory in [CAT_TINKERING_UTENSILS, CAT_TINKERING_MISCELLANEOUS]:
+        if self.recipe.toolId == TINKERING_TOOL_STATIC_ID and self.recipe.gumpCategory in [CAT_TINKERING_UTENSILS, CAT_TINKERING_MISCELLANEOUS, CAT_TINKERING_TOOLS]:
             return self.specialMaterialName + " " + self.recipe.recipeName if self.specialMaterialName is not None else self.recipe.recipeName            
             
         # Carpentry weapons and armo will turn into "oak gnarled staff" - but not furniture or containers or instruments, praise be
