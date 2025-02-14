@@ -28,15 +28,10 @@ from Scripts.fm_core.core_crafting import run_bod_builder
 # Automate bod building (both small and large). You just dump all your bods into the starting
 # container and it will sort them, craft items, fill small bods, combine large bods, etc. 
 #
-# WARNING: OPERATES IN BACKPACK AND WILL SALVAGE BLACKSMITH AND TAILORING ITEMS. DO NOT HAVE
-# ANYTHING GOOD IN YOUR BACKPACK WHILE YOU RUN THIS SCRIPT YOU RISK LOSING IT.
+# WARNING: IF  YOU SET craftContainer AS YOUR BACKPACK IT YOU RISK LOSING ITEMS.
 #
-# Known quirks:
-#   - For inscription, scrolls are stacked after crafting. The auto-add-to-sbod part may fail
-#       if the stack has more than one. So, you'll have to stop the script and separate the items
-#       into individual stacks of one and restart the script. Normally the item is added to the sbod
-#       deed immediately. But internet fuzz and crashing in the middle of an inscription scroll sbod
-#       may leave it in this state. Be aware.
+# Quirks:
+#   - If you fail to create an alchemy potion, it drops the bottle in your backpack for some reason. 
 #
 # Requirements:
 #   - You need a container to do work in (put a bag in your backpack)

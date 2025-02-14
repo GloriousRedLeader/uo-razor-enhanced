@@ -32,6 +32,15 @@ from Scripts.fm_core.core_items import WHITE_PEARL
 from Scripts.fm_core.core_items import FIRE_RUBY
 from Scripts.fm_core.core_items import PERFECT_EMERALD
 from Scripts.fm_core.core_items import TURQUOISE
+from Scripts.fm_core.core_items import STAR_SAPPHIRE
+from Scripts.fm_core.core_items import CITRINE 
+from Scripts.fm_core.core_items import DIAMOND
+from Scripts.fm_core.core_items import AMBER
+from Scripts.fm_core.core_items import AMETHYST
+from Scripts.fm_core.core_items import SAPPHIRE
+from Scripts.fm_core.core_items import RUBY
+from Scripts.fm_core.core_items import EMERALD
+from Scripts.fm_core.core_items import TOURMALINE
 from Scripts.fm_core.core_items import MANDRAKEROOT
 from Scripts.fm_core.core_items import BLOODMOSS
 from Scripts.fm_core.core_items import SULPHUROUSASH
@@ -91,9 +100,9 @@ from Scripts.fm_core.core_items import HUE_TINKERING
 # resourceBoxSerial: Inspect your resource box with razor, get the serial, plug it in
 # resourceBoxButton: This is the button id of the gump. You can use gump inspector. Starts at 100 and increments up.
 # amount: The number of items you want in your commodityDeedBox.
-# resourceBoxPage: (Optional) The gump has multiple pages. Starts at 0. Most items are on page 0.
+# resourceBoxPage: (Optional) The gump has multiple pages. Starts at 1 (default screen). Most items are on page 1.
 class RestockItem:
-    def __init__(self, itemId, itemHue, resourceBoxSerial, resourceBoxButton, amount = 10000, resourceBoxPage = 0):
+    def __init__(self, itemId, itemHue, resourceBoxSerial, resourceBoxButton, amount = 10000, resourceBoxPage = 1):
         self.itemId = itemId
         self.itemHue = itemHue
         self.resourceBoxSerial = resourceBoxSerial
@@ -105,44 +114,51 @@ class RestockItem:
         return f"RestockItem(itemId='{self.itemId}', itemHue={self.itemHue}, amount='{self.amount}', resourceBoxSerial='{self.resourceBoxSerial}', resourceBoxButton='{self.resourceBoxButton}', resourceBoxPage='{self.resourceBoxPage}')"        
 
 # User would define something like this and pass it as an arg to the run_restocker() function.
-#RESOURCES = [
-#    RestockItem(BLACKPEARL, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 100, 10000, 0),
-#    RestockItem(BLOODMOSS, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 101, 10000, 0),
-#    RestockItem(GARLIC, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 102, 10000, 0),
-#    RestockItem(GINSENG, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 103, 10000, 0),
-#    RestockItem(MANDRAKEROOT, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 104, 10000, 0),
-#    RestockItem(NIGHTSHADE, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 105, 10000, 0),
-#    RestockItem(SULPHUROUSASH, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 106, 10000, 0),
-#    RestockItem(SPIDERSILK, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 107, 10000, 0),
-#    RestockItem(BATWING, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 108, 10000, 0),
-#    RestockItem(GRAVEDUST, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 109, 10000, 0),
-#    RestockItem(DAEMONBLOOD, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 110, 10000, 0),
-#    RestockItem(NOXCRYSTAL, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 111, 10000, 0),
-#    RestockItem(PIGIRON, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 112, 10000, 0),
-#
-#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_DEFAULT, woodResourceBoxSerial, 107, 10000, 0),
-#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_OAK, woodResourceBoxSerial, 108, 10000, 0),
-#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_ASH, woodResourceBoxSerial, 109, 10000, 0),
-#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_YEW, woodResourceBoxSerial, 110, 10000, 0),
-#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_HEARTWOOD, woodResourceBoxSerial, 111, 10000, 0),
-#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_BLOODWOOD, woodResourceBoxSerial, 112, 10000, 0),
-#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_FROSTWOOD, woodResourceBoxSerial, 113, 10000, 0),
-#
-#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_DEFAULT, ingotResourceBoxSerial, 101, 10000, 0),
-#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_DULL_COPPER, ingotResourceBoxSerial, 101, 10000, 0),
-#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_SHADOW_IRON, ingotResourceBoxSerial, 102, 10000, 0),
-#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_COPPER, ingotResourceBoxSerial, 103, 10000, 0),
-#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_BRONZE, ingotResourceBoxSerial, 104, 10000, 0),
-#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_GOLD, ingotResourceBoxSerial, 105, 10000, 0),
-#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_AGAPITE, ingotResourceBoxSerial, 106, 10000, 0),
-#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_VERITE, ingotResourceBoxSerial, 107, 10000, 0),
-#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_VALORITE, ingotResourceBoxSerial, 108, 10000, 0),
-#
-#    RestockItem(CLOTH_STATIC_ID, RESOURCE_HUE_DEFAULT, leatherResourceBoxSerial, 111, 10000, 0),
-#    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_DEFAULT, leatherResourceBoxSerial, 100, 10000, 0),
-#    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_SPINED, leatherResourceBoxSerial, 101, 10000, 0),
-#    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_HORNED, leatherResourceBoxSerial, 102, 10000, 0),
-#    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_BARBED, leatherResourceBoxSerial, 103, 10000, 0),
+#resources = [
+#    RestockItem(BLACKPEARL, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 100, 10000),
+#    RestockItem(BLOODMOSS, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 101, 10000),
+#    RestockItem(GARLIC, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 102, 10000),
+#    RestockItem(GINSENG, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 103, 10000),
+#    RestockItem(MANDRAKEROOT, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 104, 10000),
+#    RestockItem(NIGHTSHADE, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 105, 10000),
+#    RestockItem(SULPHUROUSASH, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 106, 10000),
+#    RestockItem(SPIDERSILK, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 107, 10000),
+#    RestockItem(BATWING, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 108, 10000),
+#    RestockItem(GRAVEDUST, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 109, 10000),
+#    RestockItem(DAEMONBLOOD, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 110, 10000),
+#    RestockItem(NOXCRYSTAL, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 111, 10000),
+#    RestockItem(PIGIRON, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 112, 10000),
+#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_DEFAULT, logsAndBoardsResourceBoxSerial, 107, 10000),
+#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_OAK, logsAndBoardsResourceBoxSerial, 108, 10000),
+#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_ASH, logsAndBoardsResourceBoxSerial, 109, 10000),
+#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_YEW, logsAndBoardsResourceBoxSerial, 110, 10000),
+#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_HEARTWOOD, logsAndBoardsResourceBoxSerial, 111, 10000),
+#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_BLOODWOOD, logsAndBoardsResourceBoxSerial, 112, 10000),
+#    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_FROSTWOOD, logsAndBoardsResourceBoxSerial, 113, 10000),
+#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_DEFAULT, minerResourceBoxSerial, 101, 10000),
+#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_DULL_COPPER, minerResourceBoxSerial, 101, 10000),
+#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_SHADOW_IRON, minerResourceBoxSerial, 102, 10000),
+#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_COPPER, minerResourceBoxSerial, 103, 10000),
+#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_BRONZE, minerResourceBoxSerial, 104, 10000),
+#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_GOLD, minerResourceBoxSerial, 105, 10000),
+#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_AGAPITE, minerResourceBoxSerial, 106, 10000),
+#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_VERITE, minerResourceBoxSerial, 107, 10000),
+#    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_VALORITE, minerResourceBoxSerial, 108, 10000),
+#    RestockItem(CLOTH_STATIC_ID, RESOURCE_HUE_DEFAULT, tailorResourceBoxSerial, 111, 10000),
+#    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_DEFAULT, tailorResourceBoxSerial, 100, 10000),
+#    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_SPINED, tailorResourceBoxSerial, 101, 10000),
+#    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_HORNED, tailorResourceBoxSerial, 102, 10000),
+#    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_BARBED, tailorResourceBoxSerial, 103, 10000),
+#    RestockItem(CITRINE, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 100, 1000),
+#    RestockItem(EMERALD, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 102, 1000),
+#    RestockItem(TOURMALINE, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 104, 1000),
+#    RestockItem(DIAMOND, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 106, 1000),
+#    RestockItem(SAPPHIRE, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 108, 1000),
+#    RestockItem(STAR_SAPPHIRE, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 109, 1000),
+#    RestockItem(RUBY, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 111, 1000),
+#    RestockItem(AMBER, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 113, 1000),
+#    RestockItem(AMETHYST, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 115, 1000),
+#    RestockItem(WHITE_PEARL, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 117, 100, 2),
 #]
 
 # Helper that returns sum of all the stacks in a container, ideally there would just be one stack.
@@ -166,12 +182,12 @@ def run_restocker(
     # Page is the page on the gump menu.
     resources,
     
-    # Time to wait between item moves. Adjust with caution. Reducing this will increase speed
-    # of the script, but you risk disconnects and other issues maintaining state
+    # (Optional) Time to wait between item moves. Adjust with caution. Reducing this will increase speed
+    # of the script, but you risk disconnects and other issues maintaining state. Default is 1 second.
     itemMoveDelayMs = 1000,    
     
     # (Optional) Timeout between  gump button presses. Configure based on server latency.
-    gumpDelayMs = 250
+    gumpDelayMs = 500
 ):
     RESOURCE_BOX_GUMP_ID = 0x23d0f169
     
@@ -192,10 +208,10 @@ def run_restocker(
         Gumps.WaitForGump(RESOURCE_BOX_GUMP_ID, 3000)
         Misc.Pause(gumpDelayMs)
         
-        for page in range(0, resource.resourceBoxPage):
+        for page in range(1, resource.resourceBoxPage):
             Gumps.SendAction(RESOURCE_BOX_GUMP_ID, 2)
             Gumps.WaitForGump(RESOURCE_BOX_GUMP_ID, 3000)
-            Misc.Pause(gumpDelayMs)
+            Misc.Pause(gumpDelayMs * 4)
             
         while True:
             amountInBox = get_amount_in_container(resource, commodityBoxSerial)
@@ -271,6 +287,16 @@ CAT_INSCRIPTION_NECRO = 29
 CAT_INSCRIPTION_OTHER = 36
 CAT_INSCRIPTION_MYSTICISM = 43
 
+CAT_TINKERING_JEWELRY = 1
+CAT_TINKERING_WOODEN_ITEMS = 8
+CAT_TINKERING_TOOLS = 15
+CAT_TINKERING_PARTS = 22
+CAT_TINKERING_UTENSILS = 29
+CAT_TINKERING_MISCELLANEOUS = 36
+CAT_TINKERING_ASSEMBLIES = 43
+CAT_TINKERING_TRAPS = 50
+CAT_TINKERING_MAGIC_JEWELRY = 57
+
 # Internal data structure for storing ingredients for a recipe.
 class SmallBodResource:
     def __init__(self, resourceId, amount = 35):
@@ -294,6 +320,10 @@ class SmallBodResource:
         # Light things like reagents < 1 stone
         if self.resourceId in [MANDRAKEROOT, BLOODMOSS, SULPHUROUSASH, NIGHTSHADE, BLACKPEARL, SPIDERSILK, GINSENG, GARLIC, PIGIRON, BATWING, NOXCRYSTAL, DAEMONBLOOD, GRAVEDUST]:
             return self.amount * 50
+
+        # Light things like gems  
+        if self.resourceId in [STAR_SAPPHIRE, CITRINE, TURQUOISE, DIAMOND, AMBER, AMETHYST, SAPPHIRE, RUBY, EMERALD, TOURMALINE]:
+            return self.amount * 50      
             
         return self.amount
         
@@ -323,6 +353,27 @@ class SmallBodRecipe:
         
 # Internal data structure used in our main method. Represents a bod and its recipe. 
 class SmallBod:
+    
+    #prefixes = {
+    #        RESOURCE_HUE_DULL_COPPER: "dull copper",
+    #        RESOURCE_HUE_SHADOW_IRON: "shadow iron",
+    #        RESOURCE_HUE_COPPER: "copper",
+    #        RESOURCE_HUE_BRONZE: "bronze",
+    #        RESOURCE_HUE_GOLD: "golden",
+    #        RESOURCE_HUE_AGAPITE: "agapite",
+    #        RESOURCE_HUE_VERITE: "verite",
+    #        RESOURCE_HUE_VALORITE: "valorite",
+    #        RESOURCE_HUE_SPINED: "spined",
+    #        RESOURCE_HUE_HORNED: "horned",
+    #        RESOURCE_HUE_BARBED: "barbed",
+    #        RESOURCE_HUE_OAK: "oak",
+    #        RESOURCE_HUE_ASH: "ash",
+    #        RESOURCE_HUE_YEW: "yew",
+    #        RESOURCE_HUE_HEARTWOOD: "heartwood",
+    #        RESOURCE_HUE_BLOODWOOD: "bloodwood",
+    #        RESOURCE_HUE_FROSTWOOD: "frostwood"
+    #}    
+    
     def __init__(self, bodSerial, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, specialMaterialName, recipe):
         #self.craftedItemName = craftedItemName
         self.amountMade = amountMade
@@ -334,6 +385,22 @@ class SmallBod:
         self.specialMaterialName = specialMaterialName
         self.recipe = recipe
         self.bodSerial = bodSerial
+        
+    # For the most part the names of items needed in small bods matches
+    # what is listed in large bods. There are exceptions. Thats what this is for.
+    def getNameInLargeBod(self):
+        
+        # smallbod this is skillet, in largebod this is frypan
+        if self.recipe.recipeName == "skillet":
+            return "frypan"
+
+        return self.recipe.recipeName
+
+    # Not used
+#    def getSpecialMaterialPrefix(self):
+#        # Blacksmithy weapons all turn into "plate helm" (normal iron ingots) or "dull copper plate helm" (dull copper)
+#        if self.recipe.toolId in [BLACKSMITHY_TOOL_STATIC_ID, TAILORING_TOOL_STATIC_ID, TINKERING_TOOL_STATIC_ID] and self.specialMaterialHue in prefixes:
+#            return prefixes[self.specialMaterialHue] + " "
     
     # So we can find crafted items either to salvage, trash, or combine with deed.
     # Have to account for special materials, e.g. plate helm becomes shadow iron plate helm
@@ -342,14 +409,12 @@ class SmallBod:
     # Most of the time, this matches the recipe name. But caps get weird. Sometimes they use them,
     # sometimes they dont, e.g. the recipe for "Wooden Throne" is caps and others are lower.
     def getCraftedItemName(self):
-        # Blacksmithy weapons all turn into "plate helm" (normal iron ingots) or "dull copper plate helm" (dull copper)
-        if self.recipe.toolId in [BLACKSMITHY_TOOL_STATIC_ID, TAILORING_TOOL_STATIC_ID]:
-            return self.specialMaterialName + " " + self.recipe.recipeName if self.specialMaterialName is not None else self.recipe.recipeName
-            
-        # Carpentry weapons and armo will turn into "oak gnarled staff" - but not furniture or containers or instruments, praise be
-        if self.recipe.toolId == CARPENTRY_TOOL_STATIC_ID and self.recipe.gumpCategory in [CAT_CARPENTRY_WEAPONS, CAT_CARPENTRY_ARMOR]:
-            return self.specialMaterialName + " " + self.recipe.recipeName if self.specialMaterialName is not None else self.recipe.recipeName            
-            
+        
+        # Tinkering puts iron in front of some items. Be careful with tings like "iron key" which
+        # is the real name, we dont want to make it "iron iron key"
+        if self.recipe.recipeName == "globe" and self.specialMaterialHue == RESOURCE_HUE_DEFAULT:
+            return "iron globe"
+        
         # Carpentry strikes again
         if self.recipe.recipeName == "wooden shelf":
             return "empty bookcase"
@@ -357,6 +422,18 @@ class SmallBod:
         # Large and Small crates turn into "crate"
         if self.recipe.recipeName in ["Large Crate", "Medium Crate"]:
             return "crate"
+            
+        # Blacksmithy weapons all turn into "plate helm" (normal iron ingots) or "dull copper plate helm" (dull copper)
+        if self.recipe.toolId in [BLACKSMITHY_TOOL_STATIC_ID, TAILORING_TOOL_STATIC_ID]:
+            return self.specialMaterialName + " " + self.recipe.recipeName if self.specialMaterialName is not None else self.recipe.recipeName
+
+        # Tinkering only some categories have this prefix
+        if self.recipe.toolId == TINKERING_TOOL_STATIC_ID and self.recipe.gumpCategory in [CAT_TINKERING_UTENSILS, CAT_TINKERING_MISCELLANEOUS]:
+            return self.specialMaterialName + " " + self.recipe.recipeName if self.specialMaterialName is not None else self.recipe.recipeName            
+            
+        # Carpentry weapons and armo will turn into "oak gnarled staff" - but not furniture or containers or instruments, praise be
+        if self.recipe.toolId == CARPENTRY_TOOL_STATIC_ID and self.recipe.gumpCategory in [CAT_CARPENTRY_WEAPONS, CAT_CARPENTRY_ARMOR]:
+            return self.specialMaterialName + " " + self.recipe.recipeName if self.specialMaterialName is not None else self.recipe.recipeName            
 
         # Default is to just use the exact recipe name that matches crafted item, e.g. "Deadly Poison potion"
         return self.recipe.recipeName        
@@ -443,6 +520,207 @@ class BodReport:
 
 # Default list of recipes. See SmallBodRecipe. You can use these, edit these, or just define your own.
 RECIPES = [
+
+    ############################ Tinkering ############################
+    
+    # Jewelry
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 2, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 9, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 16, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 23, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 30, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 37, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),
+    SmallBodRecipe(True, "star sapphire ring", CAT_TINKERING_JEWELRY, 44, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(STAR_SAPPHIRE, 1)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 51, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 58, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),
+    SmallBodRecipe(True, "star sapphire earrings", CAT_TINKERING_JEWELRY, 65, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(STAR_SAPPHIRE, 1)] ),
+    
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 72, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),
+    SmallBodRecipe(True, "star sapphire bracelet", CAT_TINKERING_JEWELRY, 79, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(STAR_SAPPHIRE, 1)] ),
+    SmallBodRecipe(True, "emerald ring", CAT_TINKERING_JEWELRY, 86, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(EMERALD, 1)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 93, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 100, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),
+    SmallBodRecipe(True, "emerald earrings", CAT_TINKERING_JEWELRY, 107, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(EMERALD, 1)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 114, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),
+    SmallBodRecipe(True, "emerald bracelet", CAT_TINKERING_JEWELRY, 121, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(EMERALD, 1)] ),
+    SmallBodRecipe(True, "sapphire ring", CAT_TINKERING_JEWELRY, 128, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(SAPPHIRE, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 135, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 142, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "sapphire earrings", CAT_TINKERING_JEWELRY, 149, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(SAPPHIRE, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 156, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "sapphire bracelet", CAT_TINKERING_JEWELRY, 163, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(SAPPHIRE, 1)] ),   
+    SmallBodRecipe(True, "ruby ring", CAT_TINKERING_JEWELRY, 170, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(RUBY, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 177, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 184, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "ruby earrings", CAT_TINKERING_JEWELRY, 191, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(RUBY, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 198, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "ruby bracelet", CAT_TINKERING_JEWELRY, 205, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(RUBY, 1)] ),   
+    
+    SmallBodRecipe(True, "citrine ring", CAT_TINKERING_JEWELRY, 212, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(CITRINE, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 219, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 226, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "citrine earrings", CAT_TINKERING_JEWELRY, 233, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(CITRINE, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 240, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "citrine bracelet", CAT_TINKERING_JEWELRY, 247, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(CITRINE, 1)] ),   
+    SmallBodRecipe(True, "amethyst ring", CAT_TINKERING_JEWELRY, 254, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(AMETHYST, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 261, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 268, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "amethyst earrings", CAT_TINKERING_JEWELRY, 275, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(AMETHYST, 1)] ),   
+    
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 282, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "amethyst bracelet", CAT_TINKERING_JEWELRY, 289, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(AMETHYST, 1)] ),   
+    SmallBodRecipe(False, "tourmaline ring", CAT_TINKERING_JEWELRY, 296, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(TOURMALINE, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 303, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 310, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "tourmaline earrings", CAT_TINKERING_JEWELRY, 317, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(TOURMALINE, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 324, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "tourmaline bracelet", CAT_TINKERING_JEWELRY, 331, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(TOURMALINE, 1)] ),   
+    SmallBodRecipe(True, "amber ring", CAT_TINKERING_JEWELRY, 338, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(AMBER, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 345, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 352, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "amber earrings", CAT_TINKERING_JEWELRY, 359, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(AMBER, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 366, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "amber bracelet", CAT_TINKERING_JEWELRY, 373, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(AMBER, 1)] ),   
+    SmallBodRecipe(False, "diamond ring", CAT_TINKERING_JEWELRY, 380, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(DIAMOND, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 387, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 394, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "diamond earrings", CAT_TINKERING_JEWELRY, 401, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(DIAMOND, 1)] ),   
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_JEWELRY, 408, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(1000000000, 1)] ),   
+    SmallBodRecipe(True, "diamond bracelet", CAT_TINKERING_JEWELRY, 415, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(DIAMOND, 1)] ),   
+    
+    # Wodden Items
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 2, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 9, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 16, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 23, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "clock frame", CAT_TINKERING_WOODEN_ITEMS, 30, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID, 6)] ),
+    SmallBodRecipe(False, "axle", CAT_TINKERING_WOODEN_ITEMS, 37, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 44, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 51, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 58, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 65, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 72, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 79, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 86, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 93, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 100, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 107, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 114, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 121, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 128, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    
+    # Tools
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_TOOLS, 2, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(True, "mortar and pestle", CAT_TINKERING_TOOLS, 9, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 3)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_TOOLS, 16, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_TOOLS, 23, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "hatchet", CAT_TINKERING_TOOLS, 30, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_TOOLS, 37, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(True, "sewing kit", CAT_TINKERING_TOOLS, 44, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_TOOLS, 51, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_TOOLS, 58, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "froe", CAT_TINKERING_TOOLS, 65, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_TOOLS, 72, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_TOOLS, 79, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "tongs", CAT_TINKERING_TOOLS, 86, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 1)] ),
+    SmallBodRecipe(True, "smith's hammer", CAT_TINKERING_TOOLS, 93, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ), #'
+    SmallBodRecipe(False, "saw", CAT_TINKERING_TOOLS, 100, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_TOOLS, 107, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "pickaxe", CAT_TINKERING_TOOLS, 114, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_TOOLS, 121, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    # This goddamned thing is a killet in smallbods (item name is skillet too) but a frypan in large bods
+    SmallBodRecipe(True, "skillet", CAT_TINKERING_TOOLS, 128, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ),   
+    SmallBodRecipe(False, "flour sifter", CAT_TINKERING_TOOLS, 135, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 3)] ),   
+    SmallBodRecipe(True, "arrow fletching", CAT_TINKERING_TOOLS, 142, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 3)] ),   
+    SmallBodRecipe(False, "clippers", CAT_TINKERING_TOOLS, 163, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ),   
+    SmallBodRecipe(False, "pitchfork", CAT_TINKERING_TOOLS, 177, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ),   
+   
+    # Parts
+    SmallBodRecipe(False, "gears", CAT_TINKERING_PARTS, 2, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "clock parts", CAT_TINKERING_PARTS, 9, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 1)] ),
+    SmallBodRecipe(False, "barrel tap", CAT_TINKERING_PARTS, 16, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "springs", CAT_TINKERING_PARTS, 23, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "sextant parts", CAT_TINKERING_PARTS, 30, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ),
+    SmallBodRecipe(False, "barrel hoops", CAT_TINKERING_PARTS, 37, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 5)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 44, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 51, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 58, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 65, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 72, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 79, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 86, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 93, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 100, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 107, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 114, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 121, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_PARTS, 128, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ), 
+
+    # Utensils
+    SmallBodRecipe(True, "butcher knife", CAT_TINKERING_UTENSILS, 2, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(True, "spoon", CAT_TINKERING_UTENSILS, 9, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 1)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_UTENSILS, 16, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(True, "plate", CAT_TINKERING_UTENSILS, 23, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(True, "fork", CAT_TINKERING_UTENSILS, 30, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 1)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_UTENSILS, 37, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "cleaver", CAT_TINKERING_UTENSILS, 44, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 3)] ),
+    SmallBodRecipe(True, "knife", CAT_TINKERING_UTENSILS, 51, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 1)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_UTENSILS, 58, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(True, "goblet", CAT_TINKERING_UTENSILS, 65, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "pewter mug", CAT_TINKERING_UTENSILS, 72, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_UTENSILS, 79, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_UTENSILS, 86, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_UTENSILS, 93, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_UTENSILS, 100, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_UTENSILS, 107, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_UTENSILS, 114, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_UTENSILS, 121, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_UTENSILS, 128, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ), 
+   
+    # Miscellaneous
+    SmallBodRecipe(True, "key ring", CAT_TINKERING_MISCELLANEOUS, 2, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "candelabra", CAT_TINKERING_MISCELLANEOUS, 9, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ),
+    SmallBodRecipe(False, "scales", CAT_TINKERING_MISCELLANEOUS, 16, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ),
+    SmallBodRecipe(False, "iron key", CAT_TINKERING_MISCELLANEOUS, 23, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 3)] ),
+    SmallBodRecipe(True, "globe", CAT_TINKERING_MISCELLANEOUS, 30, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ),
+    SmallBodRecipe(False, "spyglass", CAT_TINKERING_MISCELLANEOUS, 37, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 4)] ),
+    SmallBodRecipe(False, "lantern", CAT_TINKERING_MISCELLANEOUS, 44, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 51, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 58, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 65, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 72, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 79, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 86, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 93, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 100, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 107, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 114, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 121, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_MISCELLANEOUS, 128, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),   
+ 
+    # Assemblies
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 2, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 9, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 16, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 23, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 30, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 37, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 44, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 51, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 58, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 65, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 72, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 79, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 86, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 93, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 100, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 107, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 114, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 121, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),
+    SmallBodRecipe(False, "00000000000", CAT_TINKERING_ASSEMBLIES, 128, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID)] ),    
+
     
     ############################ Tailoring ############################
     
@@ -567,15 +845,6 @@ RECIPES = [
     SmallBodRecipe(False, "Protection", CAT_INSCRIPTION_FIRST_SECOND, 100, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(GINSENG, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Strength", CAT_INSCRIPTION_FIRST_SECOND, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     
-#    from Scripts.fm_core.core_items import MANDRAKEROOT
-#from Scripts.fm_core.core_items import BLOODMOSS
-#from Scripts.fm_core.core_items import SULPHUROUSASH
-#from Scripts.fm_core.core_items import NIGHTSHADE
-#from Scripts.fm_core.core_items import BLACKPEARL
-#from Scripts.fm_core.core_items import SPIDERSILK
-#from Scripts.fm_core.core_items import GINSENG
-#from Scripts.fm_core.core_items import GARLIC        
-    
     SmallBodRecipe(False, "Bless", CAT_INSCRIPTION_THIRD_FOURTH, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     SmallBodRecipe(False, "Fireball", CAT_INSCRIPTION_THIRD_FOURTH, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1) ] ),
     SmallBodRecipe(False, "Magic Lock", CAT_INSCRIPTION_THIRD_FOURTH, 16, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(GARLIC, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
@@ -592,15 +861,6 @@ RECIPES = [
     SmallBodRecipe(False, "Lightning", CAT_INSCRIPTION_THIRD_FOURTH, 93, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(False, "Mana Drain", CAT_INSCRIPTION_THIRD_FOURTH, 100, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     SmallBodRecipe(True, "Recall", CAT_INSCRIPTION_THIRD_FOURTH, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
-    
-#    from Scripts.fm_core.core_items import MANDRAKEROOT
-#from Scripts.fm_core.core_items import BLOODMOSS
-#from Scripts.fm_core.core_items import SULPHUROUSASH
-#from Scripts.fm_core.core_items import NIGHTSHADE
-#from Scripts.fm_core.core_items import BLACKPEARL
-#from Scripts.fm_core.core_items import SPIDERSILK
-#from Scripts.fm_core.core_items import GINSENG
-#from Scripts.fm_core.core_items import GARLIC    
     
     SmallBodRecipe(True, "Blade Spirits", CAT_INSCRIPTION_FIFTH_SIXTH, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(NIGHTSHADE, 1), SmallBodResource(MANDRAKEROOT, 1) ] ),
     SmallBodRecipe(True, "Dispel Field", CAT_INSCRIPTION_FIFTH_SIXTH, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(GARLIC, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
@@ -619,16 +879,6 @@ RECIPES = [
     SmallBodRecipe(False, "Paralyze Field", CAT_INSCRIPTION_FIFTH_SIXTH, 100, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(GINSENG, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     SmallBodRecipe(False, "Reveal", CAT_INSCRIPTION_FIFTH_SIXTH, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     
-#    from Scripts.fm_core.core_items import MANDRAKEROOT
-#from Scripts.fm_core.core_items import BLOODMOSS
-#from Scripts.fm_core.core_items import SULPHUROUSASH
-#from Scripts.fm_core.core_items import NIGHTSHADE
-#from Scripts.fm_core.core_items import BLACKPEARL
-#from Scripts.fm_core.core_items import SPIDERSILK
-#from Scripts.fm_core.core_items import GINSENG
-#from Scripts.fm_core.core_items import GARLIC        
-    
-    
     SmallBodRecipe(True, "Chain Lightning", CAT_INSCRIPTION_SEVENTH_EIGTH, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(False, "Energy Field", CAT_INSCRIPTION_SEVENTH_EIGTH, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLACKPEARL, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Flamestrike", CAT_INSCRIPTION_SEVENTH_EIGTH, 16, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
@@ -645,15 +895,6 @@ RECIPES = [
     SmallBodRecipe(True, "Summon Earth Elemental", CAT_INSCRIPTION_SEVENTH_EIGTH, 93, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
     SmallBodRecipe(True, "Summon Fire Elemental", CAT_INSCRIPTION_SEVENTH_EIGTH, 100, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1), SmallBodResource(SULPHUROUSASH, 1) ] ),
     SmallBodRecipe(True, "Summon Water Elemental", CAT_INSCRIPTION_SEVENTH_EIGTH, 107, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(BLOODMOSS, 1), SmallBodResource(MANDRAKEROOT, 1), SmallBodResource(SPIDERSILK, 1) ] ),
-    
-#    from Scripts.fm_core.core_items import MANDRAKEROOT
-#from Scripts.fm_core.core_items import BLOODMOSS
-#from Scripts.fm_core.core_items import SULPHUROUSASH
-#from Scripts.fm_core.core_items import NIGHTSHADE
-#from Scripts.fm_core.core_items import BLACKPEARL
-#from Scripts.fm_core.core_items import SPIDERSILK
-#from Scripts.fm_core.core_items import GINSENG
-#from Scripts.fm_core.core_items import GARLIC        
     
     SmallBodRecipe(True, "animate dead", CAT_INSCRIPTION_NECRO, 2, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(GRAVEDUST, 1), SmallBodResource(DAEMONBLOOD, 1) ] ),
     SmallBodRecipe(True, "blood oath", CAT_INSCRIPTION_NECRO, 9, INSCRIPTION_TOOL_STATIC_ID, [SmallBodResource(BLANK_SCROLL, 1), SmallBodResource(DAEMONBLOOD, 1) ] ),
@@ -679,7 +920,6 @@ RECIPES = [
     
     SmallBodRecipe(False, "barrel staves", CAT_CARPENTRY_OTHER, 2, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "barrel lid", CAT_CARPENTRY_OTHER, 9, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
-    
     
     SmallBodRecipe(False, "foot stool", CAT_CARPENTRY_FURNITURE, 2, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "stool", CAT_CARPENTRY_FURNITURE, 9, CARPENTRY_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
@@ -808,7 +1048,6 @@ PROP_ID_SMALL_BULK_ORDER = 1060654
 PROP_ID_AMOUNT_TO_MAKE = 1060656
 PROP_ID_BOD_EXCEPTIONAL = 1045141
 PROP_ID_ITEM_TEXT = 1060658
-PROP_ID_ITEM_EXCEPTIONAL = 1060636
 
 # This goes prop.Number -> { gump button id, special resource hue, item name }
 # ServUO\Scripts\Services\BulkOrders\SmallBODs\SmallBODGump.cs
@@ -821,7 +1060,7 @@ SPECIAL_PROP_MATERIAL_MAP = {
     1045143: { "button": 20, "hue": RESOURCE_HUE_SHADOW_IRON,   "name": "shadow iron" },    # Shadow Iron
     1045144: { "button": 27, "hue": RESOURCE_HUE_COPPER,        "name": "copper" },         # Copper
     1045145: { "button": 34, "hue": RESOURCE_HUE_BRONZE,        "name": "bronze" },         # Bronze
-    1045146: { "button": 41, "hue": RESOURCE_HUE_GOLD,          "name": "gold" },           # Gold
+    1045146: { "button": 41, "hue": RESOURCE_HUE_GOLD,          "name": "golden" },           # Gold
     1045147: { "button": 48, "hue": RESOURCE_HUE_AGAPITE,       "name": "agapite" },        # Agapite
     1045148: { "button": 55, "hue": RESOURCE_HUE_VERITE,        "name": "verite" },         # Verite
     1045149: { "button": 62, "hue": RESOURCE_HUE_VALORITE,      "name": "valorite" },       # Valorite
@@ -867,7 +1106,6 @@ def parse_small_bod(bod, recipes, alertMissingRecipe = False):
                 recipe = recipes[recipeName]
                 
     if recipe is not None and isSmallBod:
-        #craftedItemName = specialMaterialName + " " + recipe.itemName if specialMaterialName is not None else recipe.itemName
         return SmallBod(bod.Serial, amountMade, isExceptional, amountToMake, specialMaterialButton, specialMaterialHue, specialMaterialPropId, specialMaterialName, recipe)
     elif isSmallBod == True and alertMissingRecipe:
         print("Warning: Skipping because not in recipe list")
@@ -916,22 +1154,10 @@ def get_tool(craftContainer, smallBod, toolContainer, itemMoveDelayMs):
                 Misc.Pause(itemMoveDelayMs)
                 
     return tool
-            
-        
-#    tool = Items.FindByID(smallBod.recipe.toolId, -1, craftContainer, -1)
-#    if tool is not None:
-#        return tool
-#    tool = Items.FindByID(smallBod.recipe.toolId, -1, toolContainer, -1)
-#    if tool is not None:
-#        Items.Move(tool, craftContainer, tool.Amount)
-#        Misc.Pause(1000)
-#        return tool
     
 # Helper method to get resources from the resourceContainer. Ignore me.
 def check_resources(craftContainer, smallBod, resourceContainer, itemMoveDelayMs):
     itemsToMove = []
-    
-    # Optimized
     for resource in smallBod.recipe.resources:
         hue = smallBod.specialMaterialHue if resource.canOverrideHue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
         items = Items.FindAllByID(resource.resourceId, hue, craftContainer, 0)
@@ -940,7 +1166,6 @@ def check_resources(craftContainer, smallBod, resourceContainer, itemMoveDelayMs
         if amountBackpack > resource.amount:
             continue
             
-        #amountNeeded = max(0, resource.amount - amountBackpack)
         amountNeeded = max(0, resource.getOptimizedAmout() - amountBackpack)
         
         items = Items.FindAllByID(resource.resourceId, hue, resourceContainer, -1)
@@ -961,32 +1186,6 @@ def check_resources(craftContainer, smallBod, resourceContainer, itemMoveDelayMs
         Misc.Pause(itemMoveDelayMs)
 
     return True
-    
-    # Original
-    #for resource in smallBod.recipe.resources:
-    #    while True:
-    #        hue = smallBod.specialMaterialHue if resource.can_override_hue() and smallBod.specialMaterialHue is not None else RESOURCE_HUE_DEFAULT    
-    #        items = Items.FindAllByID(resource.resourceId, hue, Player.Backpack.Serial, 0)#
-    #
-    #        amount = 0
-    #        for item in items:
-    #            amount = amount + item.Amount
-    #        
-    #        if amount >= resource.amount:
-    #            break
-    #    
-    #        #print("Resources: {}/{}, getting more...".format(amount, resource.amount))
-    #        item = Items.FindByID(resource.resourceId, hue, resourceContainer, -1)
-    #        if item is not None:
-    #            amountNeeded = resource.amount - amount
-    #            amountRequested = item.Amount if item.Amount <= amountNeeded else amountNeeded
-    #            itemsToMove.append({ "Serial": item.Serial, "Amount": amountRequested })
-    #            Items.Move(item, Player.Backpack.Serial, amountRequested)
-    #            Misc.Pause(1000)
-    #        else:
-    #            return False
-    #    
-    #return True    
     
 # Internal: Helper method to salvage stuff.
 def cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, itemMoveDelayMs, smallBod = None):
@@ -1013,7 +1212,7 @@ def cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, itemM
                 Items.Move(item, trashContainer, item.Amount)
                 Misc.Pause(itemMoveDelayMs)
             
-    ALL_RESOURCES = [INGOT_STATIC_ID, BOARD_STATIC_ID, CLOTH_STATIC_ID, LEATHER_STATIC_ID, MANDRAKEROOT, BLOODMOSS, SULPHUROUSASH, NIGHTSHADE, BLACKPEARL, SPIDERSILK, GINSENG, GARLIC, PIGIRON, BATWING, NOXCRYSTAL, DAEMONBLOOD, GRAVEDUST, EMPTY_BOTTLE_STATIC_ID, BONE, UNMARKED_RUNE, GATE_SCROLL, RECALL_SCROLL, BLANK_SCROLL, PARASITIC_PLANT, LUMINESCENT_FUNGI, WHITE_PEARL, FIRE_RUBY, PERFECT_EMERALD, TURQUOISE ]
+    ALL_RESOURCES = [INGOT_STATIC_ID, BOARD_STATIC_ID, CLOTH_STATIC_ID, LEATHER_STATIC_ID, MANDRAKEROOT, BLOODMOSS, SULPHUROUSASH, NIGHTSHADE, BLACKPEARL, SPIDERSILK, GINSENG, GARLIC, PIGIRON, BATWING, NOXCRYSTAL, DAEMONBLOOD, GRAVEDUST, EMPTY_BOTTLE_STATIC_ID, BONE, UNMARKED_RUNE, GATE_SCROLL, RECALL_SCROLL, BLANK_SCROLL, PARASITIC_PLANT, LUMINESCENT_FUNGI, WHITE_PEARL, FIRE_RUBY, PERFECT_EMERALD, TURQUOISE, STAR_SAPPHIRE, CITRINE, TURQUOISE, DIAMOND, AMBER, AMETHYST, SAPPHIRE, RUBY, EMERALD, TOURMALINE ]
 
     # Cleanup nonessentials, move to resource crate. If a smallBod is present, dont clean up the resources we are workign with
     for resourceId in ALL_RESOURCES:
@@ -1042,9 +1241,14 @@ def build_complete_small_bod_db(smallBodWaitingForLargeBodContainers, recipes):
         for bod in bods:
             smallBod = parse_small_bod(bod, recipes)
             if smallBod is not None and smallBod.isComplete():
-                if smallBod.recipe.recipeName not in db:
-                    db[smallBod.recipe.recipeName] = []
-                db[smallBod.recipe.recipeName].append(smallBod)
+                smallBod.getNameInLargeBod()
+                if smallBod.getNameInLargeBod() not in db:
+                    db[smallBod.getNameInLargeBod()] = []
+                db[smallBod.getNameInLargeBod()].append(smallBod)
+                
+                #if smallBod.recipe.recipeName not in db:
+                #    db[smallBod.recipe.recipeName] = []
+                #db[smallBod.recipe.recipeName].append(smallBod)
                 itemsInDb = itemsInDb + 1    
                     
     print("Database built with {} complete small bods".format(itemsInDb))
@@ -1376,7 +1580,6 @@ def run_bod_builder(
                         print("Warning: Skipping because material is not in allowed list: {}".format(smallBod.getCraftedItemName()))
                         break
                     
-                    
                     if smallBod.isComplete():
                         print("Filled small BOD!")
                         if smallBod.recipe.hasLargeBod:
@@ -1395,7 +1598,7 @@ def run_bod_builder(
                         foundCraftedItem = False
                         for craftedItem in Items.FindBySerial(craftContainer).Contains:
                             if smallBod.getCraftedItemName().lower() in craftedItem.Name.lower():
-                                if smallBod.isExceptional and not any(prop.Number == PROP_ID_ITEM_EXCEPTIONAL for prop in craftedItem.Properties):
+                                if smallBod.isExceptional and not any(prop.ToString() == "exceptional" for prop in craftedItem.Properties):
                                     continue
                                     
                                 if smallBod.specialMaterialHue != craftedItem.Color:
@@ -1444,7 +1647,6 @@ def run_bod_builder(
                             Gumps.CloseGump(SMALL_BOD_GUMP_ID)                        
                             
                         else:
-                            
                             print("Bod progress: craftedItemName={}, recipeName={} {}/{}".format(smallBod.getCraftedItemName(), smallBod.recipe.recipeName, smallBod.amountMade, smallBod.amountToMake))
                             
                             cleanup(craftContainer, salvageBag, trashContainer, resourceContainer, itemMoveDelayMs, smallBod)
@@ -1512,8 +1714,6 @@ def run_bod_builder(
                             Gumps.SendAction(CRAFTING_GUMP_ID, smallBod.recipe.gumpSelection)                    
                             Gumps.WaitForGump(CRAFTING_GUMP_ID, 10000)
                             Misc.Pause(gumpDelayMs) #1000 before
-                            #if not Gumps.HasGump(CRAFTING_GUMP_ID):
-                            #    continue
 
                 else:
                     break
@@ -1578,8 +1778,5 @@ def run_bod_builder(
                             break                    
             
     print("Checked {} Large Bods".format(len(largeBods)))                
-                    
-                    #Items.Move(largeBod.bodSerial, incompleteBodContainer, 1)
-                    #Misc.Pause(itemMoveDelayMs)
 
     report_final_metrics(reports, recipes, incompleteBodContainers, smallBodWaitingForLargeBodContainers, completeSmallBodContainer, completeLargeBodContainer)

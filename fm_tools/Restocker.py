@@ -8,6 +8,19 @@ from Scripts.fm_core.core_items import INGOT_STATIC_ID
 from Scripts.fm_core.core_items import BOARD_STATIC_ID 
 from Scripts.fm_core.core_items import CLOTH_STATIC_ID 
 from Scripts.fm_core.core_items import LEATHER_STATIC_ID 
+from Scripts.fm_core.core_items import WHITE_PEARL
+from Scripts.fm_core.core_items import FIRE_RUBY
+from Scripts.fm_core.core_items import PERFECT_EMERALD
+from Scripts.fm_core.core_items import TURQUOISE
+from Scripts.fm_core.core_items import STAR_SAPPHIRE
+from Scripts.fm_core.core_items import CITRINE 
+from Scripts.fm_core.core_items import DIAMOND
+from Scripts.fm_core.core_items import AMBER
+from Scripts.fm_core.core_items import AMETHYST
+from Scripts.fm_core.core_items import SAPPHIRE
+from Scripts.fm_core.core_items import RUBY
+from Scripts.fm_core.core_items import EMERALD
+from Scripts.fm_core.core_items import TOURMALINE
 from Scripts.fm_core.core_items import MANDRAKEROOT
 from Scripts.fm_core.core_items import BLOODMOSS
 from Scripts.fm_core.core_items import SULPHUROUSASH
@@ -52,13 +65,11 @@ from Scripts.fm_core.core_crafting import run_restocker
 commodityBoxSerial = 0x408CC21E
 
 # Set these serials to your InsaneUO resource boxes.
-ingotResourceBoxSerial = 0x4003A151
+minerResourceBoxSerial = 0x4003A151
 reagentResourceBoxSerial = 0x408F3168
-leatherResourceBoxSerial = 0x40E2C44B
-woodResourceBoxSerial = 0x402A1002
-
-# Just keeping the peace.
-gumpDelayMs = 250
+tailorResourceBoxSerial = 0x40E2C44B
+logsAndBoardsResourceBoxSerial = 0x402A1002
+mondainLegacyResourceBoxSerial = 0x4094F259
 
 # Main configuration. Set the resources you want to stock here and their amounts.
 # Restockable item that lives inside of a specialized resource container.
@@ -83,45 +94,56 @@ resources = [
     RestockItem(DAEMONBLOOD, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 110, 10000),
     RestockItem(NOXCRYSTAL, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 111, 10000),
     RestockItem(PIGIRON, RESOURCE_HUE_DEFAULT, reagentResourceBoxSerial, 112, 10000),
-    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_DEFAULT, woodResourceBoxSerial, 107, 10000),
-    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_OAK, woodResourceBoxSerial, 108, 10000),
-    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_ASH, woodResourceBoxSerial, 109, 10000),
-    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_YEW, woodResourceBoxSerial, 110, 10000),
-    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_HEARTWOOD, woodResourceBoxSerial, 111, 10000),
-    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_BLOODWOOD, woodResourceBoxSerial, 112, 10000),
-    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_FROSTWOOD, woodResourceBoxSerial, 113, 10000),
-    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_DEFAULT, ingotResourceBoxSerial, 101, 10000),
-    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_DULL_COPPER, ingotResourceBoxSerial, 101, 10000),
-    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_SHADOW_IRON, ingotResourceBoxSerial, 102, 10000),
-    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_COPPER, ingotResourceBoxSerial, 103, 10000),
-    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_BRONZE, ingotResourceBoxSerial, 104, 10000),
-    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_GOLD, ingotResourceBoxSerial, 105, 10000),
-    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_AGAPITE, ingotResourceBoxSerial, 106, 10000),
-    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_VERITE, ingotResourceBoxSerial, 107, 10000),
-    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_VALORITE, ingotResourceBoxSerial, 108, 10000),
-    RestockItem(CLOTH_STATIC_ID, RESOURCE_HUE_DEFAULT, leatherResourceBoxSerial, 111, 10000),
-    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_DEFAULT, leatherResourceBoxSerial, 100, 10000),
-    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_SPINED, leatherResourceBoxSerial, 101, 10000),
-    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_HORNED, leatherResourceBoxSerial, 102, 10000),
-    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_BARBED, leatherResourceBoxSerial, 103, 10000)
+    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_DEFAULT, logsAndBoardsResourceBoxSerial, 107, 10000),
+    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_OAK, logsAndBoardsResourceBoxSerial, 108, 10000),
+    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_ASH, logsAndBoardsResourceBoxSerial, 109, 10000),
+    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_YEW, logsAndBoardsResourceBoxSerial, 110, 10000),
+    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_HEARTWOOD, logsAndBoardsResourceBoxSerial, 111, 10000),
+    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_BLOODWOOD, logsAndBoardsResourceBoxSerial, 112, 10000),
+    RestockItem(BOARD_STATIC_ID, RESOURCE_HUE_FROSTWOOD, logsAndBoardsResourceBoxSerial, 113, 10000),
+    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_DEFAULT, minerResourceBoxSerial, 101, 10000),
+    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_DULL_COPPER, minerResourceBoxSerial, 101, 10000),
+    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_SHADOW_IRON, minerResourceBoxSerial, 102, 10000),
+    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_COPPER, minerResourceBoxSerial, 103, 10000),
+    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_BRONZE, minerResourceBoxSerial, 104, 10000),
+    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_GOLD, minerResourceBoxSerial, 105, 10000),
+    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_AGAPITE, minerResourceBoxSerial, 106, 10000),
+    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_VERITE, minerResourceBoxSerial, 107, 10000),
+    RestockItem(INGOT_STATIC_ID, RESOURCE_HUE_VALORITE, minerResourceBoxSerial, 108, 10000),
+    RestockItem(CLOTH_STATIC_ID, RESOURCE_HUE_DEFAULT, tailorResourceBoxSerial, 111, 10000),
+    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_DEFAULT, tailorResourceBoxSerial, 100, 10000),
+    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_SPINED, tailorResourceBoxSerial, 101, 10000),
+    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_HORNED, tailorResourceBoxSerial, 102, 10000),
+    RestockItem(LEATHER_STATIC_ID, RESOURCE_HUE_BARBED, tailorResourceBoxSerial, 103, 10000),
+    RestockItem(CITRINE, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 100, 1000),
+    RestockItem(EMERALD, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 102, 1000),
+    RestockItem(TOURMALINE, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 104, 1000),
+    RestockItem(DIAMOND, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 106, 1000),
+    RestockItem(SAPPHIRE, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 108, 1000),
+    RestockItem(STAR_SAPPHIRE, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 109, 1000),
+    RestockItem(RUBY, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 111, 1000),
+    RestockItem(AMBER, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 113, 1000),
+    RestockItem(AMETHYST, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 115, 1000),
+    RestockItem(WHITE_PEARL, RESOURCE_HUE_DEFAULT, mondainLegacyResourceBoxSerial, 117, 100, 2),
 ]
 
 # Stand near resource boxes and load everything from a resource box into a real container.
 # This is useful for use in conjunction with the BODBuilder.
 # InsaneUO specific.
 run_restocker(
+
     # Green commodity deed box. Can be any container that can hold weight though.
-    commodityBoxSerial,
+    commodityBoxSerial = commodityBoxSerial,
     
     # An array of RestockItem, the resources you want to stock. This is how you configure it.
     # Include only those resources you wish to stock, the hue, the amount, the  gump button id, and page.
     # Page is the page on the gump menu.
-    resources,
+    resources = resources,
     
     # Time to wait between item moves. Adjust with caution. Reducing this will increase speed
     # of the script, but you risk disconnects and other issues maintaining state
     itemMoveDelayMs = 1000, 
     
     # (Optional) Timeout between  gump button presses. Configure based on server latency.
-    gumpDelayMs = 250
+    gumpDelayMs = 500
 )

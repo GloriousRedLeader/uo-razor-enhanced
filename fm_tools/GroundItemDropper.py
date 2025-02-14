@@ -71,6 +71,7 @@ TRASH_NAMES = [
     "Arms of Compassion (Virtue Armor Set)",
     "Alchemist's Bauble", #'
     "Night's Kiss", #'
+    "Bow of the Juka King",
 ]
 
 Timer.Create( 'pingTimer', 1 )

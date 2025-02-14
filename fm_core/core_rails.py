@@ -21,7 +21,6 @@ user32.GetAsyncKeyState.argtypes = [wintypes.INT]
 
 # Globals. Put in a class one day.
 CORE_LOOP_DELAY_MS = 650
-#railsStartingGold = 0
 railsStartingTime = 0
 railsEarnedGold = 0
 railsLastGold = 0
@@ -139,29 +138,16 @@ def go_to_tile(
     
     if tileOffset > 0:
         tiles = PathFinding.GetPath(x, y, True)
-        #print("Total Tiles: {}".format(len(tiles)))
-        
         numTiles = len(tiles) if tiles is not None else 0
         
         if numTiles - tileOffset > 1:
             # There is a duplicate of last tile entry. Its in there twice.
             tileIndex = numTiles - tileOffset - 2
-            #print("tileIndex used {}".format(tileIndex))
-            #print("Original {}, {}".format(x, y))
-            
-            #i = 0
-            #for tile in tiles:
-            #    print("tiles[{}]".format(i), tile.X, tile.Y)
-            #    i = i + 1
-            
             x = tiles[tileIndex].X
             y = tiles[tileIndex].Y
-            #print("New {}, {}".format(x, y))
-            
         else:
             return True
         
-        
     route = PathFinding.Route() 
     route.X = x
     route.Y = y
@@ -170,27 +156,8 @@ def go_to_tile(
     route.Timeout = timeoutSeconds
     res = PathFinding.Go(route)
     
-    total = "{:.2f}".format(time.time() - start_time)
-    #Misc.SendMessage("It took {} seconds to generate route ({})".format(total, res), 48)
+    #total = "{:.2f}".format(time.time() - start_time)
     return res  
-
-# Deprecated. Works. Doesnt have tileOffset
-def go_to_tile2(x, y, timeoutSeconds = -1):
-    if Player.Position.X == x and Player.Position.Y == y:
-        return True
-        
-    start_time = time.time()
-    route = PathFinding.Route() 
-    route.X = x
-    route.Y = y
-    route.MaxRetry = 3
-    route.IgnoreMobile = True
-    route.Timeout = timeoutSeconds
-    res = PathFinding.Go(route)
-    
-    total = "{:.2f}".format(time.time() - start_time)
-    #Misc.SendMessage("It took {} seconds to generate route ({})".format(total, res), 48)
-    return res
 
 # This method moves our character next to the x, y provided (not on top of it)
 # the go_to_tile method is exact. This one takes a little bit more processing,
@@ -261,36 +228,21 @@ def do_route(
                 Misc.SendMessage("Cant make it to target, aborting this coord", 38)
                 break
             
-            #Player.HeadMessage(48, "Weve arrived at sector {}".format(sectorId))
             Misc.Pause(1000)
-            
-            #eligible = get_mobs_exclude_serials(range, True, serialsToExclude) 
             eligible = get_enemies(range, serialsToExclude) 
 
             if len(eligible) > 0:  
-                #Player.HeadMessage(48, "Found {} things to attack ({}) filtered".format(len(eligible), len(serialsToExclude)))    
                 nearest = Mobiles.Select(eligible, 'Nearest')
-                
                 goToNearestAttempts = 3
                 while Mobiles.FindBySerial(nearest.Serial) is not None and Player.DistanceTo(nearest)<=range:            
-                    #Mobiles.Message(nearest,68,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
-                    
                     res = go_to_tile(nearest.Position.X, nearest.Position.Y, pathFindingTimeoutSeconds, tileOffset)
-                    #res = go_to_adjacent_tile(nearest.Position.X, nearest.Position.Y, pathFindingTimeoutSeconds)
-                    
                     Misc.Pause(50)
                     
                     if res == False or (Player.DistanceTo(nearest) > 1 and goToNearestAttempts <= 0):
                         serialsToExclude.append(nearest.Serial)
-                        #Mobiles.Message(nearest,38,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
-                        #Player.HeadMessage(38, "Giving up on this monster")
                         break
                     elif Player.DistanceTo(nearest) > 1:
                         goToNearestAttempts = goToNearestAttempts - 1
-                        #Mobiles.Message(nearest,28,"^ {} tiles ^".format(Player.DistanceTo(nearest)),False)
-                        #Player.HeadMessage(28, "Monster too far, attempt {}".format(goToNearestAttempts))
-                    else:
-                        pass
                     
                     Misc.Pause(250)
                         
@@ -304,16 +256,16 @@ def do_route(
                 # got away or not. It is more likely that there is loot and the monster is dead if attempts 
                 # is greater than zero.
                 if autoLootBufferMs > 0 and goToNearestAttempts > 0:
-                    #Player.HeadMessage(48, "Pausing a little extra for more loot")
                     Misc.Pause(autoLootBufferMs)
             else:
-                #Player.HeadMessage(48, "Nothing left in sector")
                 break
-    #Player.HeadMessage(48, "Done in this zone!")
     
-    
-# Goes to monsters in range. 
-def defend(
+# Stays put until an enemy comes into range, then moves to it.
+# Useful if you are at a champ for example. No need for a specific
+# set of route coordinates, just stand still and wait until a mob
+# happens by.
+def run_defend_loop(
+
     # range is the number of tiles to search for monsters in each "sector"
     range = 6, 
     
@@ -361,88 +313,66 @@ def defend(
             Player.HeadMessage(48, "Nothing left in sector")
             Misc.Pause(1000)
 
-Timer.Create("railsStatsTimer", 1)
+#Timer.Create("railsStatsTimer", 1)
 
-# Crappy way of reporting gold per hour
-def rails_stats(
-    # clear | start | reset = setse initial values and times to 0
-    # report_head = flashes data above player head
-    # report = Prints message in journal
-    option
-):
-    #global railsStartingGold
+# Crappy way of reporting gold per hour. The optiona parameter has the following values:
+#   clear | start | reset = setse initial values and times to 0
+#   report_head = flashes data above player head
+#   report = Prints message in journal
+def rails_stats(option):
     global railsStartingTime
     global railsEarnedGold
     global railsLastGold
+    
     if option == "clear" or option == "start" or option == "reset":
-        #railsStartingGold = Player.Gold
         railsStartingTime = time.time()       
         railsEarnedGold = 0
         railsLastGold = Player.Gold
-    #elif option == "report":
-        #hours = (time.time() - railsStartingTime) / 60 / 60
-        #hoursFormatted = "{:.2f}".format(hours)
-        #earnedGold = Player.Gold - railsStartingGold
-        #earnedGoldFormatted = "{:,}".format(earnedGold)
-        #if hours == 0:
-        #    goldPerHour = 0
-        #else:
-        #    goldPerHour = "{:,.2f}".format(earnedGold / hours)
-        #Misc.SendMessage("Total hours: {} Earned Gold: {} Gold Per Hour: {}".format(hoursFormatted, earnedGoldFormatted, goldPerHour)) 
     elif option == "report_head" or option == "report":
         hours = (time.time() - railsStartingTime) / 60 / 60
-        
         if  Player.Gold < railsLastGold:
             railsEarnedGold = railsEarnedGold + Player.Gold
             railsLastGold = Player.Gold
-            #print("< Earned Gold: {}".format(railsEarnedGold))
         elif railsLastGold != Player.Gold:
             railsEarnedGold = railsEarnedGold + Player.Gold - railsLastGold
             railsLastGold = Player.Gold
-            #print("!= Earned Gold: {}".format(railsEarnedGold))
         timeMinutes =round((time.time() - railsStartingTime) / 60)
-        #print("Gold Earned: {} Minutes: {}".format( "{:,.0f}".format(railsEarnedGold), timeMinutes))
-        #earnedGold = Player.Gold - railsStartingGold
-        #if Player.Gold - railsStartingGold < 0:
-        #    railsEarnedGold = railsEarnedGold + Player.Gold
-        #    railsStartingGold = 0
-        #else:
-        #    railsEarnedGold = railsEarnedGold + Player.Gold - railsStartingGold
         
         if hours == 0:
             goldPerHour = 0
         else:
             goldPerHour = "{:,.0f}".format(railsEarnedGold / hours)
-        #Player.HeadMessage(253, "[GPH: {}]".format(goldPerHour))    
+
         if Timer.Check("railsStatsTimer") == False:
             message = "Gold Earned: {} Minutes: {} GPH: {}".format( "{:,.0f}".format(railsEarnedGold), timeMinutes, goldPerHour)
             Misc.SendMessage(message, 253)    
             Timer.Create("railsStatsTimer", 15000)
-        
 
-# Run a single route. The only required argument is a set of coordinates. 
+# Runs a route based on a list of [x, y] coordinates. Will run it repeatadly.
+# It is recommended to make those routes a loop that start and end at or
+# around the same coordinate since it loops indefinitely.
 # You can find a list of coordinates predefined in fm_core/core_routes.py
-def run_rail_loop_single(
+def run_rail_loop(
 
     # (Required) This is a list of coordinates to travel. See core_routes for a list of available, pre-defined routes.
     # You can generate your own using the rails tool. It's easy. Just load up the script in fm_tools/RailRecorder.py
     # and start adding points. Walk to a location, click add point. When you're done hit save. Open the file. It 
     # will contain a list of coordinates you can paste here. Your character will walk around like an idiot.
-    path = None,
+    path,
 
-    # (Required) Number of tiles to scan for nearby monsters. If you set this too high it will
+    # (Optional) Number of tiles to scan for nearby monsters. If you set this too high it will
     # try to find monsters through walls and in other maps and waste time.
     attackRange = 5,    
     
-    # (Required) Number of seconds to allow before giving up when going from one coord to another.
+    # (Optional) Number of seconds to allow before giving up when going from one coord to another.
     # Default is 3 seconds.
     pathFindingTimeoutSeconds = 5.0,
     
-    # Give a little extra time to loot when a monster dies. This is useful. A nice value
+    # (Optional) Give a little extra time to loot when a monster dies. This is useful. A nice value
     # is about 2000ms.
     autoLootBufferMs = 2000,
     
-    # Value of 0 means land right on x, y. This is the default behavior. Positive value means stop 
+    # (Optional) Value of 0 means land right on x, y. This is the default behavior. Positive value means stop 
     # short of the provided x, y by that many tiles. This is useful for casters or anyone who 
     # doesnt wish to be directly on top of a mobile.
     tileOffset = 0 
@@ -456,8 +386,3 @@ def run_rail_loop_single(
         else:
             Player.HeadMessage(48, "Stopping because max weight reached")
             break
-            
-# Looks for corpses in the ocean, sails to them, pauses for your autolooter
-# then returns to the original spot.
-def run_ocean_looter():
-    return True
