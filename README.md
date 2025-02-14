@@ -48,7 +48,12 @@ A rather inefficient **Caster Attack Loop**. Good for mage tamer and InsaneUO sp
 
 A couple of **resource gathering** scripts. Use with caution. Don't break any rules. Includes fishing on a boat (also crab fishing), lumberjacking, and mining.
 
-**BOD Builder** script to automate crafting and filling small bods. Highly configurable. Current support for Alchemy, Tailoring, Inscription, and Blacksmithy.
+**BOD Builder** script to automate crafting and filling small and large bods. Seriously, this does 100% of the work for you. Highly configurable. Current support for
+* Alchemy
+* Tailoring
+* Inscription
+* Blacksmithy
+* Tinkering
 
 **Move Items** scripts to put things in various containers. I bind about 3 of these to the M key (shift + M,alt + M) lots of use cases.
 
@@ -63,6 +68,8 @@ A script that **scans journal entries and alerts** with obnoxious sounds and ove
 **Lootmaster** script from Dorana. Just keeping a copy for posterity.
 
 A script that **opens Messages in a bottle and sorts them** into 3 chests, one for each section of the map (west, central, east). This makes fishing MiBs much more efficient since you aren't hunting all over the map, just 1/3 of it with more condensed spots. I usually take about 100 of them with me.
+
+An **IDOC Scanner** script. This thing is awesome. Written by someone else (can't track down author). Just storing for safe keeping. 
 
 ### Credits
 
