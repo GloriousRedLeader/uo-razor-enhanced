@@ -1601,7 +1601,8 @@ def run_bod_builder(
                                 if smallBod.isExceptional and not any(prop.ToString().lower() == "exceptional" for prop in craftedItem.Properties):
                                     continue
                                     
-                                if smallBod.specialMaterialHue != craftedItem.Color:
+                                if smallBod.specialMaterialHue != RESOURCE_HUE_DEFAULT and smallBod.specialMaterialHue != craftedItem.Color:
+                                    print("This color is different smallbod special material hue: {} crafted item color: {}".format(smallBod.specialMaterialHue, craftedItem.Color))
                                     continue
                                     
                                 foundCraftedItem = True
