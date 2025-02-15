@@ -60,6 +60,7 @@ A couple of **resource gathering** scripts. Use with caution. Don't break any ru
 **Move Items** scripts to put things in various containers. Lots of different flavors and uses. They all present with a target reticle so no need for hard coding anything. Different flavors include:
 * Move x number of items from one container to another (type number of items in chat, target source container, target destination container)
 * Move all items of a type from their current container to another container (target item, target destination container)
+* Move all items of a type **and color** from their current container to another container, you can use this turn in bods (target item, target destination container)
 * Move all items from container to another container (target source container, target destination container)
 
 **Automated character movement** script that uses the rails framework. Several default routes already established. You can easily add your own, it's just a list of x, y coordinates. Use this in conjunction with dexer / caster loops for maximum farming. For the love of all that is holy, use while you're at your machine supervising. You will get banned.

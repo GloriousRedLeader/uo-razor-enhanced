@@ -107,44 +107,11 @@ def find_instrument( container ):
     global INSTRUMENT_STATIC_IDS
     return find_first_in_container_by_ids( INSTRUMENT_STATIC_IDS, container )
     
-# Give it a list of item ids and it will deposit into bank
-# Gold is 0x0EED
-#def open_bank_and_deposit_items(itemIDs = []):
-#    Player.HeadMessage(455, "[start] Depositing Items...")
-#    Player.ChatSay(48, 'banco')
-#    Misc.Pause(600)
-#    depositCount = 0
-#    for itemID in itemIDs:
-#        while True:
-#            item = find_in_container_by_id(itemID)
-#            if item == None:
-#                break
-#            Player.HeadMessage(455, "Depositing {}".format(item.Name))
-#            Items.Move(item, Player.Bank, item.Amount)
-#            depositCount = depositCount + 1
-#            Misc.Pause(600)
-#    Player.HeadMessage(455, "[done] Depositing {} items.".format(depositCount))
-            
-# This will get us items from our bank box and put them in our backpack.
-# Use this to get regs, bandages, potions, etc.
-# Will stop if cannot find the amount required.
-#def open_bank_and_resupply(
-    # An array of tuples (<item id>, <amount>)
-#    itemsNeeded = []):
-
-    #Player.HeadMessage(455, "[start] Resupplying...")
-#    Player.ChatSay(48, 'banco')
-#    Misc.Pause(1000)
- 
-#    for itemID, amount in itemsNeeded:
-#        count = Items.ContainerCount(Player.Backpack, itemID, -1, True)
-#        print("Currenlty have {} / {} of itemID in backpack".format(count, amount))
-
 # Moves all items matching type of itemID from sourceSerial container
 # to destinationSerial container    
-def move_item_to_container_by_id(itemID, sourceSerial, destinationSerial):
+def move_item_to_container_by_id(itemID, sourceSerial, destinationSerial, color = -1):
     while True:
-        item = find_in_container_by_id(itemID, sourceSerial, color = -1, ignoreContainer = [])
+        item = find_in_container_by_id(itemID, sourceSerial, color = color, ignoreContainer = [])
         if item is not None:
             move_item_to_container(item, destinationSerial)
         else:
