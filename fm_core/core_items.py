@@ -185,6 +185,9 @@ BOD_STATIC_ID = 0x2258
 
 BOD_BOOK_STATIC_ID = 0x2259
 
+BLUE_BEETLE_ITEM_ID = 0x260F
+FIRE_BEETLE_ITEM_ID = 0x281C
+
 # Corpses are technically items.    
 def get_corpses(range = 2):
     filter = Items.Filter()

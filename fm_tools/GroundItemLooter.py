@@ -29,12 +29,23 @@ from Scripts.fm_core.core_items import ORE_STATIC_IDS
 from Scripts.fm_core.core_items import INGOT_STATIC_IDS
 from Scripts.fm_core.core_items import STONE_STATIC_IDS
 from Scripts.fm_core.core_items import SAND_STATIC_IDS
-# Test
-# Loots items near player into pack animal
-# TODO Change to get_pets from core_player
-#PACK_ANIMAL_NAMES = ["one", "two", "three", "four"]
+from Scripts.fm_core.core_items import BLUE_BEETLE_ITEM_ID
+
+# Will pick up items on the ground and stash them in inventory or giant beetles
+# Will attempt to deploy giant beetles that are in inventory.
+
+deployGiantBeetle = True
 
 Timer.Create( 'pingTimer', 1 )
+
+numDeployedPets = len(Player.Pets)
+if numDeployedPets < 5 and deployGiantBeetle:
+    for blueBeetle in Items.FindAllByID(BLUE_BEETLE_ITEM_ID, -1, Player.Backpack.Serial, -1):
+        Items.UseItem(blueBeetle)
+        Misc.Pause(650)
+        numDeployedPets = numDeployedPets + 1
+        if numDeployedPets == 5:
+            break
 
 while True:
     if Timer.Check( 'pingTimer' ) == False:

@@ -23,15 +23,15 @@ from Scripts.fm_core.core_mobiles import BLUE_BEETLE_MOBILE_ID
 # You will need an axe equipped I believe.
 run_lumberjacking_loop(
 
-    # Makes a square tileRange * tileRange and will search for trees inside of it. So,
+    # (Optional) Makes a square tileRange * tileRange and will search for trees inside of it. So,
     # all you have to do is place yourself near a bunch of trees and hit the hotkey that
     # runs this function.
     tileRange = 10, 
     
-    # Flag that will convert the logs into boards. I think you need an axe.
+    # (Optional) Flag that will convert the logs into boards. I think you need an axe.
     cutLogsToBoards = True, 
 
-    # Only keep logs and boards that match these hues. By default that is all hues. Remove the ones
+    # (Optional) Only keep logs and boards that match these hues. By default that is all hues. Remove the ones
     # you wish to discard. It will drop them at your feet. It is a common case where you may not care
     # about the basic wood board (RESOURCE_HUE_DEFAULT), so remove that from the list if you only
     # want special woods.

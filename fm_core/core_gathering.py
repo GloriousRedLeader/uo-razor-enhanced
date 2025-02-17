@@ -141,38 +141,32 @@ def cut_tree(tree, tool, cutDelayMs):
         cut_tree(tree, tool, cutDelayMs)
     
 # Internal helper  method to discard logs or cut logs into boards
-def cut_or_drop_logs(axe, keepItemHues, cutLogsToBoards, itemMoveDelayMs):    
+def cut_logs_to_boards(axe, itemMoveDelayMs):    
     for logStaticID in LOG_STATIC_IDS:
         logs = find_all_in_container_by_id(logStaticID, containerSerial = Player.Backpack.Serial)
         for log in logs:
-            if log.Color not in keepItemHues:
-                print("Dropping Logs on ground")
-                tileX, tileY, tileZ = get_tile_behind(1)
-                Items.MoveOnGround(log, log.Amount, tileX, tileY, tileZ)
-                Misc.Pause(itemMoveDelayMs)
-            elif cutLogsToBoards:
-                Items.UseItem(axe)
-                Target.WaitForTarget(10000, False)
-                Target.TargetExecute(log.Serial)
-                Misc.Pause(itemMoveDelayMs)    
+            Items.UseItem(axe)
+            Target.WaitForTarget(10000, False)
+            Target.TargetExecute(log.Serial)
+            Misc.Pause(itemMoveDelayMs)    
             
 # Makes a box around where player is standing and chops trees inside. The
 # size of the box is determined by tileRange.
 # You will need an axe equipped I believe.
 def run_lumberjacking_loop(
 
-    # Makes a square tileRange * tileRange and will search for trees inside of it. So,
+    # (Optional) Makes a square tileRange * tileRange and will search for trees inside of it. So,
     # all you have to do is place yourself near a bunch of trees and hit the hotkey that
     # runs this function.
     tileRange = 10, 
     
-    # If this limit is reached, the script just stops apparently.
+    # (Optional) If this limit is reached, the script just stops apparently.
     #weightLimit = 500, 
     
-    # Flag that will convert the logs into boards. I think you need an axe.
+    # (Optional) Flag that will convert the logs into boards. I think you need an axe.
     cutLogsToBoards = True, 
 
-    # Only keep logs and boards that match these hues. By default that is all hues. Remove the ones
+    # (Optional) Only keep logs and boards that match these hues. By default that is all hues. Remove the ones
     # you wish to discard. It will drop them at your feet. It is a common case where you may not care
     # about the basic wood board (RESOURCE_HUE_DEFAULT), so remove that from the list if you only
     # want special woods.
@@ -210,7 +204,11 @@ def run_lumberjacking_loop(
     for tree in trees:
         print("Moving to a tree")
 
-        cut_or_drop_logs(axe, keepItemHues, cutLogsToBoards, itemMoveDelayMs)
+        drop_unwanted_resources(BOARD_STATIC_IDS + LOG_STATIC_IDS, keepItemHues, itemMoveDelayMs) 
+
+        if cutLogsToBoards:
+            cut_logs_to_boards(axe, itemMoveDelayMs)
+        
         move_items_to_pack_animal(BOARD_STATIC_IDS, packAnimalMobileId, itemMoveDelayMs)
         
         go_to_tile(tree.x - 1, tree.y - 1, 10.0)
@@ -219,8 +217,15 @@ def run_lumberjacking_loop(
         
         Misc.Pause(int(itemMoveDelayMs / 3))
 
-    cut_or_drop_logs(axe, keepItemHues, cutLogsToBoards, itemMoveDelayMs)
-    move_items_to_pack_animal(BOARD_STATIC_IDS, packAnimalMobileId, itemMoveDelayMs)        
+    #cut_or_drop_logs(axe, keepItemHues, cutLogsToBoards, itemMoveDelayMs)
+    #move_items_to_pack_animal(BOARD_STATIC_IDS, packAnimalMobileId, itemMoveDelayMs)        
+    drop_unwanted_resources(BOARD_STATIC_IDS + LOG_STATIC_IDS, keepItemHues, itemMoveDelayMs) 
+
+    if cutLogsToBoards:
+        cut_logs_to_boards(axe, itemMoveDelayMs)
+    
+    move_items_to_pack_animal(BOARD_STATIC_IDS, packAnimalMobileId, itemMoveDelayMs)    
+    
     print("All done")
             
 # Variation of above that will get kindling usinga knife
@@ -273,6 +278,17 @@ def move_items_to_pack_animal(itemIds, packAnimalMobileId, itemMoveDelayMs):
                     print("Moving {} to {} (Weight: {})".format(item.Name, packAnimal.Name, packAnimal.Backpack.Weight))
                     Items.Move(item, packAnimal.Backpack.Serial, item.Amount)
                     Misc.Pause(itemMoveDelayMs)
+                    
+# Internal helper  method to discard logs/ingots not in our list
+def drop_unwanted_resources(itemStaticIds, keepItemHues, itemMoveDelayMs):    
+    for itemStaticId in itemStaticIds:
+        resources = find_all_in_container_by_id(itemStaticId, containerSerial = Player.Backpack.Serial)
+        for resource in resources:
+            if resource.Color not in keepItemHues:
+                print("Dropping {} on ground".format(resource.Name))
+                tileX, tileY, tileZ = get_tile_behind(2)
+                Items.MoveOnGround(resource, resource.Amount, tileX, tileY, tileZ)
+                Misc.Pause(itemMoveDelayMs)
 
 ################## ################## ################## ##################
 #
@@ -297,23 +313,24 @@ def smelt_ore(forgeAnimalMobileId, itemMoveDelayMs):
                 Target.WaitForTarget(5000, True)
                 Target.TargetExecute(forgeAnimals[0])
                 Misc.Pause(itemMoveDelayMs)
-                if Journal.Search("There is not enough metal-bearing ore in this pile to make an ingot."):
-                    print(ore)
-                    print(ore.Serial)
-                    tileX, tileY, tileZ = get_tile_in_front()
-                    Items.MoveOnGround(ore, 0, tileX, tileY , 0)
-                    Misc.Pause(itemMoveDelayMs)
+                #if Journal.Search("There is not enough metal-bearing ore in this pile to make an ingot."):
+                #    print(ore)
+                #    print(ore.Serial)
+                #    tileX, tileY, tileZ = get_tile_in_front()
+                #    Items.MoveOnGround(ore, 0, tileX, tileY , 0)
+                #    Misc.Pause(itemMoveDelayMs)
         Misc.Pause(itemMoveDelayMs)     
     else:
         print("No forge animal found")
                     
-def readJournal():
+# Internal helper whether we should move        
+def should_move():
     if Journal.Search('no metal') or Journal.Search('t mine that') or Journal.Search('no sand'):
         Journal.Clear()
         return True
     else:
         Journal.Clear()
-        return False
+        return False    
         
 # Gets the tile serial. This isnt a trivial task.
 # Searching by cave floor tile id. Then doing an item search.
@@ -342,8 +359,11 @@ def get_tile_in_front_serial():
 # Attempts to smelt ores if you have a fire beetle (provide parameter)
 # Attempts to move smelted ore to pack animal (provide parameter)
 def run_mining_loop(
+
+    # (Optional) After a vein runs out, how many tiles forward to move.
+    numTilesToMove = 1,
     
-    # Only keep ingots that match these hues. By default that is all hues. Remove the ones
+    # (Optional) Only keep ingots that match these hues. By default that is all hues. Remove the ones
     # you wish to discard. It will drop them at your feet. It is a common case where you may not care
     # about the basic iron ingots (RESOURCE_HUE_DEFAULT), so remove that from the list if you only
     # want special ingots.
@@ -360,6 +380,7 @@ def run_mining_loop(
 ):
                 
     while True:
+        drop_unwanted_resources(INGOT_STATIC_IDS + STONE_STATIC_IDS + ORE_STATIC_IDS, keepItemHues, itemMoveDelayMs) 
         smelt_ore(forgeAnimalMobileId, itemMoveDelayMs)
         move_items_to_pack_animal(INGOT_STATIC_IDS + STONE_STATIC_IDS + SAND_STATIC_IDS, packAnimalMobileId, itemMoveDelayMs)
         miningTool = getMinerTool()
@@ -376,9 +397,8 @@ def run_mining_loop(
         
         Misc.Pause(itemMoveDelayMs)
         
-        boolMove = readJournal()
-        if boolMove:
-            move(1)
+        if should_move():
+            move(numTilesToMove)
 
         Misc.Pause(int(itemMoveDelayMs / 2))
         
