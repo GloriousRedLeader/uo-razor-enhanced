@@ -47,6 +47,8 @@ if numDeployedPets < 5 and deployGiantBeetle:
         if numDeployedPets == 5:
             break
 
+Player.ChatSay("All Follow Me")
+
 while True:
     if Timer.Check( 'pingTimer' ) == False:
         Player.HeadMessage( 118, "Ground Looter Running...")
