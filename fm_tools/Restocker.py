@@ -71,6 +71,10 @@ tailorResourceBoxSerial = 0x40E2C44B
 logsAndBoardsResourceBoxSerial = 0x402A1002
 mondainLegacyResourceBoxSerial = 0x4094F259
 
+#minerResourceBoxSerial = 0x4007D963
+#tailorResourceBoxSerial = 0x409A3EA9
+#logsAndBoardsResourceBoxSerial = 0x4022E8ED
+
 # Main configuration. Set the resources you want to stock here and their amounts.
 # Restockable item that lives inside of a specialized resource container.
 # Arguments are as follows:

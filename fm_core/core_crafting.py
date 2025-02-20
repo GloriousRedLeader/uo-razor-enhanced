@@ -347,7 +347,11 @@ class SmallBodRecipe:
         self.resources = resources
         
     def canSalvage(self):
-        return self.toolId in [BLACKSMITHY_TOOL_STATIC_ID, TAILORING_TOOL_STATIC_ID]
+        if self.toolId in [BLACKSMITHY_TOOL_STATIC_ID]:
+            return True
+        if self.toolId == TAILORING_TOOL_STATIC_ID and not any(resource.resourceId == BONE for resource in self.resources):
+            return True
+        return False
     def __str__(self):
         return f"SmallBodRecipe(hasLargeBod={self.hasLargeBod},recipeName='{self.recipeName}', gumpCategory='{self.gumpCategory}', gumpSelection='{self.gumpSelection}', toolId='{self.toolId}', resources='{self.resources}')"        
         
@@ -591,7 +595,7 @@ RECIPES = [
     SmallBodRecipe(True, "diamond bracelet", CAT_TINKERING_JEWELRY, 415, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 2), SmallBodResource(DIAMOND, 1)] ),   
     
     # Wodden Items
-    SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 2, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
+    SmallBodRecipe(False, "nunchaku", CAT_TINKERING_WOODEN_ITEMS, 2, TINKERING_TOOL_STATIC_ID, [SmallBodResource(INGOT_STATIC_ID, 3), SmallBodResource(BOARD_STATIC_ID, 8)] ),
     SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 9, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 16, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
     SmallBodRecipe(False, "00000000000", CAT_TINKERING_WOODEN_ITEMS, 23, TINKERING_TOOL_STATIC_ID, [SmallBodResource(BOARD_STATIC_ID)] ),
