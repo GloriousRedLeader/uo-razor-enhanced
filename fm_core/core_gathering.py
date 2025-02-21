@@ -113,6 +113,7 @@ def scan_trees(tileRange, treeStaticIds):
     return trees
     
 # Internal helper method that cuts a tree with either axe (logs) or dagger (kindling)
+# Returns True if there is more wood to harvest, False if it is time to move on
 def cut_tree(tree, tool, cutDelayMs):
     Target.Cancel()
     Misc.Pause(int(cutDelayMs / 2))
@@ -134,11 +135,14 @@ def cut_tree(tree, tool, cutDelayMs):
         tree.tooFarAwayAttempts = tree.tooFarAwayAttempts + 1
         Journal.Clear()
         if (tree.tooFarAwayAttempts < 5):
-            cut_tree(tree, tool, cutDelayMs)
+            #cut_tree(tree, tool, cutDelayMs)
+            return True
         else:
             print("(cant reach tree) Moving on")
+            return False
     else:
-        cut_tree(tree, tool, cutDelayMs)
+        #cut_tree(tree, tool, cutDelayMs)
+        return True
     
 # Internal helper  method to discard logs or cut logs into boards
 def cut_logs_to_boards(axe, itemMoveDelayMs):    
@@ -213,7 +217,15 @@ def run_lumberjacking_loop(
         
         go_to_tile(tree.x - 1, tree.y - 1, 10.0)
         
-        cut_tree(tree, axe, cutDelayMs)
+        #cut_tree(tree, axe, cutDelayMs)
+        while cut_tree(tree, axe, cutDelayMs) == True:
+            drop_unwanted_resources(BOARD_STATIC_IDS + LOG_STATIC_IDS, keepItemHues, itemMoveDelayMs) 
+
+            if cutLogsToBoards:
+                cut_logs_to_boards(axe, itemMoveDelayMs)
+        
+            move_items_to_pack_animal(BOARD_STATIC_IDS, packAnimalMobileId, itemMoveDelayMs)
+            
         
         Misc.Pause(int(itemMoveDelayMs / 3))
 
