@@ -1749,6 +1749,8 @@ def run_bod_builder(
                 for smallBod in smallBods:
                     Items.Move(smallBod.bodSerial, craftContainer, 1)
                     Misc.Pause(itemMoveDelayMs)
+                    
+                
                    
                 # Open Large bod gump
                 Target.Cancel()
@@ -1781,7 +1783,7 @@ def run_bod_builder(
                             Items.Move(bod, incompleteBodContainer, 1)
                             Misc.Pause(itemMoveDelayMs)                
                             break                    
-            
+                
     print("Checked {} Large Bods".format(len(largeBods)))                
 
     report_final_metrics(reports, recipes, incompleteBodContainers, smallBodWaitingForLargeBodContainers, completeSmallBodContainer, completeLargeBodContainer)

@@ -175,7 +175,7 @@ def cast_spell(
     if target is not None:
         Target.TargetExecute(target)
     
-    Misc.Pause(get_fcr_delay(spellName))
+    Misc.Pause(get_fcr_delay(spellName, latencyMs))
 
 
 # Considers FC jewelry and protection spell. Add a buffer for lag.
@@ -197,12 +197,19 @@ def get_fc_delay (
     if delay < 250:
         delay = 250
         
-    delay = delay + latencyMs
+    #delay = delay + latencyMs
     #print("fc", Player.FasterCasting, "fcCap", fcCap, "protection", Player.BuffsExist("Protection"), "baseDelayMs", baseDelayMs, "fcOffset", fcOffset, "delay", delay)        
-    return delay
+    return delay + latencyMs
     
 # Completely stolen from Omniwraith and his lazy mage
-def get_fcr_delay(spellName):
+def get_fcr_delay(
+
+    # Spell from Magery, Spellweaving, Necromancy, Chivalry
+    spellName,  
+    
+    # Milliseonds of extra delay when computing cast time to account for internet fuzz. Fine tune this as needed.
+    latencyMs = 200
+):
 
     fcr = int(((6 - Player.FasterCastRecovery) / 4) * 1000)
         
@@ -210,7 +217,7 @@ def get_fcr_delay(spellName):
         fcr = 1
 
     #print("FCR", "fcr", fcr)        
-    return fcr    
+    return fcr + latencyMs
     
 # InsaneUO specific. Summons a single familiar. Will require multiple calls
 # to summon all 4. 
