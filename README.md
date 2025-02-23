@@ -9,22 +9,22 @@ They may or may not work on others. Requires razor enhanced 0.8.2.242
 
 ### Setup
 
-You can safely clone this repo or just manually copy *ALL* of the files into your razord enhanced scripts directory. I have these organized as follows:
+Create a folder called *fm_core* in your RazorEnhanced/Scripts directory. Download all the files from this repo's *fm_core* folder into your directory. This is core stuff. You'll need it all. Next, pick the scripts you'd like from this repo's *fm_tools* or *fm_train* folders. You can download these anywhere in your RazorEnhanced/Scripts directory. See the 
 
 ```bash
 └── RazorInstallDirectory
     └── Scripts
-        ├── fm_core                # Core framework stuff, don't touch
+        ├── fm_core                # Core framework stuff, don't touch. You need all of these.
         |   ├── core_items.py
         |   ├── core_mobiles.py
         |   └── ...
-        ├── fm_tools               # Edit these, bind them to keys, go forth.
+        ├── fm_tools               # Edit these, bind them to keys. Only pick what you want. Can be placed anywhere.
         |   ├── CasterLoop.py
         |   ├── DexLoop.py
         |   ├── MiningLoop.py
         |   ├── BODBuilder.py
         |   └── ...
-        ├── fm_train               # Standalone scripts for training skills
+        ├── fm_train               # Standalone scripts for training skills. Only pick what you want. Can be placed anywhere.
         |   ├── TrainMagery.py
         |   ├── TrainHiding.py
         |   └── ...
